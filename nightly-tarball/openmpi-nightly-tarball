@@ -1,0 +1,55 @@
+#!/usr/bin/env python
+#
+# Copyright (c) 2017      Amazon.com, Inc. or its affiliates.  All Rights
+#                         Reserved.
+#
+# Additional copyrights may follow
+#
+
+import OMPIBuilder
+import S3BuildFiler
+
+
+nightly_prefix='/mnt/data/nightly-tarball'
+config_data = { 'project_name' : 'Open MPI',
+                'project_short_name' : 'openmpi',
+                'project_very_short_name' : 'ompi',
+                'email_dest' : 'testing@lists.open-mpi.org',
+                'email_from' : 'mpiteam@aws.open-mpi.org',
+                'repository' : 'https://github.com/open-mpi/ompi.git',
+                'scratch_path' : nightly_prefix + '/scratch',
+                'failed_build_prefix' : 'failed-builds/',
+                'failed_build_url' : 'http://download.open-mpi.org/nightly/open-mpi',
+                'autogen' : './autogen.pl',
+                'coverity' : { 'tool_dir' : nightly_prefix + '/coverity',
+                               'tool_url' : 'https://scan.coverity.com/download/cxx/linux64',
+                               'token_file' : nightly_prefix + '/coverity/openmpi-token.txt',
+                               'project_name' : 'Open+MPI',
+                               'project_prefix' : 'openmpi',
+                               'configure_args' : '--enable-debug --enable-mpi-fortran --enable-mpi-cxx --enable-mpi-java --enable-oshmem --enable-oshmem-fortran --with-usnic --with-libfabric=/mnt/data/local-installs',
+                               'make_args' : '-j 8',
+                               'email' : 'jsquyres@cisco.com' },
+                'branches' : { 'master' : { 'output_location' : 'master/',
+                                            'coverity' : True,
+                                            'max_count' : 7 },
+                               'v3.x' : { 'output_location' : 'v3.x/',
+                                          'coverity' : False,
+                                          'max_count' : 7 },
+                               'v2.x' : { 'output_location' : 'v2.x/',
+                                          'coverity' : False,
+                                          'max_count' : 7 },
+                               'v2.0.x' : { 'output_location' : 'v2.0.x/',
+                                          'coverity' : False,
+                                          'max_count' : 7 },
+                               'v1.10' : { 'output_location' : 'v1.10/',
+                                          'coverity' : False,
+                                          'max_count' : 7 },
+                               },
+                'legacy_file_host' : 'ompiteam@192.185.39.252',
+                'legacy_target_prefix' : 'public_html/nightly/'
+                }
+
+
+filer = S3BuildFiler.S3BuildFiler('open-mpi-nightly', 'nightly/open-mpi/')
+builder = OMPIBuilder.OMPIBuilder(config_data, filer)
+builder.run()

@@ -1,0 +1,112 @@
+#!/usr/bin/env python
+#
+# Copyright (c) 2017      Amazon.com, Inc. or its affiliates.  All Rights
+#                         Reserved.
+#
+# Additional copyrights may follow
+#
+
+import OMPIBuilder
+import S3BuildFiler
+import os
+import re
+import shutil
+import tempfile
+import S3BuildFiler
+
+
+nightly_prefix='/mnt/data/nightly-tarball'
+config_data = { 'project_name' : 'hwloc',
+                'project_short_name' : 'hwloc',
+                'email_dest' : 'hwloc-devel@lists.open-mpi.org',
+                'email_from' : 'mpiteam@aws.open-mpi.org',
+                'repository' : 'https://github.com/open-mpi/hwloc.git',
+                'scratch_path' : nightly_prefix + '/scratch',
+                'failed_build_prefix' : 'failed-builds/',
+                'failed_build_url' : 'http://download.open-mpi.org/nightly/hwloc/',
+                'autogen' : './autogen.sh',
+                'coverity' : { 'tool_dir' : nightly_prefix + '/coverity',
+                               'tool_url' : 'https://scan.coverity.com/download/cxx/linux64',
+                               'token_file' : nightly_prefix + '/coverity/pmix-token.txt',
+                               'project_name' : 'hwloc',
+                               'project_prefix' : 'hwloc',
+                               'configure_args' : '',
+                               'make_args' : '-j 8',
+                               'email' : 'brice.goglin@labri.fr' },
+                'branches' : { 'master' : { 'output_location' : 'master/',
+                                            'coverity' : True,
+                                            'max_count' : 7 },
+                               'v1.11' : { 'output_location' : 'v1.11/',
+                                          'coverity' : False,
+                                          'max_count' : 7 },
+                               },
+                'legacy_file_host' : 'ompiteam@192.185.39.252',
+                'legacy_target_prefix' : 'public_html/software/hwloc/nightly/'
+                }
+
+
+class HwlocBuilder(OMPIBuilder.OMPIBuilder):
+    """hwloc Custom Bulder class
+
+    Hwloc does things really differently.  Have a custom OMPIBuilder
+    until we can fix the make_tarball script.
+
+    """
+    def update_version_file(self):
+        branch = self._current_build['branch']
+        build_time = self._current_build['build_time']
+        githash = self._current_build['revision']
+        version_file = os.path.join(self._current_build['source_tree'], 'VERSION')
+
+        self._current_build['version_string'] = '%s-%s-%s' % (branch, build_time, githash)
+        self._logger.debug('version_string: %s' % (self._current_build['version_string']))
+
+        # sed in the new tarball_version= and repo_rev= lines in the VERSION file
+        snapshot_pattern = re.compile(r'^snapshot=.*')
+        snapshot_version_pattern = re.compile(r'^snapshot_version=.*')
+        with tempfile.NamedTemporaryFile(mode='w', delete=False) as tmp_file:
+            with open(version_file) as src_file:
+                for line in src_file:
+                    line = snapshot_version_pattern.sub('snapshot_version=%s' %
+                                                        (self._current_build['version_string']), line)
+                    line = snapshot_pattern.sub('snapshot=1', line)
+                    tmp_file.write(line)
+        shutil.copystat(version_file, tmp_file.name)
+        shutil.move(tmp_file.name, version_file)
+
+
+    def build(self):
+        # currently can't use the build script because it always
+        # rewrites the VERSION file.  Need to fix that, and then can
+        # kill off this function and use the tarball_builder.
+        branch_name = self._current_build['branch_name']
+        source_tree = self._current_build['source_tree']
+        cwd = os.getcwd()
+        os.chdir(source_tree)
+        try:
+            # lie about our username in $USER so that autogen will skip all
+            # .ompi_ignore'ed directories (i.e., so that we won't get
+            # .ompi_unignore'ed)
+            child_env = os.environ.copy()
+            child_env['USER'] = self._config['project_very_short_name'] + 'builder'
+
+            self.call([self._config['autogen']], build_call=True, env=child_env)
+            self.call(['./configure'], build_call=True, env=child_env)
+
+            # Do make distcheck (which will invoke config/distscript.csh to set
+            # the right values in VERSION).  distcheck does many things; we need
+            # to ensure it doesn't pick up any other installs via LD_LIBRARY_PATH.
+            # It may be a bit Draconian to totally clean LD_LIBRARY_PATH (i.e., we
+            # may need something in there), but at least in the current building
+            # setup, we don't.  But be advised that this may need to change in the
+            # future...
+            child_env['LD_LIBRARY_PATH'] = ''
+            self.call(['make', 'doc'], build_call=True, env=child_env)
+            self.call(['make', 'distcheck'], build_call=True, env=child_env)
+        finally:
+            os.chdir(cwd)
+
+
+filer = S3BuildFiler.S3BuildFiler('open-mpi-nightly', 'nightly/hwloc/')
+builder = HwlocBuilder(config_data, filer)
+builder.run()

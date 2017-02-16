@@ -1,0 +1,42 @@
+#!/usr/bin/env python
+#
+# Copyright (c) 2017      Amazon.com, Inc. or its affiliates.  All Rights
+#                         Reserved.
+#
+# Additional copyrights may follow
+#
+
+import OMPIBuilder
+import S3BuildFiler
+
+
+nightly_prefix='/mnt/data/nightly-tarball'
+config_data = { 'project_name' : 'PMIx',
+                'project_short_name' : 'pmix',
+                'email_dest' : 'rhc@open-mpi.org',
+                'email_from' : 'mpiteam@aws.open-mpi.org',
+                'repository' : 'https://github.com/pmix/pmix.git',
+                'scratch_path' : nightly_prefix + '/scratch',
+                'failed_build_prefix' : 'failed-builds/',
+                'failed_build_url' : 'http://download.open-mpi.org/nightly/pmix/',
+                'autogen' : './autogen.pl',
+                'coverity' : { 'tool_dir' : nightly_prefix + '/coverity',
+                               'tool_url' : 'https://scan.coverity.com/download/cxx/linux64',
+                               'token_file' : nightly_prefix + '/coverity/pmix-token.txt',
+                               'project_name' : 'open-mpi%2Fpmix',
+                               'project_prefix' : 'pmix',
+                               'configure_args' : '',
+                               'make_args' : '-j 8',
+                               'email' : 'rhc@open-mpi.org' },
+                'branches' : { 'master' : { 'output_location' : 'master/',
+                                            'coverity' : True,
+                                            'max_count' : 7 },
+                               },
+                'legacy_file_host' : 'ompiteam@192.185.39.252',
+                'legacy_target_prefix' : 'public_html/software/pmix/nightly/'
+                }
+
+
+filer = S3BuildFiler.S3BuildFiler('open-mpi-nightly', 'nightly/pmix/')
+builder = OMPIBuilder.OMPIBuilder(config_data, filer)
+builder.run()
