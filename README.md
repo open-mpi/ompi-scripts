@@ -10,3 +10,8 @@ Scripts for building the nightly tarballs for ompi, pmix, and hwloc.
 The scripts are designed to push to S3 (fronted by the CloudFront
 download.open-mpi.org URL), but can also scp to the web tree for
 www.open-mpi.org until the web bits are updated.
+
+## migration/
+
+Scripts for migrating bits of Open MPI's infrastructure from IU or
+HostGator to AWS.
