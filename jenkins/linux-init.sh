@@ -41,12 +41,15 @@ case $PLATFORM_ID in
 	# version, so don't worry about script version
 	# differentiation.
 	# gcc = 4.8.5
+	sudo service sshd stop
 	sudo yum -y update
 	sudo yum -y group install "Development Tools"
 	sudo yum -y install libevent hwloc hwloc-libs
 	sudo yum -y install java
+	sudo service sshd start
 	;;
     amzn)
+	sudo service sshd stop
 	sudo yum -y update
 	sudo yum -y groupinstall "Development Tools"
 	sudo yum -y install libevent-devel
@@ -58,8 +61,10 @@ case $PLATFORM_ID in
 		sudo yum -y groupinstall "Java Development"
 		;;
 	esac
+	sudo service sshd start
 	;;
     ubuntu)
+	sudo service ssh stop
 	sudo apt-get update
 	sudo apt-get -y upgrade
 	sudo apt-get -y install build-essential gfortran \
@@ -80,8 +85,10 @@ case $PLATFORM_ID in
 		;;
 	esac
 	sudo apt-get -y install default-jre
+	sudo service ssh start
 	;;
     sles)
+	sudo service sshd stop
 	sudo zypper -n install gcc gcc-c++ gcc-fortran \
 	     autoconf automake libtool flex make
 	case $VERSION_ID in
@@ -98,6 +105,7 @@ case $PLATFORM_ID in
 	jre_file=jre-8u121-linux-x64.rpm
 	aws s3 cp s3://ompi-jenkins-config/${jre_file} /tmp/${jre_file}
 	rpm -i /tmp/${jre_file}
+	sudo service sshd start
 	;;
     *)
 	echo "ERROR: Unkonwn platform ${PLATFORM_ID}"
