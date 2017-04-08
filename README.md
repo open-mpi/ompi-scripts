@@ -15,3 +15,8 @@ www.open-mpi.org until the web bits are updated.
 
 Scripts for migrating bits of Open MPI's infrastructure from IU or
 HostGator to AWS.
+
+## jenkins/
+
+Scripts used for running the community Jenkins server
+(https://jenkins.open-mpi.org/).
