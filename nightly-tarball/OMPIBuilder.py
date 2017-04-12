@@ -132,7 +132,9 @@ class OMPIBuilder(Builder.Builder):
 
         # first, expire out builds
         self.call(['ssh', '-p', '2222', self._config['legacy_file_host'],
-                   'git/ompi/contrib/build-server/remove-old.pl 7 public_html/nightly/' + self._current_build['branch_name']],
+                   'git/ompi/contrib/build-server/remove-old.pl 7 '
+                   + self._config['legacy_target_prefix']
+                   + self._current_build['branch_name']],
                   log_name='ssh_remove_old', env=child_env)
 
         # second, copy build artifacts
