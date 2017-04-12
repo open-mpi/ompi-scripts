@@ -24,6 +24,8 @@
 # 5) Create new Jenkins worker configuration with new AMI id.
 #
 
+set -e
+
 labels="ec2"
 
 eval "PLATFORM_ID=`sed -n 's/^ID=//p' /etc/os-release`"
@@ -128,7 +130,7 @@ case $PLATFORM_ID in
 	# No java shipped in SLES by default...
 	jre_file=jre-8u121-linux-x64.rpm
 	aws s3 cp s3://ompi-jenkins-config/${jre_file} /tmp/${jre_file}
-	rpm -i /tmp/${jre_file}
+	sudo rpm -i /tmp/${jre_file}
 	;;
     *)
 	echo "ERROR: Unkonwn platform ${PLATFORM_ID}"
@@ -151,7 +153,7 @@ if test $run_test != 0; then
 fi
 
 echo "==> Cleaning instance"
-rm -rf ${HOME}/* ${HOME}/.ssh ${HOME}/.history ${HOME}/.bash_history ${HOME}/.sudo_as_admin_successful ${HOME}/.cache
+rm -rf ${HOME}/* ${HOME}/.ssh ${HOME}/.history ${HOME}/.bash_history ${HOME}/.sudo_as_admin_successful ${HOME}/.cache ${HOME}/.oracle_jre_usage
 sudo rm -rf /var/log/*
 sudo rm -f /etc/ssh/ssh_host*
 sudo rm -rf /root/* ~root/.ssh ~root/.history ~root/.bash_history
