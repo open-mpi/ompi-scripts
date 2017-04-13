@@ -101,7 +101,7 @@ case $PLATFORM_ID in
 		     gcc-4.8 g++-4.8 gfortran-4.8 \
 		     gcc-4.9 g++-4.9 gfortran-4.9 \
 		     clang-3.6 clang-3.7 clang-3.8
-		labels="${labels} gcc47 gcc48 gcc49 clang36 clang37 clang38"
+		labels="${labels} gcc47 gcc48 gcc49 gcc5 clang36 clang37 clang38"
 		;;
 	    *)
 		echo "ERROR: Unknown version ${PLATFORM_ID} ${VERSION_ID}"
@@ -120,7 +120,7 @@ case $PLATFORM_ID in
 		sudo zypper -n install gcc48 gcc48-c++ gcc48-fortran \
 		     gcc5 gcc5-c++ gcc5-fortran \
 		     gcc6 gcc6-c++ gcc6-fortran
-		labels="${labels} gcc48 gcc53 gcc62"
+		labels="${labels} gcc48 gcc5 gcc6"
 		;;
 	    *)
 		echo "ERROR: Unknown version ${PLATFORM_ID} ${VERSION_ID}"
