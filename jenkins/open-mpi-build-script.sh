@@ -1,0 +1,207 @@
+#!/bin/sh
+
+# abort on error
+set -e
+
+#
+# Start by figuring out what we are...
+#
+os=`uname -s`
+if test "${os}" = "Linux"; then
+    eval "PLATFORM_ID=`sed -n 's/^ID=//p' /etc/os-release`"
+    eval "VERSION_ID=`sed -n 's/^VERSION_ID=//p' /etc/os-release`"
+else
+    PLATFORM_ID=`uname -s`
+    VERSION_ID=`uname -r`
+fi
+
+echo "--> platform: $PLATFORM_ID"
+echo "--> version: $VERSION_ID"
+
+AUTOGEN_ARGS=
+CONFIGURE_ARGS=
+MAKE_ARGS=
+MAKE_J="-j 8"
+PREFIX=${WORKSPACE}/install
+
+#
+# See if builder provided a compiler we should use, and translate it
+# to CONFIGURE_ARGS
+#
+case ${PLATFORM_ID} in
+    rhel)
+	case "$Compiler" in
+	    gcc48|"")
+		echo "--> Using default compilers"
+		;;
+	    *)
+		echo "Unsupported compiler ${Compiler}.  Aborting"
+		exit 1
+		;;
+	esac
+	;;
+    amzn)
+	case "$Compiler" in
+	    "")
+		echo "--> Using default compilers"
+		;;
+	    gcc44)
+		CONFIGURE_ARGS="CC=gcc44 CXX=g++44 FC=gfortran44"
+		;;
+	    gcc48)
+		CONFIGURE_ARGS="CC=gcc48 CXX=g++48 FC=gfortran48"
+		;;
+	    clang36)
+		CONFIGURE_ARGS="CC=clang CXX=clang++ --disable-mpi-fortran"
+		;;
+	    *)
+		echo "Unsupported compiler ${Compiler}.  Aborting"
+		exit 1
+		;;
+	esac
+	;;
+    ubuntu)
+	case "$Compiler" in
+	    "")
+		echo "--> Using default compilers"
+		;;
+	    gcc47)
+		CONFIGURE_ARGS="CC=gcc-4.7 CXX=g++-4.7 FC=gfortran-4.7"
+		;;
+	    gcc48)
+		CONFIGURE_ARGS="CC=gcc-4.8 CXX=g++-4.8 FC=gfortran-4.8"
+		;;
+	    gcc49)
+		CONFIGURE_ARGS="CC=gcc-4.9 CXX=g++-4.9 FC=gfortran-4.9"
+		;;
+	    gcc5)
+		CONFIGURE_ARGS="CC=gcc-5 CXX=g++-5 FC=gfortran-5"
+		;;
+	    clang36)
+		CONFIGURE_ARGS="CC=clang-3.6 CXX=clang++-3.6 --disable-mpi-fortran"
+		;;
+	    clang37)
+		CONFIGURE_ARGS="CC=clang-3.7 CXX=clang++-3.7 --disable-mpi-fortran"
+		;;
+	    clang38)
+		CONFIGURE_ARGS="CC=clang-3.8 CXX=clang++-3.8 --disable-mpi-fortran"
+		;;
+	    *)
+		echo "Unsupported compiler ${Compiler}.  Aborting"
+		exit 1
+		;;
+	esac
+	;;
+    sles)
+	case "$Compiler" in
+	    "")
+		echo "--> Using default compilers"
+		;;
+	    gcc48)
+		CONFIGURE_ARGS="CC=gcc-48 CXX=g++-48 FC=gfortran-48"
+		;;
+	    gcc5)
+		CONFIGURE_ARGS="CC=gcc-5 CXX=g++-5 FC=gfortran-5"
+		;;
+	    gcc6)
+		CONFIGURE_ARGS="CC=gcc-6 CXX=g++-6 FC=gfortran-6"
+		;;
+	    *)
+		echo "Unsupported compiler ${Compiler}.  Aborting"
+		exit 1
+		;;
+	esac
+	;;
+    FreeBSD)
+	CONFIGURE_ARGS="LDFLAGS=-Wl,-rpath,/usr/local/lib/gcc5 --with-wrapper-ldflags=-Wl,-rpath,/usr/local/lib/gcc5"
+	;;
+esac
+
+echo "--> Compiler setup: $CONFIGURE_ARGS"
+
+#
+# Add any Autogen or Configure arguments provided by the builder job
+#
+if test "$AUTOGEN_OPTIONS" != ""; then
+    echo "--> Adding autogen arguments: $AUTOGEN_OPTIONS"
+    AUTOGEN_ARGS="${AUTOGEN_ARGS} ${AUTOGEN_OPTIONS}"
+fi
+
+if test "$CONFIGURE_OPTIONS" != ""; then
+    echo "--> Adding configure arguments: $CONFIGURE_OPTIONS"
+    CONFIGURE_ARGS="${CONFIGURE_ARGS} ${CONFIGURE_OPTIONS}"
+fi
+
+#
+# Build.
+#
+cd ${WORKSPACE}/src
+if test -f autogen.pl; then
+    echo "--> running ./autogen.pl ${AUTOGEN_ARGS}"
+    ./autogen.pl ${AUTOGEN_ARGS}
+else
+    if test "${AUTOGEN_ARGS}" != ""; then
+	echo "--> Being a coward and not running with special autogen arguments and autogen.sh"
+	exit 1
+    else
+	echo "--> running ./atogen.sh"
+	./autogen.sh
+    fi
+fi
+
+echo "--> running ./configure --prefix=${PREFIX} ${CONFIGURE_ARGS}"
+./configure --prefix=${PREFIX} ${CONFIGURE_ARGS}
+
+# shortcut for the distcheck case, as it won't run any tests beyond
+# the build-in make check tests.
+if test "${MAKE_DISTCHECK}" != ""; then
+    echo "--> running make ${MAKE_ARGS} distcheck"
+    make ${MAKE_ARGS} distcheck
+    exit 0
+fi
+
+echo "--> running make ${MAKE_J} ${MAKE_ARGS} all"
+make ${MAKE_J} ${MAKE_ARGS} all
+echo "--> running make check"
+make ${MAKE_ARGS} check
+echo "--> running make install"
+make ${MAKE_ARGS} install
+
+export PATH=${PREFIX}/bin:${PATH}
+
+echo "--> running ompi_info"
+ompi_info
+
+echo "--> running make all in examples"
+cd examples
+make ${MAKE_ARGS} all
+cd ..
+
+if test "${MPIRUN_MODE}" != "none"; then
+    echo "--> running examples"
+    echo "localhost cpu=2" > ${WORKSPACE}/hostfile
+    exec="timeout -s SIGKILL 3m mpirun -hostfile ${WORKSPACE}/hostfile -np 2 "
+    ${exec} ./examples/hello_c
+    ${exec} ./examples/ring_c
+    ${exec} ./examples/connectivity_c
+    if ompi_info --parsable | grep -q bindings:cxx:yes >/dev/null; then
+    	${exec} ./examples/hello_cxx
+    	${exec} ./examples/ring_cxx
+    fi
+    if ompi_info --parsable | grep -q bindings:mpif.h:yes >/dev/null; then
+	${exec} ./examples/hello_mpifh
+	${exec} ./examples/ring_mpifh
+    fi
+    if ompi_info --parsable | egrep -q bindings:use_mpi:\"\?yes >/dev/null; then
+	${exec} ./examples/hello_usempi
+	${exec} ./examples/ring_usempi
+    fi
+    if ompi_info --parsable | grep -q bindings:use_mpi_f08:yes >/dev/null; then
+	${exec} ./examples/hello_usempif08
+	${exec} ./examples/ring_usempif08
+    fi
+else
+    echo "--> Skipping examples (MPIRUN_MODE = none)"
+fi
+
+echo "--> All done!"
