@@ -181,24 +181,37 @@ if test "${MPIRUN_MODE}" != "none"; then
     echo "--> running examples"
     echo "localhost cpu=2" > ${WORKSPACE}/hostfile
     exec="timeout -s SIGKILL 3m mpirun -hostfile ${WORKSPACE}/hostfile -np 2 "
+    echo "--> running C examples"
     ${exec} ./examples/hello_c
     ${exec} ./examples/ring_c
     ${exec} ./examples/connectivity_c
     if ompi_info --parsable | grep -q bindings:cxx:yes >/dev/null; then
+	echo "--> running C++ examples"
     	${exec} ./examples/hello_cxx
     	${exec} ./examples/ring_cxx
+    else
+	echo "--> skipping C++ examples"
     fi
     if ompi_info --parsable | grep -q bindings:mpif.h:yes >/dev/null; then
+	echo "--> running mpif examples"
 	${exec} ./examples/hello_mpifh
 	${exec} ./examples/ring_mpifh
+    else
+	echo "--> skipping mpif examples"
     fi
     if ompi_info --parsable | egrep -q bindings:use_mpi:\"\?yes >/dev/null; then
+	echo "--> running usempi examples"
 	${exec} ./examples/hello_usempi
 	${exec} ./examples/ring_usempi
+    else
+	echo "--> skipping usempi examples"
     fi
     if ompi_info --parsable | grep -q bindings:use_mpi_f08:yes >/dev/null; then
+	echo "--> running usempif08 examples"
 	${exec} ./examples/hello_usempif08
 	${exec} ./examples/ring_usempif08
+    else
+	echo "--> skipping usempif08 examples"
     fi
 else
     echo "--> Skipping examples (MPIRUN_MODE = none)"
