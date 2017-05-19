@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #
 # Copyright (c) 2017      Amazon.com, Inc. or its affiliates.  All Rights
 #                         Reserved.
@@ -14,8 +14,8 @@
 # 1) launch normal AMI (t2.micros are great for keeping costs low in
 #    building AMIs)
 # 2) run the follwowing in the instance:
-#    curl https://raw.github.com/open-mpi/ompi-scripts/master/jenkins/linux-customize-ami.sh -i /tmp/linux-customize-ami.sh
-#    bash /tmp/linux-customize-ami.sh
+#    curl https://raw.github.com/open-mpi/ompi-scripts/master/jenkins/customize-ami.sh -i /tmp/customize-ami.sh
+#    sh /tmp/customize-ami.sh
 #    sudo shutdown -h now
 # 3) From EC2 Console / API, run 'Create Image'
 #    3.1) AMI Name should be similar to Ubuntu 16.04
@@ -28,23 +28,35 @@ set -e
 
 labels="ec2"
 
-eval "PLATFORM_ID=`sed -n 's/^ID=//p' /etc/os-release`"
-eval "VERSION_ID=`sed -n 's/^VERSION_ID=//p' /etc/os-release`"
+os=`uname -s`
+if test "${os}" = "Linux"; then
+    eval "PLATFORM_ID=`sed -n 's/^ID=//p' /etc/os-release`"
+    eval "VERSION_ID=`sed -n 's/^VERSION_ID=//p' /etc/os-release`"
+else
+    PLATFORM_ID=`uname -s`
+    VERSION_ID=`uname -r`
+fi
 
-echo "==> PLatform: $PLATFORM_ID"
+echo "==> Platform: $PLATFORM_ID"
 echo "==> Version:  $VERSION_ID"
 
 OPTIND=1         # Reset in case getopts has been used previously in the shell.
-run_test=0       # -t runs an ompi build test; useful for testing new AMIs
+run_test=0       # -b runs an ompi build test; useful for testing new AMIs
+clean_ami=1      # -t enables testing mode, where the AMI isn't cleaned up
+                 # after the test (so remote logins still work)
 
-while getopts "h?t" opt; do
+while getopts "h?tb" opt; do
     case "$opt" in
     h|\?)
-        echo "usage: linux-init.sh [-t]"
-        exit 1
-        ;;
-    t)  run_test=1
-        ;;
+	echo "usage: customize-ami.sh [-t]"
+	exit 1
+	;;
+    b)
+	run_test=1
+	;;
+    t)
+	clean_ami=0
+	;;
     esac
 done
 
@@ -64,14 +76,15 @@ case $PLATFORM_ID in
     amzn)
 	sudo yum -y update
 	sudo yum -y groupinstall "Development Tools"
-	sudo yum -y install libevent-devel
+     sudo yum -y groupinstall "Java Development"
+	sudo yum -y install libevent-devel java-1.8.0-openjdk-devel java-1.8.0-openjdk
 	labels="${labels} linux amazon_linux_${VERSION_ID}"
 	case $VERSION_ID in
 	    2016.09|2017.03)
 		# clang == 3.6.2
 		sudo yum -y install gcc44 gcc44-c++ gcc44-gfortran \
 		     gcc48 gcc48-c++ gcc48-gfortran clang
-		sudo yum -y groupinstall "Java Development"
+          sudo alternatives --set java /usr/lib/jvm/jre-1.8.0-openjdk.x86_64/bin/java
 		labels="${labels} gcc44 gcc48 clang36"
 		;;
 	    *)
@@ -132,6 +145,24 @@ case $PLATFORM_ID in
 	aws s3 cp s3://ompi-jenkins-config/${jre_file} /tmp/${jre_file}
 	sudo rpm -i /tmp/${jre_file}
 	;;
+    FreeBSD)
+	su -m root -c 'pkg install -y sudo'
+	if ! grep -q '^%wheel ALL=(ALL) NOPASSWD: ALL' /usr/local/etc/sudoers ; then
+	    echo "--> Updating sudoers"
+	    su -m root -c 'echo "%wheel ALL=(ALL) NOPASSWD: ALL" >> /usr/local/etc/sudoers'
+	else
+	    echo "--> Skipping sudoers update"
+	fi
+	sudo pkg install -y openjdk8 autoconf automake libtool gcc wget curl git
+	if ! grep -q '/dev/fd' /etc/fstab ; then
+	    echo "Adding /dev/fd entry to /etc/fstab"
+	    sudo sh -c 'echo "fdesc /dev/fd fdescfs rw 0 0" >> /etc/fstab'
+	fi
+	if ! grep -q '/proc' /etc/fstab ; then
+	    echo "Adding /proc entry to /etc/fstab"
+	    sudo sh -c 'echo "proc /proc procfs rw 0 0 " >> /etc/fstab'
+	fi
+	;;
     *)
 	echo "ERROR: Unkonwn platform ${PLATFORM_ID}"
 	exit 1
@@ -149,16 +180,27 @@ if test $run_test != 0; then
     make -j 4 all
     make check
     make install
+    cd $HOME
     echo "==> SUCCESS!  Open MPI compiled!"
 fi
 
-echo "==> Cleaning instance"
-rm -rf ${HOME}/* ${HOME}/.ssh ${HOME}/.history ${HOME}/.bash_history ${HOME}/.sudo_as_admin_successful ${HOME}/.cache ${HOME}/.oracle_jre_usage
-sudo rm -rf /var/log/*
-sudo rm -f /etc/ssh/ssh_host*
-sudo rm -rf /root/* ~root/.ssh ~root/.history ~root/.bash_history
+if test "${clean_ami}" != "0" ; then
+    echo "==> Cleaning instance"
+
+    if test "${PLATFORM_ID}" = "FreeBSD" ; then
+	sudo touch /firstboot
+    fi
+
+    rm -rf ${HOME}/* ${HOME}/.ssh ${HOME}/.history ${HOME}/.bash_history ${HOME}/.sudo_as_admin_successful ${HOME}/.cache ${HOME}/.oracle_jre_usage
+    sudo rm -rf /var/log/*
+    sudo rm -f /etc/ssh/ssh_host*
+    sudo rm -rf /root/* ~root/.ssh ~root/.history ~root/.bash_history
+    echo "Recommended labels: ${labels}"
+else
+    echo "Skipped cleaning instance.  Do not use to build AMI!"
+fi
 
 echo "==> All done!"
-echo "Recommended labels: ${labels}"
+
 
 # cleanup phase
