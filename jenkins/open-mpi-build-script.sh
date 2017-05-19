@@ -22,7 +22,7 @@ AUTOGEN_ARGS=
 CONFIGURE_ARGS=
 MAKE_ARGS=
 MAKE_J="-j 8"
-PREFIX=${WORKSPACE}/install
+PREFIX="${WORKSPACE}/install"
 
 #
 # See if builder provided a compiler we should use, and translate it
@@ -135,7 +135,7 @@ fi
 #
 # Build.
 #
-cd ${WORKSPACE}/src
+cd "${WORKSPACE}/src"
 if test -f autogen.pl; then
     echo "--> running ./autogen.pl ${AUTOGEN_ARGS}"
     ./autogen.pl ${AUTOGEN_ARGS}
@@ -149,8 +149,8 @@ else
     fi
 fi
 
-echo "--> running ./configure --prefix=${PREFIX} ${CONFIGURE_ARGS}"
-./configure --prefix=${PREFIX} ${CONFIGURE_ARGS}
+echo "--> running ./configure --prefix=\"${PREFIX}\" ${CONFIGURE_ARGS}"
+./configure --prefix="${PREFIX}" ${CONFIGURE_ARGS}
 
 # shortcut for the distcheck case, as it won't run any tests beyond
 # the build-in make check tests.
@@ -167,7 +167,7 @@ make ${MAKE_ARGS} check
 echo "--> running make install"
 make ${MAKE_ARGS} install
 
-export PATH=${PREFIX}/bin:${PATH}
+export PATH="${PREFIX}/bin":${PATH}
 
 echo "--> running ompi_info"
 ompi_info
@@ -196,8 +196,8 @@ run_example() {
 
 if test "${MPIRUN_MODE}" != "none"; then
     echo "--> running examples"
-    echo "localhost cpu=2" > ${WORKSPACE}/hostfile
-    exec="timeout -s SIGKILL 3m mpirun -hostfile ${WORKSPACE}/hostfile -np 2 "
+    echo "localhost cpu=2" > "${WORKSPACE}/hostfile"
+    exec="timeout -s SIGKILL 3m mpirun -hostfile \"${WORKSPACE}/hostfile\" -np 2 "
     run_example "${exec}" ./examples/hello_c
     run_example "${exec}" ./examples/ring_c
     run_example "${exec}" ./examples/connectivity_c
