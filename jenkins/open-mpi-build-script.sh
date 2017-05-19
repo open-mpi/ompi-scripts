@@ -177,41 +177,57 @@ cd examples
 make ${MAKE_ARGS} all
 cd ..
 
+# it's hard to determine what the failure was and there's no printing
+# of error code with set -e, so for the tests, we do per-command
+# checking...
+set +e
+
+run_example() {
+    example=`basename ${2}`
+    echo "--> Running example: $example"
+    ${1} ${2}
+    ret=$?
+    if test ${ret} -ne 0 ; then
+	echo "Execution failed: ${ret}"
+	echo "command was: ${1} ${2}"
+	exit ${ret}
+    fi
+}
+
 if test "${MPIRUN_MODE}" != "none"; then
     echo "--> running examples"
     echo "localhost cpu=2" > ${WORKSPACE}/hostfile
     exec="timeout -s SIGKILL 3m mpirun -hostfile ${WORKSPACE}/hostfile -np 2 "
-    echo "--> running C examples"
-    ${exec} ./examples/hello_c
-    ${exec} ./examples/ring_c
-    ${exec} ./examples/connectivity_c
+    run_example "${exec}" ./examples/hello_c
+    run_example "${exec}" ./examples/ring_c
+    run_example "${exec}" ./examples/connectivity_c
     if ompi_info --parsable | grep -q bindings:cxx:yes >/dev/null; then
-	echo "--> running C++ examples"
-    	${exec} ./examples/hello_cxx
-    	${exec} ./examples/ring_cxx
+        echo "--> running C++ examples"
+        run_example "${exec}" ./examples/hello_cxx
+        run_example "${exec}" ./examples/ring_cxx
     else
-	echo "--> skipping C++ examples"
+        echo "--> skipping C++ examples"
     fi
     if ompi_info --parsable | grep -q bindings:mpif.h:yes >/dev/null; then
-	echo "--> running mpif examples"
-	${exec} ./examples/hello_mpifh
-	${exec} ./examples/ring_mpifh
+        echo "--> running mpif examples"
+        run_example "${exec}" ./examples/hello_mpifh
+        run_example "${exec}" ./examples/ring_mpifh
     else
-	echo "--> skipping mpif examples"
+        echo "--> skipping mpif examples"
     fi
     if ompi_info --parsable | egrep -q bindings:use_mpi:\"\?yes >/dev/null; then
-	echo "--> running usempi examples"
-	${exec} ./examples/hello_usempi
-	${exec} ./examples/ring_usempi
+        echo "--> running usempi examples"
+        run_example "${exec}" ./examples/hello_usempi
+        run_example "${exec}" ./examples/ring_usempi
     else
-	echo "--> skipping usempi examples"
+        echo "--> skipping usempi examples"
     fi
     if ompi_info --parsable | grep -q bindings:use_mpi_f08:yes >/dev/null; then
-	echo "--> running usempif08 examples"
-	${exec} ./examples/hello_usempif08
-	${exec} ./examples/ring_usempif08
+        echo "--> running usempif08 examples"
+        run_example "${exec}" ./examples/hello_usempif08
+        run_example "${exec}" ./examples/ring_usempif08
     else
-	echo "--> skipping usempif08 examples"
+        echo "--> skipping usempif08 examples"
     fi
 else
     echo "--> Skipping examples (MPIRUN_MODE = none)"
