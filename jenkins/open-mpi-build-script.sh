@@ -173,7 +173,7 @@ echo "--> running ompi_info"
 ompi_info
 
 echo "--> running make all in examples"
-cd examples
+cd "${WORKSPACE}/src/examples"
 make ${MAKE_ARGS} all
 cd ..
 
@@ -188,8 +188,8 @@ run_example() {
     ${1} ${2}
     ret=$?
     if test ${ret} -ne 0 ; then
-	echo "Execution failed: ${ret}"
-	echo "command was: ${1} ${2}"
+	echo "Example failed: ${ret}"
+	echo "Command was: ${1} ${2}"
 	exit ${ret}
     fi
 }
@@ -197,7 +197,7 @@ run_example() {
 if test "${MPIRUN_MODE}" != "none"; then
     echo "--> running examples"
     echo "localhost cpu=2" > "${WORKSPACE}/hostfile"
-    exec="timeout -s SIGKILL 3m mpirun -hostfile \"${WORKSPACE}/hostfile\" -np 2 "
+    exec="timeout -s SIGKILL 3m mpirun -hostfile ${WORKSPACE}/hostfile -np 2 "
     run_example "${exec}" ./examples/hello_c
     run_example "${exec}" ./examples/ring_c
     run_example "${exec}" ./examples/connectivity_c
