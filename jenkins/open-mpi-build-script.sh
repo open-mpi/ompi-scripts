@@ -197,7 +197,15 @@ run_example() {
 if test "${MPIRUN_MODE}" != "none"; then
     echo "--> running examples"
     echo "localhost cpu=2" > "${WORKSPACE}/hostfile"
-    exec="timeout -s SIGKILL 3m mpirun -hostfile ${WORKSPACE}/hostfile -np 2 "
+    mpirun_version=`"${WORKSPACE}/install/bin/mpirun" --version | sed -n 's/.*\([0-9]\+\.[0-9]\+\)\..*/\1/p'`
+    case ${mpirun_version} in
+	1.*|2.0.*)
+	    exec="timeout -s SIGSEGV 3m mpirun -hostfile ${WORKSPACE}/hostfile -np 2 "
+	    ;;
+	*)
+	    exec="timeout -s SIGSEGV 4m mpirun --get-stack-traces --timeout 180 -hostfile ${WORKSPACE}/hostfile -np 2 "
+	    ;;
+    esac
     run_example "${exec}" ./examples/hello_c
     run_example "${exec}" ./examples/ring_c
     run_example "${exec}" ./examples/connectivity_c
