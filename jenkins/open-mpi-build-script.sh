@@ -27,7 +27,7 @@ PREFIX="${WORKSPACE}/install"
 #
 # If they exist, use installed autotools
 #
-if test -z "${JENKINS_AGENT_HOME}" ; then
+if test -n "${JENKINS_AGENT_HOME}" ; then
     base_dir=${JENKINS_AGENT_HOME}
 else
     base_dir=${HOME}
