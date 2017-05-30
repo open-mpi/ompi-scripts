@@ -39,7 +39,7 @@ install_autotools ()
 	fi
 	if test ${found} -eq 1 ; then
 	    echo "Autotools already available"
-	    return
+	    return 0
 	fi
     fi
 
