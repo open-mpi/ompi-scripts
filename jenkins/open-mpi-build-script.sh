@@ -27,7 +27,12 @@ PREFIX="${WORKSPACE}/install"
 #
 # If they exist, use installed autotools
 #
-AUTOTOOLS=${JENKINS_HOME}/software/autotools-2.69-1.15.0-2.4.6/bin
+if test -z "${JENKINS_AGENT_HOME}" ; then
+    base_dir=${JENKINS_AGENT_HOME}
+else
+    base_dir=${HOME}
+fi
+AUTOTOOLS=${base_dir}/software/autotools-2.69-1.15.0-2.4.6/bin
 if test -d ${AUTOTOOLS} ; then
     export PATH=${AUTOTOOLS}:${PATH}
 fi
