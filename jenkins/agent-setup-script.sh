@@ -47,9 +47,9 @@ install_autotools ()
     mkdir -p ${SOURCE_ROOT}
     cd ${SOURCE_ROOT}
 
-    wget http://ftp.gnu.org/gnu/autoconf/autoconf-${autoconf}.tar.gz
-    wget http://ftp.gnu.org/gnu/automake/automake-${automake}.tar.gz
-    wget http://ftp.gnu.org/gnu/libtool/libtool-${libtool}.tar.gz
+    curl http://ftp.gnu.org/gnu/autoconf/autoconf-${autoconf}.tar.gz -o autoconf-${autoconf}.tar.gz
+    curl http://ftp.gnu.org/gnu/automake/automake-${automake}.tar.gz -o automake-${automake}.tar.gz
+    curl http://ftp.gnu.org/gnu/libtool/libtool-${libtool}.tar.gz -o libtool-${libtool}.tar.gz
 
     tar xf autoconf-${autoconf}.tar.gz
     tar xf automake-${automake}.tar.gz
