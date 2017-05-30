@@ -25,6 +25,14 @@ MAKE_J="-j 8"
 PREFIX="${WORKSPACE}/install"
 
 #
+# If they exist, use installed autotools
+#
+AUTOTOOLS=${JENKINS_HOME}/software/autotools-2.69-1.15.0-2.4.6/bin
+if test -d ${AUTOTOOLS} ; then
+    export PATH=${AUTOTOOLS}:${PATH}
+fi
+
+#
 # See if builder provided a compiler we should use, and translate it
 # to CONFIGURE_ARGS
 #
