@@ -149,6 +149,10 @@ fi
 # Build.
 #
 cd "${WORKSPACE}/src"
+
+sha1=`git rev-parse HEAD`
+echo "--> Building commit ${sha1}"
+
 if test -f autogen.pl; then
     echo "--> running ./autogen.pl ${AUTOGEN_ARGS}"
     ./autogen.pl ${AUTOGEN_ARGS}
