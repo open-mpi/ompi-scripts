@@ -5,23 +5,15 @@
 #
 # Additional copyrights may follow
 #
-# Script to take a normal Linux AMI and make it OMPI Jenkins-ified.
-# This is still a bit more manual than it could be, but given how
-# infrequent AMIs are reved, this is plan B (Plan A was to do all this
-# at instance start, which made Jenkins unhappy due to slow startup
-# times).  General instructions:
+# Script to take a normal EC2 AMI and make it OMPI Jenkins-ified,
+# intended to be run on a stock instance.  This script should probably
+# not be called directly (except when debugging), but instead called
+# from the packer.json file included in this directory.  Packer will
+# automate creating all current AMIs, using this script to configure
+# all the in-AMI bits.
 #
-# 1) launch normal AMI (t2.micros are great for keeping costs low in
-#    building AMIs)
-# 2) run the follwowing in the instance:
-#    curl https://raw.github.com/open-mpi/ompi-scripts/master/jenkins/customize-ami.sh -i /tmp/customize-ami.sh
-#    sh /tmp/customize-ami.sh
-#    sudo shutdown -h now
-# 3) From EC2 Console / API, run 'Create Image'
-#    3.1) AMI Name should be similar to Ubuntu 16.04
-#    3.2) Description should include the AMI used in step 1
-# 4) Terminate instance
-# 5) Create new Jenkins worker configuration with new AMI id.
+# It is recommended that you use build-amis.sh to build a current set
+# of AMIs; see build-amis.sh for usage details.
 #
 
 set -e
@@ -70,21 +62,21 @@ case $PLATFORM_ID in
 	# gcc = 4.8.5
 	sudo yum -y update
 	sudo yum -y group install "Development Tools"
-	sudo yum -y install libevent hwloc hwloc-libs java
+	sudo yum -y install libevent hwloc hwloc-libs java gdb
 	labels="${labels} linux rhel ${VERSION_ID} gcc48"
 	;;
     amzn)
 	sudo yum -y update
 	sudo yum -y groupinstall "Development Tools"
-     sudo yum -y groupinstall "Java Development"
-	sudo yum -y install libevent-devel java-1.8.0-openjdk-devel java-1.8.0-openjdk
+	sudo yum -y groupinstall "Java Development"
+	sudo yum -y install libevent-devel java-1.8.0-openjdk-devel java-1.8.0-openjdk gdb
 	labels="${labels} linux amazon_linux_${VERSION_ID}"
 	case $VERSION_ID in
 	    2016.09|2017.03)
 		# clang == 3.6.2
 		sudo yum -y install gcc44 gcc44-c++ gcc44-gfortran \
 		     gcc48 gcc48-c++ gcc48-gfortran clang
-          sudo alternatives --set java /usr/lib/jvm/jre-1.8.0-openjdk.x86_64/bin/java
+		sudo alternatives --set java /usr/lib/jvm/jre-1.8.0-openjdk.x86_64/bin/java
 		labels="${labels} gcc44 gcc48 clang36"
 		;;
 	    *)
@@ -124,7 +116,7 @@ case $PLATFORM_ID in
 	;;
     sles)
 	sudo zypper -n install gcc gcc-c++ gcc-fortran \
-	     autoconf automake libtool flex make
+	     autoconf automake libtool flex make gdb
 	labels="${labels} linux sles_${VERSION_ID}"
 	case $VERSION_ID in
 	    12.2)

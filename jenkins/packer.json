@@ -1,0 +1,68 @@
+{
+  "variables": {
+   "subnet_id" : "{{env `AWS_SUBNET_ID`}}",
+   "vpc_id" : "{{env `AWS_VPC_ID`}}",
+   "build_date" : "{{env `BUILD_DATE`}}"
+  },
+  "builders": [{
+    "type": "amazon-ebs",
+    "name" : "AmazonLinux17.03",
+    "region": "us-west-2",
+    "source_ami": "ami-4836a428",
+    "instance_type": "c4.4xlarge",
+    "ssh_username": "ec2-user",
+    "ssh_pty" : true,
+    "ami_name": "Jenkins Amazon Linux 17.03 {{user `build_date`}}",
+    "associate_public_ip_address" : true,
+    "enhanced_networking" : true
+  },{
+    "type": "amazon-ebs",
+    "name" : "Ubuntu16.04",
+    "region": "us-west-2",
+    "source_ami": "ami-a58d0dc5",
+    "instance_type": "t2.micro",
+    "ssh_username": "ubuntu",
+    "ssh_pty" : true,
+    "ami_name": "Jenkins Ubuntu 16.04 {{user `build_date`}}",
+    "associate_public_ip_address" : true,
+    "enhanced_networking" : true
+  },{
+    "type": "amazon-ebs",
+    "name" : "RHEL73",
+    "region": "us-west-2",
+    "source_ami": "ami-6f68cf0f",
+    "instance_type": "t2.micro",
+    "ssh_username": "ec2-user",
+    "ssh_pty" : true,
+    "ami_name": "Jenkins RHEL 7.3 {{user `build_date`}}",
+    "associate_public_ip_address" : true,
+    "enhanced_networking" : true
+  },{
+    "type": "amazon-ebs",
+    "name" : "SLES12sp2",
+    "region": "us-west-2",
+    "source_ami": "ami-e4a30084",
+    "instance_type": "t2.micro",
+    "ssh_username": "ec2-user",
+    "ssh_pty" : true,
+    "ami_name": "Jenkins SLES 12sp2 {{user `build_date`}}",
+    "associate_public_ip_address" : true,
+    "enhanced_networking" : true
+  },{
+    "type": "amazon-ebs",
+    "name" : "FreeBSD11",
+    "region": "us-west-2",
+    "source_ami": "ami-6926f809",
+    "instance_type": "t2.micro",
+    "ssh_username": "ec2-user",
+    "ssh_pty" : true,
+    "ssh_timeout" : "10m",
+    "ami_name": "Jenkins FreeBSD 11 {{user `build_date`}}",
+    "associate_public_ip_address" : true,
+    "enhanced_networking" : true
+  }],
+  "provisioners": [{
+    "type": "shell",
+    "script" : "customize-ami.sh"
+  }]
+}
