@@ -28,5 +28,6 @@ while getopts "h?a:l" opt; do
 done
 
 export BUILD_DATE=`date +%Y%m%d%H%M`
+export AWS_IAM_ROLE="jenkins-worker"
 
 packer build ${packer_opts} packer.json
