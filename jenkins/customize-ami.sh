@@ -160,6 +160,14 @@ case $PLATFORM_ID in
 	exit 1
 esac
 
+#
+# Run the most recent version of the agent script to pre-fetch the
+# required software packages.
+#
+curl https://raw.githubusercontent.com/open-mpi/ompi-scripts/master/jenkins/agent-setup-script.sh -o agent-setup-script.sh
+/bin/sh ./agent-setup-script.sh
+rm ./agent-setup-script.sh
+
 if test $run_test != 0; then
     # for these tests, fail the script if a test fails
     set -e
@@ -173,6 +181,7 @@ if test $run_test != 0; then
     make check
     make install
     cd $HOME
+    rm -rf ${HOME}/ompi ${HOME}/install
     echo "==> SUCCESS!  Open MPI compiled!"
 fi
 
@@ -183,7 +192,7 @@ if test "${clean_ami}" != "0" ; then
 	sudo touch /firstboot
     fi
 
-    rm -rf ${HOME}/* ${HOME}/.ssh ${HOME}/.history ${HOME}/.bash_history ${HOME}/.sudo_as_admin_successful ${HOME}/.cache ${HOME}/.oracle_jre_usage
+    rm -rf ${HOME}/.ssh ${HOME}/.history ${HOME}/.bash_history ${HOME}/.sudo_as_admin_successful ${HOME}/.cache ${HOME}/.oracle_jre_usage
     sudo rm -rf /var/log/*
     sudo rm -f /etc/ssh/ssh_host*
     sudo rm -rf /root/* ~root/.ssh ~root/.history ~root/.bash_history
