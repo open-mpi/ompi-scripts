@@ -18,7 +18,7 @@ import S3BuildFiler
 nightly_prefix='/mnt/data/nightly-tarball'
 config_data = { 'project_name' : 'hwloc',
                 'project_short_name' : 'hwloc',
-                'email_dest' : 'hwloc-devel@lists.open-mpi.org',
+                'email_dest' : 'hwloc-commits@lists.open-mpi.org',
                 'email_from' : 'mpiteam@aws.open-mpi.org',
                 'repository' : 'https://github.com/open-mpi/hwloc.git',
                 'scratch_path' : nightly_prefix + '/scratch',
