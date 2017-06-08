@@ -217,7 +217,7 @@ if test "${MPIRUN_MODE}" != "none"; then
     mpirun_version=`"${WORKSPACE}/install/bin/mpirun" --version | sed -n 's/.*\([0-9]\+\.[0-9]\+\)\..*/\1/p'`
     echo "--> mpirun version: ${mpirun_version}"
     case ${mpirun_version} in
-	1.*|2.0.*)
+	1.*|2.0*)
 	    exec="timeout -s SIGSEGV 3m mpirun -hostfile ${WORKSPACE}/hostfile -np 2 "
 	    ;;
 	*)
