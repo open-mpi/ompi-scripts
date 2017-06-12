@@ -216,7 +216,7 @@ if test "${MPIRUN_MODE}" != "none"; then
     echo "localhost cpu=2" > "${WORKSPACE}/hostfile"
     # Note: using perl here because figuring out a portable sed regexp
     # proved to be a little challenging.
-    mpirun_version=`"${WORKSPACE}/install/bin/mpirun --version | perl -wnE 'say $1 if /mpirun [^\d]*(\d+.\d+)/'`
+    mpirun_version=`"${WORKSPACE}/install/bin/mpirun" --version | perl -wnE 'say $1 if /mpirun [^\d]*(\d+.\d+)/'`
     echo "--> mpirun version: ${mpirun_version}"
     case ${mpirun_version} in
 	1.*|2.0*)
