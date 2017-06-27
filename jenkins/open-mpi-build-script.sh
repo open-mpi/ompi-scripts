@@ -136,6 +136,11 @@ echo "--> Compiler setup: $CONFIGURE_ARGS"
 # Add any Autogen or Configure arguments provided by the builder job
 #
 if test "$AUTOGEN_OPTIONS" != ""; then
+    # special case, to work around the fact that Open MPI can't build
+    # when there's a space in the build path name (sigh)
+    if test "$AUTOGEN_OPTIONS" = "--no-orte"; then
+	AUTOGEN_OPTIONS="--no-orte --no-ompi"
+    fi
     echo "--> Adding autogen arguments: $AUTOGEN_OPTIONS"
     AUTOGEN_ARGS="${AUTOGEN_ARGS} ${AUTOGEN_OPTIONS}"
 fi
@@ -185,6 +190,13 @@ echo "--> running make install"
 make ${MAKE_ARGS} install
 
 export PATH="${PREFIX}/bin":${PATH}
+
+case "$AUTOGEN_OPTIONS" in
+    *--no-ompi*)
+	echo "--> Skipping MPI tests due to --no-ompi"
+	exit 0
+	;;
+esac
 
 echo "--> running ompi_info"
 ompi_info
