@@ -11,6 +11,7 @@
 
 # be lazy...
 set -e
+set -x
 
 ompi_tree=$1
 dist_script=${ompi_tree}/contrib/dist/make_dist_tarball
@@ -21,11 +22,11 @@ if test ! -r ${dist_script} ; then
     exit 1
 fi
 
-for pkg in AC AM LT M4 ; do
+for pkg in AC AM LT M4 FLEX; do
     eval "${pkg}_VERSION=`sed -ne \"s/^${pkg}_TARGET_VERSION=\(.*\)/\1/p\" ${dist_script}`"
 done
 
-version_string="${AC_VERSION}-${AM_VERSION}-${LT_VERSION}-${M4_VERSION}"
+version_string="${AC_VERSION}-${AM_VERSION}-${LT_VERSION}-${M4_VERSION}-${FLEX_VERSION}"
 tarball="autotools-${version_string}.tar.gz"
 echo "version string: ${version_string}"
 
@@ -53,6 +54,15 @@ if ! aws s3 cp s3://ompi-jenkins-config/${tarball} . >& /dev/null ; then
     curl -O http://ftp.gnu.org/gnu/m4/m4-${M4_VERSION}.tar.gz
     tar xf m4-${M4_VERSION}.tar.gz
     (cd m4-${M4_VERSION} ; ./configure --prefix=${topdir}/autotools-install ; make install)
+
+    flex_tarball="flex-${FLEX_VERSION}.tar.gz"
+    if ! aws s3 cp s3://ompi-jenkins-config/${flex_tarball} ${flex_tarball}  ; then
+	# well, try Github, although that will only work for recent
+	# versions of flex...
+	curl -O https://github.com/westes/flex/releases/download/v${FLEX_VERSION}/${flex_tarball}
+    fi
+    tar xf flex-${FLEX_VERSION}.tar.gz
+    (cd flex-${FLEX_VERSION} ; ./configure --prefix=${topdir}/autotools-install ; make install)
 
     cd  ${topdir}/
     tar czf ${tarball} autotools-install
