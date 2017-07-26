@@ -10,7 +10,7 @@
     "name" : "AmazonLinux17.03",
     "region": "us-west-2",
     "source_ami": "ami-4836a428",
-    "instance_type": "c4.4xlarge",
+    "instance_type": "t2.micro",
     "ssh_username": "ec2-user",
     "ssh_pty" : true,
     "ami_name": "Jenkins Amazon Linux 17.03 {{user `build_date`}}",

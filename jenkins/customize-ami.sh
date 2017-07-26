@@ -63,6 +63,11 @@ case $PLATFORM_ID in
 	sudo yum -y update
 	sudo yum -y group install "Development Tools"
 	sudo yum -y install libevent hwloc hwloc-libs java gdb
+	(cd /tmp && \
+	 curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip" && \
+         unzip awscli-bundle.zip && \
+         sudo ./awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws && \
+         rm -rf awscli-bundle*)
 	labels="${labels} linux rhel ${VERSION_ID} gcc48"
 	;;
     amzn)
@@ -90,7 +95,7 @@ case $PLATFORM_ID in
 	sudo apt-get -y upgrade
 	sudo apt-get -y install build-essential gfortran \
 	     autoconf automake libtool flex hwloc libhwloc-dev git \
-	     default-jre
+	     default-jre awscli
 	labels="${labels} linux ubuntu_${VERSION_ID}"
 	case $VERSION_ID in
 	    14.04)
@@ -115,6 +120,7 @@ case $PLATFORM_ID in
 	esac
 	;;
     sles)
+	sudo zypper -n update
 	sudo zypper -n install gcc gcc-c++ gcc-fortran \
 	     autoconf automake libtool flex make gdb
 	labels="${labels} linux sles_${VERSION_ID}"
