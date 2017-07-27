@@ -496,12 +496,12 @@ class Builder(object):
         datafile = self.generate_build_history_filename(self._current_build['branch_name'],
                                                         self._current_build['build_unix_time'],
                                                         self._current_build['revision'])
-        self._filer.upload_from_stream(datafile, json.dumps(build_data))
+        self._filer.upload_from_stream(datafile, json.dumps(build_data), {'Cache-Control' : 'max-age=600'})
 
         latest_filename = os.path.join(self._config['branches'][branch_name]['output_location'],
                                        'latest_snapshot.txt')
         version_string = self._current_build['version_string'] + '\n'
-        self._filer.upload_from_stream(latest_filename, version_string)
+        self._filer.upload_from_stream(latest_filename, version_string, {'Cache-Control' : 'max-age=600'} )
 
 
     def update_build_history(self, build_history):
@@ -637,7 +637,7 @@ class Builder(object):
                                                                 build_history[key]['build_unix_time'],
                                                                 build_history[key]['revision'])
                 self._filer.upload_from_stream(filename,
-                                               json.dumps(build_history[key]))
+                                               json.dumps(build_history[key]), {'Cache-Control' : 'max-age=600'})
 
         for build in build_history.keys():
             delete_on = build_history[build]['delete_on']

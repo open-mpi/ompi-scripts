@@ -31,7 +31,7 @@ class BuildFiler(object):
         raise NotImplementedError
 
 
-    def upload_from_stream(self, filename, data):
+    def upload_from_stream(self, filename, data, properties = {}):
         """Upload from a stream
 
         Puts the stream information in data to an object at
@@ -52,7 +52,7 @@ class BuildFiler(object):
         raise NotImplementedError
 
 
-    def upload_from_file(self, local_filename, remote_filename):
+    def upload_from_file(self, local_filename, remote_filename, properties = {}):
         """Upload a file
 
         Upload the local_file to the remote filename.

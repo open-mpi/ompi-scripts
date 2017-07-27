@@ -59,7 +59,7 @@ class S3BuildFiler(BuildFiler.BuildFiler):
         return response['Body']
 
 
-    def upload_from_stream(self, filename, data):
+    def upload_from_stream(self, filename, data, properties = {}):
         """Upload from a stream
 
         Puts the stream information in data to an object at
@@ -70,7 +70,11 @@ class S3BuildFiler(BuildFiler.BuildFiler):
         logger.debug("-> uploading from stream: " + filename)
         key = self._basename + filename
         try:
-            self._s3.put_object(Bucket=self._bucket, Key=key, Body=data)
+            if len(properties) > 0:
+                self._s3.put_object(Bucket=self._bucket, Key=key, Body=data,
+                                    Metadata=properties)
+            else:
+                self._s3.put_object(Bucket=self._bucket, Key=key, Body=data)
         except botocore.exceptions.ClientError as e:
             code = e.response['Error']['Code']
             if code == "NoSuchBucket":
@@ -100,7 +104,7 @@ class S3BuildFiler(BuildFiler.BuildFiler):
                 raise
 
 
-    def upload_from_file(self, local_filename, remote_filename):
+    def upload_from_file(self, local_filename, remote_filename, properties = {}):
         """Upload a file
 
         Upload the local_file to S3 as basename/remote_filename.

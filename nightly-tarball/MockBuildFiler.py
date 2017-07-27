@@ -61,7 +61,7 @@ class MockBuildFiler(BuildFiler.BuildFiler):
         return open(pathname, "r")
 
 
-    def upload_from_stream(self, filename, data):
+    def upload_from_stream(self, filename, data, properties = {}):
         """Upload from a stream
 
         Puts the stream information in data to an object at
@@ -92,7 +92,7 @@ class MockBuildFiler(BuildFiler.BuildFiler):
         shutil.copyfile(remote_pathname, local_filename)
 
 
-    def upload_from_file(self, local_filename, remote_filename):
+    def upload_from_file(self, local_filename, remote_filename, properties = {}):
         """Upload a file
 
         Upload the local_file to S3 as basename/remote_filename.
