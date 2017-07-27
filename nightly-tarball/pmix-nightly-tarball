@@ -32,8 +32,6 @@ config_data = { 'project_name' : 'PMIx',
                                             'coverity' : True,
                                             'max_count' : 7 },
                                },
-                'legacy_file_host' : 'ompiteam@192.185.39.252',
-                'legacy_target_prefix' : 'public_html/software/pmix/nightly/'
                 }
 
 
