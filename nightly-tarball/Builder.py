@@ -229,8 +229,8 @@ class Builder(object):
         remote_repository = self._config['repository']
 
         now = time.time()
-        self._current_build['build_time'] = datetime.datetime.utcfromtimestamp(now).strftime("%Y%m%d%H%M")
         self._current_build['build_unix_time'] = int(now)
+        self._current_build['build_time'] = generate_build_time(now)
         build_root = os.path.join(self._config['project_path'],
                                   branch_name + "-" + self._current_build['build_time'])
         source_tree = os.path.join(build_root,
@@ -292,7 +292,12 @@ class Builder(object):
         return retval
 
 
-    def generate_build_history_filename(self, branch_name, build_time, revision):
+    def generate_build_time(self, build_unix_time):
+        """Helper function to format time strings from unix time"""
+        return datetime.datetime.utcfromtimestamp(build_unix_time).strftime("%Y%m%d%H%M")
+
+
+    def generate_build_history_filename(self, branch_name, build_unix_time, revision):
         """Helper function to build filename
 
         The build history file represents a single build, and has to
@@ -302,6 +307,7 @@ class Builder(object):
         is not sufficient for your project.
 
         """
+        build_time = generate_build_time(build_unix_time)
         return os.path.join(self._config['branches'][branch_name]['output_location'],
                             "build-%s-%s-%s-%s.json" % (self._config['project_short_name'],
                                                         branch_name,
@@ -488,7 +494,7 @@ class Builder(object):
             build_data['files'][build] = self._current_build['artifacts'][build]
 
         datafile = self.generate_build_history_filename(self._current_build['branch_name'],
-                                                        self._current_build['build_time'],
+                                                        self._current_build['build_unix_time'],
                                                         self._current_build['revision'])
         self._filer.upload_from_stream(datafile, json.dumps(build_data))
 
@@ -619,7 +625,7 @@ class Builder(object):
             max_count = 10
         builds = sorted(build_history.keys())
         if len(builds) > max_count:
-            builds = builds[max_count:]
+            builds = builds[0:len(builds) - max_count]
             for key in builds:
                 if not build_history[key]['valid']:
                     continue
