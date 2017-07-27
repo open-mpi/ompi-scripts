@@ -230,7 +230,7 @@ class Builder(object):
 
         now = time.time()
         self._current_build['build_unix_time'] = int(now)
-        self._current_build['build_time'] = generate_build_time(now)
+        self._current_build['build_time'] = self.generate_build_time(now)
         build_root = os.path.join(self._config['project_path'],
                                   branch_name + "-" + self._current_build['build_time'])
         source_tree = os.path.join(build_root,
@@ -307,7 +307,7 @@ class Builder(object):
         is not sufficient for your project.
 
         """
-        build_time = generate_build_time(build_unix_time)
+        build_time = self.generate_build_time(build_unix_time)
         return os.path.join(self._config['branches'][branch_name]['output_location'],
                             "build-%s-%s-%s-%s.json" % (self._config['project_short_name'],
                                                         branch_name,
