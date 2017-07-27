@@ -70,15 +70,23 @@ def do_migrate(input_path, output_path):
                 shutil.copyfile(os.path.join(root, name),
                                 os.path.join(output_dir, name))
 
-            pattern = '\.tar\.gz|\.tar\.bz2|-[0-9]+\.src\.rpm'
+            pattern = '\.dmg\.gz|\.exe|\.tar\.gz|\.tar\.bz2|-[0-9]+\.src\.rpm'
             if re.search(pattern, name):
                 base_filename = re.sub(pattern, '', name)
                 full_filename = os.path.join(root, name)
 
                 print("==> %s" % (full_filename))
 
+                # clean up windows names
+                if re.search('\.exe', name) :
+                    version_search = re.search('OpenMPI_v(.*)-.*', base_filename)
+                    if version_search:
+                        base_filename = 'openmpi-' + version_search.group(1)
+                    else:
+                        print("--> no joy %s" % base_filename)
+
                 # skip the bad tarballs entirely...
-                if not re.search('\.src\.rpm', name):
+                if re.search('\.tar\.', name):
                     try:
                         tar = tarfile.open(full_filename)
                     except:
@@ -114,7 +122,7 @@ def do_migrate(input_path, output_path):
                     builddata['delete_on'] = 0
                     builddata['files'] = {}
 
-                if builddata['build_time'] == 0 and not re.search('\.src\.rpm', name):
+                if builddata['build_unix_time'] == 0 and re.search('\.tar\.', name):
                     try:
                         tar = tarfile.open(full_filename)
                     except:
