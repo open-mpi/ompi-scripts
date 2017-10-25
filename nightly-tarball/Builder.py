@@ -596,12 +596,21 @@ class Builder(object):
         """
         dirpath = self._config['project_path']
         self._logger.debug("Deleting directory: %s" % (dirpath))
-        # deal with "make distcheck"'s stupid permissions
+        # deal with "make distcheck"'s stupid permissions.  Exception
+        # handling is inside the loop so that we do not skip some
+        # files on an error.  os.chmod will throw an error if it
+        # tries to follow a dangling symlink.
         for root, dirs, files in os.walk(dirpath):
             for momo in dirs:
-                os.chmod(os.path.join(root, momo), 0700)
+                try:
+                    os.chmod(os.path.join(root, momo), 0700)
+                except:
+                    pass
             for momo in files:
-                os.chmod(os.path.join(root, momo), 0700)
+                try:
+                    os.chmod(os.path.join(root, momo), 0700)
+                except:
+                    pass
         shutil.rmtree(dirpath)
 
 
