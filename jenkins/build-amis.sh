@@ -1,8 +1,17 @@
 #!/bin/sh
 #
+# Copyright (c) 2017      Amazon.com, Inc. or its affiliates.  All Rights
+#                         Reserved.
+#
+# Additional copyrights may follow
+#
 # Build a new set of AMIs for Jenkins using Packer.  This script
 # requires packer be installed, along with the packer.json and
 # customize-ami.sh scripts in this directory.
+#
+# Run this script from your laptop using an IAM role for the
+# ompi-aws-prod account with EC2 priviledges or from aws.open-mpi.org
+# using the instance's role.
 #
 
 OPTIND=1
