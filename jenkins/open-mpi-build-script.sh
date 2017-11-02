@@ -3,6 +3,11 @@
 # abort on error
 set -e
 
+# sigh; this probably isn't the most user friendly thing I've ever done...
+for var in "$@"; do
+    eval $@
+done
+
 #
 # Start by figuring out what we are...
 #
