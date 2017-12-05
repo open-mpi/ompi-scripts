@@ -177,7 +177,16 @@ else
 fi
 
 echo "--> running ./configure --prefix=\"${PREFIX}\" ${CONFIGURE_ARGS}"
-./configure --prefix="${PREFIX}" ${CONFIGURE_ARGS}
+if ! ./configure --prefix="${PREFIX}" ${CONFIGURE_ARGS}; then
+    echo "./configure --prefix=\"${PREFIX}\" ${CONFIGURE_ARGS} failed, ABORTING !"
+    if test -f config.log; then
+        echo "config.log content :"
+        cat config.log
+    else
+        echo "no config.log was generated"
+    fi
+    exit 1
+fi
 
 # shortcut for the distcheck case, as it won't run any tests beyond
 # the build-in make check tests.
