@@ -20,3 +20,8 @@ HostGator to AWS.
 
 Scripts used for running the community Jenkins server
 (https://jenkins.open-mpi.org/).
+
+## dist/
+
+Scripts used to build releases, upload to s3, etc.  The jenkins and
+nightly tarball scripts call these, in addition to direct human use.
