@@ -64,26 +64,32 @@ def do_migrate(input_path, output_path):
             output_dir = os.path.join(output_path, output_root)
 
             if name == 'latest_snapshot.txt':
-                # make sure the directory exists...
-                if not os.access(output_dir, os.F_OK):
-                    os.makedirs(output_dir)
-                shutil.copyfile(os.path.join(root, name),
-                                os.path.join(output_dir, name))
+                continue
 
-            pattern = '\.dmg\.gz|\.exe|\.tar\.gz|\.tar\.bz2|-[0-9]+\.src\.rpm'
+            pattern = '\.dmg\.gz|\.exe|\.tar\.gz|\.tar\.bz2|-[0-9]+\.src\.rpm|\.zip'
             if re.search(pattern, name):
                 base_filename = re.sub(pattern, '', name)
                 full_filename = os.path.join(root, name)
 
                 print("==> %s" % (full_filename))
 
-                # clean up windows names
+                # clean up Open MPI windows names
                 if re.search('\.exe', name) :
                     version_search = re.search('OpenMPI_v(.*)-.*', base_filename)
                     if version_search:
                         base_filename = 'openmpi-' + version_search.group(1)
                     else:
                         print("--> no joy %s" % base_filename)
+                        continue
+
+                # clean up hwloc windows names
+                if re.search('\.zip', name):
+                    version_search = re.search('(hwloc|libtopology)-win.*-build-(.*)', base_filename)
+                    if version_search:
+                        base_filename = '%s-%s' % (version_search.group(1),  version_search.group(2))
+                    else:
+                        print("--> no joy %s" % base_filename)
+                        continue
 
                 # skip the bad tarballs entirely...
                 if re.search('\.tar\.', name):
@@ -132,7 +138,7 @@ def do_migrate(input_path, output_path):
                         # changed in the migration from IU to
                         # hostgator.  So look at the top level
                         # directory in the tarball instead.
-                        builddata['build_time'] = tar.getmembers()[0].mtime
+                        builddata['build_unix_time'] = tar.getmembers()[0].mtime
 
                 hashes = compute_hashes(full_filename)
                 info = os.stat(full_filename)
