@@ -662,3 +662,23 @@ class Builder(object):
                                                                 build_history[build]['revision'])
                 self._logger.debug("Removing data file %s" % (datafile))
                 self._filer.delete(datafile)
+
+        # as a (maybe temporary?) hack, generate md5sum.txt and
+        # sha1sum.txt files for all valid builds.  Do this in
+        # remote_cleanup rather than update_build_history so that it
+        # gets regenerated whenever files go invalid/removed, rather
+        # than just when new builds are created.
+        md5sum_string = ''
+        sha1sum_string = ''
+        for build in build_history.keys():
+            if not build_history[build]['valid']:
+                continue
+            for filename in build_history[build]['files'].keys():
+                filedata = build_history[build]['files'][filename]
+                md5sum_string += '%s %s\n' % (filename, filedata['md5'])
+                sha1sum_string += '%s %s\n' % (filename, filedata['sha1'])
+        output_base = self._config['branches'][branch_name]['output_location']
+        self._filer.upload_from_stream(os.path.join(output_base, 'md5sums.txt'),
+                                       md5sum_string)
+        self._filer.upload_from_stream(os.path.join(output_base, 'sha1sums.txt'),
+                                       sha1sum_string)
