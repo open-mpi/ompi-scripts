@@ -1,6 +1,7 @@
 #
 # Copyright (c) 2017      Amazon.com, Inc. or its affiliates.  All Rights
 #                         Reserved.
+# Copyright (c) 2081 Cisco Systems, Inc.  All rights reserved.
 #
 # Additional copyrights may follow
 #
@@ -675,8 +676,8 @@ class Builder(object):
                 continue
             for filename in build_history[build]['files'].keys():
                 filedata = build_history[build]['files'][filename]
-                md5sum_string += '%s %s\n' % (filename, filedata['md5'])
-                sha1sum_string += '%s %s\n' % (filename, filedata['sha1'])
+                md5sum_string += '%s %s\n' % (filedata['md5'], filename)
+                sha1sum_string += '%s %s\n' % (filedata['sha1'], filename)
         output_base = self._config['branches'][branch_name]['output_location']
         self._filer.upload_from_stream(os.path.join(output_base, 'md5sums.txt'),
                                        md5sum_string)
