@@ -15,7 +15,8 @@
     "ssh_pty" : true,
     "ami_name": "Jenkins Amazon Linux 17.03 {{user `build_date`}}",
     "associate_public_ip_address" : true,
-    "enhanced_networking" : true,
+    "sriov_support" : true,
+    "ena_support" : true,
     "iam_instance_profile" : "{{user `iam_role`}}"
   },{
     "type": "amazon-ebs",
@@ -27,7 +28,8 @@
     "ssh_pty" : true,
     "ami_name": "Jenkins Ubuntu 16.04 {{user `build_date`}}",
     "associate_public_ip_address" : true,
-    "enhanced_networking" : true,
+    "sriov_support" : true,
+    "ena_support" : true,
     "iam_instance_profile" : "{{user `iam_role`}}"
   },{
     "type": "amazon-ebs",
@@ -39,7 +41,8 @@
     "ssh_pty" : true,
     "ami_name": "Jenkins RHEL 7.3 {{user `build_date`}}",
     "associate_public_ip_address" : true,
-    "enhanced_networking" : true,
+    "sriov_support" : true,
+    "ena_support" : true,
     "iam_instance_profile" : "{{user `iam_role`}}"
   },{
     "type": "amazon-ebs",
@@ -51,7 +54,8 @@
     "ssh_pty" : true,
     "ami_name": "Jenkins SLES 12sp2 {{user `build_date`}}",
     "associate_public_ip_address" : true,
-    "enhanced_networking" : true,
+    "sriov_support" : true,
+    "ena_support" : true,
     "iam_instance_profile" : "{{user `iam_role`}}"
   },{
     "type": "amazon-ebs",
@@ -64,7 +68,8 @@
     "ssh_timeout" : "10m",
     "ami_name": "Jenkins FreeBSD 11 {{user `build_date`}}",
     "associate_public_ip_address" : true,
-    "enhanced_networking" : true,
+    "sriov_support" : true,
+    "ena_support" : true,
     "iam_instance_profile" : "{{user `iam_role`}}"
   }],
   "provisioners": [{
