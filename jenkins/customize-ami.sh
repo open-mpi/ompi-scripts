@@ -74,7 +74,9 @@ case $PLATFORM_ID in
 	sudo yum -y update
 	sudo yum -y groupinstall "Development Tools"
 	sudo yum -y groupinstall "Java Development"
-	sudo yum -y install libevent-devel java-1.8.0-openjdk-devel java-1.8.0-openjdk gdb
+	sudo yum -y install libevent-devel java-1.8.0-openjdk-devel \
+	    java-1.8.0-openjdk gdb python27-mock python27-boto \
+	    python27-boto3
 	labels="${labels} linux amazon_linux_${VERSION_ID}"
 	case $VERSION_ID in
 	    2016.09|2017.03)
@@ -95,7 +97,7 @@ case $PLATFORM_ID in
 	sudo apt-get -y upgrade
 	sudo apt-get -y install build-essential gfortran \
 	     autoconf automake libtool flex hwloc libhwloc-dev git \
-	     default-jre awscli
+	     default-jre awscli python-mock python-boto3 rman
 	labels="${labels} linux ubuntu_${VERSION_ID}"
 	case $VERSION_ID in
 	    14.04)
@@ -122,7 +124,8 @@ case $PLATFORM_ID in
     sles)
 	sudo zypper -n update
 	sudo zypper -n install gcc gcc-c++ gcc-fortran \
-	     autoconf automake libtool flex make gdb
+	     autoconf automake libtool flex make gdb \
+	     python-boto python-boto3 python-mock
 	labels="${labels} linux sles_${VERSION_ID}"
 	case $VERSION_ID in
 	    12.2)
