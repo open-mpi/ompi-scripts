@@ -112,8 +112,9 @@ case $PLATFORM_ID in
 		sudo apt-get -y install gcc-4.7 g++-4.7 gfortran-4.7 \
 		     gcc-4.8 g++-4.8 gfortran-4.8 \
 		     gcc-4.9 g++-4.9 gfortran-4.9 \
-		     clang-3.6 clang-3.7 clang-3.8
-		labels="${labels} gcc47 gcc48 gcc49 gcc5 clang36 clang37 clang38"
+		     clang-3.6 clang-3.7 clang-3.8 \
+		     gcc-multilib g++-multilib gfortran-multilib
+		labels="${labels} gcc47 gcc48 gcc49 gcc5 clang36 clang37 clang38 32bit_builds"
 		;;
 	    *)
 		echo "ERROR: Unknown version ${PLATFORM_ID} ${VERSION_ID}"
