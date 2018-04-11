@@ -70,4 +70,4 @@ install_autotools ()
     export PATH="${old_PATH}"
 }
 
-install_autotools 2.69 1.15 2.4.6 ${SOFTWARE_ROOT}/autotools-2.69-1.15.0-2.4.6
+install_autotools 2.69 1.16.1 2.4.6 ${SOFTWARE_ROOT}/autotools-2.69-1.16.1-2.4.6

@@ -55,7 +55,7 @@ done
 echo "==> Installing packages"
 
 case $PLATFORM_ID in
-    rhel)
+    rhel|centos)
 	# RHEL's default repos only include the "base" compiler
 	# version, so don't worry about script version
 	# differentiation.
@@ -79,7 +79,7 @@ case $PLATFORM_ID in
 	    python27-boto3
 	labels="${labels} linux amazon_linux_${VERSION_ID}"
 	case $VERSION_ID in
-	    2016.09|2017.03)
+	    2016.09|2017.03|2017.09)
 		# clang == 3.6.2
 		sudo yum -y install gcc44 gcc44-c++ gcc44-gfortran \
 		     gcc48 gcc48-c++ gcc48-gfortran clang
@@ -129,7 +129,7 @@ case $PLATFORM_ID in
 	     python-boto python-boto3 python-mock
 	labels="${labels} linux sles_${VERSION_ID}"
 	case $VERSION_ID in
-	    12.2)
+	    12.2|12.3)
 		# gcc5 == 5.3.1
 		# gcc6 == 6.2.1
 		sudo zypper -n install gcc48 gcc48-c++ gcc48-fortran \

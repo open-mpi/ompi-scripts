@@ -21,7 +21,7 @@ while getopts "h?a:l" opt; do
     case "$opt" in
     h|\?)
 	echo "usage: build-ami.sh [-a <ami list>]"
-	echo "  -a <ami list>     Only build amis in ami list"
+	echo "  -a <ami list>     Only build amis in ami list (comma separated)"
 	echo "  -l                List ami names available for building"
 	exit 1
 	;;
