@@ -25,3 +25,9 @@ Scripts used for running the community Jenkins server
 
 Scripts used to build releases, upload to s3, etc.  The jenkins and
 nightly tarball scripts call these, in addition to direct human use.
+
+## administrative/
+
+Scripts used for administrative purposes.  For example, a script to
+assist with the annual Github 'open-mpi' organization committer
+review.
