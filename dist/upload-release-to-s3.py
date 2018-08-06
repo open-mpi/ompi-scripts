@@ -94,8 +94,8 @@ if len(args_dict['files']) < 1:
     print('No files specified.  Stopping.')
     exit(1)
 
-if (args_dict['project'] == None and args_dict['branch'] == None
-    and args_dict['version'] == None) and args_dict['date'] == None:
+if (args_dict['project'] == None or args_dict['branch'] == None
+    or args_dict['version'] == None) or args_dict['date'] == None:
     if args_dict['yes']:
         print('Can not use --yes option unless --project, --branch, --version, ' +
               'and --date are also set.')
