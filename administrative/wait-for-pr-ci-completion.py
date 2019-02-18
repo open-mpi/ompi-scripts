@@ -147,7 +147,6 @@ delay = args.delay
 # the top of this file)
 with open(args.oauth_file, 'r') as f:
     token = f.read().strip()
-g = Github(token)
 
 #--------------------------------------------------------------------
 
@@ -177,6 +176,15 @@ org  = vals[1]
 repo = vals[2]
 pull = vals[3]
 num  = vals[4]
+
+if parts.hostname != "github.com":
+    log.debug("Logging in to Github Enterprise server {hostname}"
+              .format(hostname=parts.hostname))
+    g = Github(base_url=("https://{hostname}/api/v3"
+                         .format(hostname=parts.hostname)),
+               login_or_token=token)
+else:
+    g = Github(token)
 
 full_name = os.path.join(org, repo)
 log.debug("Getting repo {r}...".format(r=full_name))
