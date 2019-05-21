@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017      Amazon.com, Inc. or its affiliates.  All Rights
+# Copyright (c) 2017-2019 Amazon.com, Inc. or its affiliates.  All Rights
 #                         Reserved.
 # Copyright (c) 2081 Cisco Systems, Inc.  All rights reserved.
 #
@@ -29,6 +29,7 @@ def compute_hashes(filename):
     retval = {}
     md5 = hashlib.md5()
     sha1 = hashlib.sha1()
+    sha256 = hashlib.sha256()
     with open(filename, 'rb') as f:
         while True:
             data = f.read(64 * 1024)
@@ -36,8 +37,10 @@ def compute_hashes(filename):
                 break
             md5.update(data)
             sha1.update(data)
+            sha256.update(data)
     retval['md5'] = md5.hexdigest()
     retval['sha1'] = sha1.hexdigest()
+    retval['sha256'] = sha256.hexdigest()
     return retval
 
 
@@ -459,10 +462,11 @@ class Builder(object):
                 hashes = compute_hashes(filename)
                 self._current_build['artifacts'][file] = {}
                 self._current_build['artifacts'][file]['sha1'] = hashes['sha1']
+                self._current_build['artifacts'][file]['sha256'] = hashes['sha256']
                 self._current_build['artifacts'][file]['md5'] = hashes['md5']
                 self._current_build['artifacts'][file]['size'] = info.st_size
-                self._logger.debug("Found artifact %s, size: %d, md5: %s, sha1: %s"
-                                   % (file, info.st_size, hashes['md5'], hashes['sha1']))
+                self._logger.debug("Found artifact %s, size: %d, md5: %s, sha1: %s sha256: %s"
+                                   % (file, info.st_size, hashes['md5'], hashes['sha1'], hashes['sha256']))
 
 
     def publish_build_artifacts(self):
