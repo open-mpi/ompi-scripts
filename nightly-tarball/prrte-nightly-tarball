@@ -11,36 +11,30 @@ import S3BuildFiler
 
 
 nightly_prefix='/mnt/data/nightly-tarball'
-config_data = { 'project_name' : 'PMIx',
-                'project_short_name' : 'pmix',
-                'email_dest' : 'rhc@open-mpi.org',
+config_data = { 'project_name' : 'PRRTE',
+                'project_short_name' : 'prrte',
+                'email_dest' : 'bbarrett@amazon.com',
                 'email_from' : 'mpiteam@aws.open-mpi.org',
-                'repository' : 'https://github.com/pmix/pmix.git',
+                'repository' : 'https://github.com/pmix/prrte.git',
                 'scratch_path' : nightly_prefix + '/scratch',
                 'failed_build_prefix' : 'failed-builds/',
-                'failed_build_url' : 'http://download.open-mpi.org/nightly/pmix/',
+                'failed_build_url' : 'http://download.open-mpi.org/nightly/prrte/',
                 'autogen' : './autogen.pl',
                 'coverity' : { 'tool_dir' : nightly_prefix + '/coverity',
                                'tool_url' : 'https://scan.coverity.com/download/cxx/linux64',
-                               'token_file' : nightly_prefix + '/coverity/pmix-token.txt',
-                               'project_name' : 'open-mpi%2Fpmix',
-                               'project_prefix' : 'pmix',
+                               'token_file' : nightly_prefix + '/coverity/prrte-token.txt',
+                               'project_name' : 'open-mpi%2Fprrte',
+                               'project_prefix' : 'prrte',
                                'configure_args' : '',
                                'make_args' : '-j 8',
                                'email' : 'rhc@open-mpi.org' },
                 'branches' : { 'master' : { 'output_location' : 'master/',
-                                            'coverity' : True,
+                                            'coverity' : False,
                                             'max_count' : 7 },
-                               'v2.2' : { 'output_location' : 'v2.2.x',
-                                          'coverity' : False,
-                                          'max_count' : 7 },
-                               'v3.1' : { 'output_location' : 'v3.1.x',
-                                          'coverity' : False,
-                                          'max_count' : 7 },
                                },
                 }
 
 
-filer = S3BuildFiler.S3BuildFiler('open-mpi-nightly', 'nightly/pmix/')
+filer = S3BuildFiler.S3BuildFiler('open-mpi-nightly', 'nightly/prrte/')
 builder = OMPIBuilder.OMPIBuilder(config_data, filer)
 builder.run()
