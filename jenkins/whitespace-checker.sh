@@ -13,11 +13,11 @@ config_file=.whitespace-checker-config.txt
 if [[ -r $config_file ]]; then
     exclude_dirs=`cat $config_file`
 else
-    exclude_dirs='hwloc|libevent|pmix4x|treematch|romio'
+    exclude_dirs='((opal/mca/hwloc/hwloc.*/hwloc)|/(libevent|pmix4x|treematch|romio))/'
 fi
 
 foundTab=0
-for file in $(git diff --name-only $1 $2 | grep -vE "/($exclude_dirs)/" | grep -E "(\.c|\.h)$")
+for file in $(git diff -l0 --name-only $1 $2 | grep -vE "($exclude_dirs)" | grep -E "(\.c|\.h)$")
 do
     git diff $1 $2 -- $file | grep -C $context -E "^\+.*	+"
     if [[ $? -eq 0 ]]
