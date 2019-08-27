@@ -183,7 +183,7 @@ if test $run_test != 0; then
     set -e
     echo "==> Running Compile test"
     cd
-    git clone https://github.com/open-mpi/ompi.git
+    git clone --recurse-submodules https://github.com/open-mpi/ompi.git
     cd ompi
     ./autogen.pl
     ./configure --prefix=$HOME/install
