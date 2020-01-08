@@ -380,6 +380,9 @@ class Builder(object):
             repo.git.checkout('origin/' + branch, b=branch)
         repo.head.reference = repo.refs['origin/' + branch]
 
+        # And pull in all the right submodules
+        repo.submodule_update(recursive = True)
+
         # wish I could figure out how to do this without resorting to
         # shelling out to git :/
         self._current_build['revision'] = repo.git.rev_parse(repo.head.object.hexsha, short=7)
