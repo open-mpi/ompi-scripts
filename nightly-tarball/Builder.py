@@ -81,6 +81,7 @@ class Builder(object):
         Builder functions to do the actual work.
 
         """
+        self._logger = None
         self._current_build = {}
         self._config = self._base_options.copy()
         self._config.update(config)
@@ -134,9 +135,10 @@ class Builder(object):
     def __del__(self):
         # delete the log file, since it doesn't auto-clean (we're only
         # using it for email, so no one will miss it)
-        self._logger.removeHandler(self._fh)
-        self._fh.close()
-        os.remove(self._config['log_file'])
+        if self._logger != None:
+            self._logger.removeHandler(self._fh)
+            self._fh.close()
+            os.remove(self._config['log_file'])
 
 
     def add_arguments(self, parser):
