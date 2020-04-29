@@ -52,6 +52,11 @@ while getopts "h?tb" opt; do
     esac
 done
 
+echo "==> Sleeping 2 minutes"
+# Some systems run package updates during boot.  Avoid yum/apt/zypper
+# lock conflicts by waiting a couple minutes.
+sleep 120
+
 echo "==> Installing packages"
 
 case $PLATFORM_ID in
@@ -63,28 +68,51 @@ case $PLATFORM_ID in
 	sudo yum -y update
 	sudo yum -y group install "Development Tools"
 	sudo yum -y install libevent hwloc hwloc-libs java gdb
+	labels="${labels} linux rhel ${VERSION_ID}"
+	case $VERSION_ID in
+	    7.*)
+		sudo yum -y install gcc gcc-c++ gcc-gfortran
+		labels="${labels} gcc48"
+		;;
+	    8.*)
+		sudo yum -y install python3.8 \
+		  gcc gcc-c++ gcc-gfortran
+		sudo alternatives --set python /usr/bin/python3
+		labels="${labels} gcc8"
+		;;
+            *)
+                echo "ERROR: Unknown version ${PLATFORM_ID} ${VERSION_ID}"
+                exit 1
+                ;;
+	esac
 	(cd /tmp && \
 	 curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip" && \
          unzip awscli-bundle.zip && \
          sudo ./awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws && \
          rm -rf awscli-bundle*)
-	labels="${labels} linux rhel ${VERSION_ID} gcc48"
 	;;
     amzn)
 	sudo yum -y update
 	sudo yum -y groupinstall "Development Tools"
-	sudo yum -y groupinstall "Java Development"
-	sudo yum -y install libevent-devel java-1.8.0-openjdk-devel \
-	    java-1.8.0-openjdk gdb python27-mock python27-boto \
-	    python27-boto3
-	labels="${labels} linux amazon_linux_${VERSION_ID}"
+	sudo yum -y install libevent-devel hwloc-devel \
+         java-1.8.0-openjdk-devel java-1.8.0-openjdk \
+         gdb
+	labels="${labels} linux"
 	case $VERSION_ID in
-	    2016.09|2017.03|2017.09)
+	    2016.09|2017.03|2017.09|2018.03)
 		# clang == 3.6.2
+		sudo yum -y groupinstall "Java Development"
 		sudo yum -y install gcc44 gcc44-c++ gcc44-gfortran \
-		     gcc48 gcc48-c++ gcc48-gfortran clang
+		     gcc48 gcc48-c++ gcc48-gfortran clang \
+               python27-mock python27-boto python27-boto3
 		sudo alternatives --set java /usr/lib/jvm/jre-1.8.0-openjdk.x86_64/bin/java
-		labels="${labels} gcc44 gcc48 clang36"
+		labels="${labels} amazon_linux_1 gcc44 gcc48 clang36"
+		;;
+	    2)
+		sudo yum -y install clang hwloc-devel \
+               python2-pip python2 python2-boto3
+		sudo pip install mock
+		labels="${labels} amazon_linux_2 gcc7 clang7"
 		;;
 	    *)
 		echo "ERROR: Unknown version ${PLATFORM_ID} ${VERSION_ID}"
@@ -97,11 +125,12 @@ case $PLATFORM_ID in
 	sudo apt-get -y upgrade
 	sudo apt-get -y install build-essential gfortran \
 	     autoconf automake libtool flex hwloc libhwloc-dev git \
-	     default-jre awscli python-mock python-boto3 rman
-	labels="${labels} linux ubuntu_${VERSION_ID}"
+	     default-jre awscli python-mock rman pandoc
+	labels="${labels} linux ubuntu_${VERSION_ID} pandoc"
 	case $VERSION_ID in
 	    14.04)
-		sudo apt-get -y install gcc-4.4 g++-4.4 gfortran-4.4 \
+		sudo apt-get -y install python-boto3 python-mock \
+		     gcc-4.4 g++-4.4 gfortran-4.4 \
 		     gcc-4.6 g++-4.6 gfortran-4.6 \
 		     gcc-4.7 g++-4.7 gfortran-4.7 \
 		     gcc-4.8 g++-4.8 gfortran-4.8 \
@@ -109,12 +138,37 @@ case $PLATFORM_ID in
 		labels="${labels} gcc44 gcc46 gcc47 gcc48 clang36 clang37 clang38"
 		;;
 	    16.04)
-		sudo apt-get -y install gcc-4.7 g++-4.7 gfortran-4.7 \
+		sudo apt-get -y install python-boto3 python-mock \
+		     gcc-4.7 g++-4.7 gfortran-4.7 \
 		     gcc-4.8 g++-4.8 gfortran-4.8 \
 		     gcc-4.9 g++-4.9 gfortran-4.9 \
 		     clang-3.6 clang-3.7 clang-3.8 \
 		     gcc-multilib g++-multilib gfortran-multilib
 		labels="${labels} gcc47 gcc48 gcc49 gcc5 clang36 clang37 clang38 32bit_builds"
+		;;
+	    18.04)
+		sudo apt-get -y install \
+		     python-boto3 \
+		     gcc-4.8 g++-4.8 gfortran-4.8 \
+		     gcc-5 g++-5 gfortran-5 \
+		     gcc-6 g++-6 gfortran-6 \
+		     gcc-7 g++-7 gfortran-7 \
+		     gcc-8 g++-8 gfortran-8 \
+		     clang-3.9 clang-4.0 clang-5.0 clang-6.0 \
+		     clang-7 clang-8 clang-9 \
+		     gcc-multilib g++-multilib gfortran-multilib
+		labels="${labels} gcc48 gcc5 gcc6 gcc7 gcc8 clang39 clang40 clang50 clang60 clang7 clang8 clang9 32bit_builds"
+		;;
+	    20.04)
+		sudo apt-get -y install \
+		     python-is-python3 python3-boto3 python3-mock \
+		     gcc-7 g++-7 gfortran-7 \
+		     gcc-8 g++-8 gfortran-8 \
+		     gcc-9 g++-9 gfortran-9 \
+		     gcc-10 g++-10 gfortran-10 \
+		     clang-6.0 clang-7 clang-8 clang-9 clang-10 \
+		     gcc-multilib g++-multilib gfortran-multilib
+		labels="${labels} gcc7 gcc8 gcc9 gcc10 clang60 clang7 clang8 clang9 clang10 32bit_builds"
 		;;
 	    *)
 		echo "ERROR: Unknown version ${PLATFORM_ID} ${VERSION_ID}"
@@ -125,18 +179,29 @@ case $PLATFORM_ID in
     sles)
 	sudo zypper -n update
 	sudo zypper -n install gcc gcc-c++ gcc-fortran \
-	     autoconf automake libtool flex make gdb \
-	     python-boto python-boto3 python-mock
+	     autoconf automake libtool flex make gdb
 	labels="${labels} linux sles_${VERSION_ID}"
 	case $VERSION_ID in
-	    12.2|12.3)
+	    12.*)
 		# gcc5 == 5.3.1
 		# gcc6 == 6.2.1
-		sudo zypper -n install gcc48 gcc48-c++ gcc48-fortran \
+		sudo zypper -n install \
+				 hwloc-devel \
+                     python-boto python-boto3 python-mock \
+                     gcc48 gcc48-c++ gcc48-fortran \
 		     gcc5 gcc5-c++ gcc5-fortran \
 		     gcc6 gcc6-c++ gcc6-fortran
 		labels="${labels} gcc48 gcc5 gcc6"
 		;;
+            15.*)
+		sudo zypper -n install \
+                     python3-boto python3-boto3 python3-mock \
+                     gcc7 gcc7-c++ gcc7-fortran \
+		     gcc8 gcc8-c++ gcc8-fortran \
+		     gcc9 gcc9-c++ gcc9-fortran
+		sudo ln -s /usr/bin/python3 /usr/bin/python
+		labels="${labels} gcc7 gcc8 gcc9"
+                ;;
 	    *)
 		echo "ERROR: Unknown version ${PLATFORM_ID} ${VERSION_ID}"
 		exit 1
@@ -169,14 +234,6 @@ case $PLATFORM_ID in
 	echo "ERROR: Unkonwn platform ${PLATFORM_ID}"
 	exit 1
 esac
-
-#
-# Run the most recent version of the agent script to pre-fetch the
-# required software packages.
-#
-curl https://raw.githubusercontent.com/open-mpi/ompi-scripts/master/jenkins/agent-setup-script.sh -o agent-setup-script.sh
-/bin/sh ./agent-setup-script.sh
-rm ./agent-setup-script.sh
 
 if test $run_test != 0; then
     # for these tests, fail the script if a test fails
