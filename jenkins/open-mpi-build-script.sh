@@ -180,7 +180,7 @@ fi
 # ./configure --help.  In prep for 5.0, we added a developer
 # requirement for pandoc to build (not required for dist tarballs),
 # with an explicit option to disable.
-if `where pandoc > /dev/null 2>&1` ; then
+if `which pandoc > /dev/null 2>&1` ; then
     echo "--> Found pandoc.  Allowing default manpage behavior"
 else
     if `./configure --help | grep -q disable-man-pages` ; then
