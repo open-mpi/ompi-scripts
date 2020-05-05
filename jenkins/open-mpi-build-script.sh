@@ -176,6 +176,21 @@ else
     fi
 fi
 
+# note: we can't do this until after autogen, because we need to run
+# ./configure --help.  In prep for 5.0, we added a developer
+# requirement for pandoc to build (not required for dist tarballs),
+# with an explicit option to disable.
+if `where pandoc > /dev/null 2>&1` ; then
+    echo "--> Found pandoc.  Allowing default manpage behavior"
+else
+    if `./configure --help | grep -q disable-man-pages` ; then
+	echo "--> No pandoc and configure supports --disable-man-pages"
+	CONFIGURE_ARGS="${CONFIGURE_ARGS} --disable-man-pages"
+    else
+	echo "--> No pandoc and no --disable-man-pages.  Allowing default manpage behavior"
+    fi
+fi
+
 echo "--> running ./configure --prefix=\"${PREFIX}\" ${CONFIGURE_ARGS}"
 if ! ./configure --prefix="${PREFIX}" ${CONFIGURE_ARGS}; then
     echo "./configure --prefix=\"${PREFIX}\" ${CONFIGURE_ARGS} failed, ABORTING !"
