@@ -22,12 +22,24 @@ if test ! -r ${dist_script} ; then
     exit 1
 fi
 
+os=`uname -s`
+if test "${os}" = "Linux"; then
+    eval "PLATFORM_ID=`sed -n 's/^ID=//p' /etc/os-release`"
+    eval "VERSION_ID=`sed -n 's/^VERSION_ID=//p' /etc/os-release`"
+else
+    PLATFORM_ID=`uname -s`
+    VERSION_ID=`uname -r`
+fi
+
+echo "==> Platform: $PLATFORM_ID"
+echo "==> Version:  $VERSION_ID"
+
 for pkg in AC AM LT M4 FLEX; do
     eval "${pkg}_VERSION=`sed -ne \"s/^${pkg}_TARGET_VERSION=\(.*\)/\1/p\" ${dist_script}`"
 done
 
 version_string="${AC_VERSION}-${AM_VERSION}-${LT_VERSION}-${M4_VERSION}-${FLEX_VERSION}"
-tarball="autotools-${version_string}.tar.gz"
+tarball="autotools-${PLATFORM_ID}_${VERSION_ID}-${version_string}.tar.gz"
 echo "version string: ${version_string}"
 
 if ! aws s3 cp s3://ompi-jenkins-config/${tarball} . >& /dev/null ; then
@@ -67,6 +79,7 @@ if ! aws s3 cp s3://ompi-jenkins-config/${tarball} . >& /dev/null ; then
     cd  ${topdir}/
     tar czf ${tarball} autotools-install
     aws s3 cp ${tarball} s3://ompi-jenkins-config/${tarball}
+    rm -rf ${topdir}/autotools-src
 else
     tar xf ${tarball}
 fi
