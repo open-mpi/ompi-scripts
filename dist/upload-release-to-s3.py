@@ -26,7 +26,11 @@
 import argparse
 import boto3
 import botocore
-import urlparse
+# stupid python versions
+try:
+    from urllib.parse import urlparse
+except ImportError:
+    from urlparse import urlparse
 import sys
 import re
 import os
@@ -83,7 +87,7 @@ args = parser.parse_args()
 args_dict = vars(args)
 
 # split the s3 URL into bucket and path, which is what Boto3 expects
-parts = urlparse.urlparse(args_dict['s3_base'])
+parts = urlparse(args_dict['s3_base'])
 if parts.scheme != 's3':
     print('unexpected URL format for s3-base.  Expected scheme s3, got %s' % parts.scheme)
     exit(1)
