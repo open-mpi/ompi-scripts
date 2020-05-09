@@ -33,6 +33,7 @@ def __compute_hashes(filename):
     retval = {}
     md5 = hashlib.md5()
     sha1 = hashlib.sha1()
+    sha256 = hashlib.sha256()
     with open(filename, 'rb') as f:
         while True:
             data = f.read(64 * 1024)
@@ -40,8 +41,10 @@ def __compute_hashes(filename):
                 break
             md5.update(data)
             sha1.update(data)
+            sha256.update(data)
     retval['md5'] = md5.hexdigest()
     retval['sha1'] = sha1.hexdigest()
+    retval['sha256'] = sha256.hexdigest()
     return retval
 
 
@@ -250,6 +253,7 @@ def upload_files(s3_client, s3_bucket, s3_key_prefix, release_info, files, promp
         hashes = __compute_hashes(filename)
         fileinfo = {}
         fileinfo['sha1'] = hashes['sha1']
+        fileinfo['sha256'] = hashes['sha256']
         fileinfo['md5'] = hashes['md5']
         fileinfo['size'] = info.st_size
         buildinfo['files'][os.path.basename(filename)] = fileinfo
