@@ -8,14 +8,13 @@
 
 import boto3
 import botocore
-import urlparse
 import sys
 import re
 import os
 import json
 import tarfile
 import hashlib
-import StringIO
+from io import StringIO
 import datetime
 import unittest
 import mock
@@ -474,7 +473,7 @@ class upload_files_tests(unittest.TestCase):
             fileinfo['md5'] = 'zyx'
             fileinfo['size'] = 1024
             buildinfo['files']['openmpi-100.0.0rho1.tar.bz2'] = fileinfo
-            result['Body'] = StringIO.StringIO(json.dumps(buildinfo))
+            result['Body'] = StringIO(json.dumps(buildinfo))
 
             return result
 
