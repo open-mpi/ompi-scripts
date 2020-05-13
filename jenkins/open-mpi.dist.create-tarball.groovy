@@ -176,13 +176,10 @@ def checkout_code() {
 		 submoduleCfg: [],
 		 userRemoteConfigs: [[credentialsId: '6de58bf1-2619-4065-99bb-8d284b4691ce',
 				      url: 'https://github.com/open-mpi/ompi/']]])
-  checkout(changelog: false, poll: false,
-	   scm: [$class: 'GitSCM', branches: [[name: 'origin/open-mpi-dist']],
-		 doGenerateSubmoduleConfigurations: false,
-		 extensions: [[$class: 'WipeWorkspace'],
-			      [$class: 'RelativeTargetDirectory',
-			       relativeTargetDir: 'ompi-scripts']],
-		 submoduleCfg: [],
-		 userRemoteConfigs: [[credentialsId: '6de58bf1-2619-4065-99bb-8d284b4691ce',
-				      url: 'https://github.com/bwbarrett/ompi-scripts/']]])
+  // scm is a provided global variable that points to the repository
+  // configured in the Jenkins job for the pipeline source.  Since the
+  // pipeline and the helper scripts live in the same place, this is
+  // perfect for us.  We check this out on the worker nodes so that
+  // the helper scripts are always available.
+  checkout(changelog: false, poll: false, scm: scm)
 }
