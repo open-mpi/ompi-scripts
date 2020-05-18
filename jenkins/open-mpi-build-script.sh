@@ -79,30 +79,29 @@ case ${PLATFORM_ID} in
 	esac
 	;;
     ubuntu)
+        # On Ubuntu, gcc 4.x was packaged as major.minor version
+        # packages. 5.x and later was packaged as major version only.
+        # Clang 6.x and earlier was packaged as major.minor, while
+        # Clang 7 and lager was packaged as major version only.
 	case "$Compiler" in
 	    "")
 		echo "--> Using default compilers"
 		;;
-	    gcc47)
-		CONFIGURE_ARGS="CC=gcc-4.7 CXX=g++-4.7 FC=gfortran-4.7"
+	    gcc4*)
+                version=`echo "$Compiler" | sed -e 's/gcc4\([0-9]*\)/4.\1/'`
+		CONFIGURE_ARGS="CC=gcc-${version} CXX=g++-${version} FC=gfortran-${version}"
 		;;
-	    gcc48)
-		CONFIGURE_ARGS="CC=gcc-4.8 CXX=g++-4.8 FC=gfortran-4.8"
+	    gcc*)
+                version=`echo "$Compiler" | sed -e 's/gcc\([0-9]*\)/\1/'`
+		CONFIGURE_ARGS="CC=gcc-${version} CXX=g++-${version} FC=gfortran-${version}"
 		;;
-	    gcc49)
-		CONFIGURE_ARGS="CC=gcc-4.9 CXX=g++-4.9 FC=gfortran-4.9"
+	    clang3*|clang4*|clang5*|clang6*)
+                version=`echo "$Compiler" |  sed -e 's/clang\([0-9]\)\([0-9]*\)/\1.\2/'`
+		CONFIGURE_ARGS="CC=clang-${version} CXX=clang++-${version} --disable-mpi-fortran"
 		;;
-	    gcc5)
-		CONFIGURE_ARGS="CC=gcc-5 CXX=g++-5 FC=gfortran-5"
-		;;
-	    clang36)
-		CONFIGURE_ARGS="CC=clang-3.6 CXX=clang++-3.6 --disable-mpi-fortran"
-		;;
-	    clang37)
-		CONFIGURE_ARGS="CC=clang-3.7 CXX=clang++-3.7 --disable-mpi-fortran"
-		;;
-	    clang38)
-		CONFIGURE_ARGS="CC=clang-3.8 CXX=clang++-3.8 --disable-mpi-fortran"
+	    clang*)
+                version=`echo "$Compiler" | sed -e 's/clang\([0-9]*\)/\1/'`
+		CONFIGURE_ARGS="CC=clang-${version} CXX=clang++-${version} --disable-mpi-fortran"
 		;;
 	    *)
 		echo "Unsupported compiler ${Compiler}.  Aborting"
