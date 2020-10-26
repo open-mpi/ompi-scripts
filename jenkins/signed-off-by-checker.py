@@ -27,19 +27,19 @@ _prog = re.compile("^Signed-off-by: (.+?) <(.+)>$",
 def _signed_off_by_checker(commit, results):
     # Ignore merge commits
     if len(commit.parents) > 1:
-        loggging.info(f"Merge commit {commit.hexsha} skipped")
+        loggging.info("Merge commit %s skipped" % (commit.hexsha))
         return
 
     match = _prog.search(commit.message)
     if not match:
         results['bad'] += 1
-        logging.error("Commit {commit.hexsha} not signed off")
+        logging.error("Commit %s not signed off" % (commit.hexsha))
 
     else:
         results['good'] += 1
         name = match.group(1)
         addr = match.group(2)
-        logging.info(f"Commit {commit.hexsha} properly signed off: {name} <{addr}>")
+        logging.info("Commit %s properly signed off: %s <%s>" % (commit.hexsha, name, addr))
 
 #--------------------------------------
 # Call the main engine

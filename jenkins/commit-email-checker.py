@@ -27,11 +27,11 @@ def _email_address_checker(commit, results):
         if ('root@' in email or
             'localhost' in email or
             'localdomain' in email):
-            logging.error(f"Commit {commit.hexsha} has an unspecific {type} email address: {email}")
+            logging.error("Commit %s has an unspecific %s email address: %s" % (commit.hexsha, type, email))
             results['bad'] += 1
 
         else:
-            logging.info(f"Commit {commit.hexsha} has a good {type} email address: {email}")
+            logging.info("Commit %s has a good %s email address: %s" % (commit.hexsha, type, email))
             results['good'] += 1
 
 #--------------------------------------

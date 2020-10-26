@@ -7,34 +7,40 @@
 import os
 import sys
 import logging
+import argparse
 
 from git import Repo
 
 def run(checker_name, per_commit_callback, result_messages):
     logging.basicConfig(level=logging.INFO, stream=sys.stderr)
-    logging.info(f"{checker_name} starting")
+    logging.info("%s starting" % (checker_name))
 
-    #--------------------------------------
-    # These env variables come in from Jenkins
-    # See https://jenkins.open-mpi.org/jenkins/env-vars.html/
-    try:
-        base_branch = os.environ['CHANGE_BRANCH']
-        pr_branch   = os.environ['BRANCH_NAME']
-        clone_dir   = os.environ['GIT_CHECKOUT_DIR']
-    except Exception as e:
-        logging.error(f"Cannot find the expected Jenkins environment variable: {e}")
-        logging.error("Aborting in despair")
-        exit(1)
+    argparser = argparse.ArgumentParser(description='Per-commit PR checker')
+    argparser.add_argument('--status-msg-file',
+                           help='File in which to print the GitHub status message',
+                           type=str, required=True)
+    argparser.add_argument('--gitdir', help='Git directory', type=str,
+                           required=True)
+    argparser.add_argument('--base-branch', help='Merge base branch name',
+                           type=str, required=True)
+    argparser.add_argument('--pr-branch', help='PR branch name',
+                           type=str, required=True)
+    args = argparser.parse_args()
+    args_dict = vars(args)
 
-    logging.info(f"Git clone:   {clone_dir}")
-    logging.info(f"PR branch:   {pr_branch}")
-    logging.info(f"Base branch: {base_branch}")
+    base_branch = args_dict['base_branch']
+    pr_branch   = args_dict['pr_branch']
+    clone_dir   = args_dict['gitdir']
+
+    logging.info("Git clone:   %s" % (clone_dir))
+    logging.info("PR branch:   %s" % (pr_branch))
+    logging.info("Base branch: %s" % (base_branch))
 
     #--------------------------------------
     # Make a python object representing the Git repo
     repo       = Repo(clone_dir)
     merge_base = repo.commit(base_branch)
-    logging.info(f"Merge base:  {merge_base.hexsha}")
+    logging.info("Merge base:  %s" % (merge_base.hexsha))
 
     #--------------------------------------
     # Iterate from the HEAD of the PR branch down to the merge base with
@@ -44,9 +50,9 @@ def run(checker_name, per_commit_callback, result_messages):
         'bad'  : 0,
     }
 
-    for commit in repo.iter_commits(repo.head.ref):
+    for commit in repo.iter_commits(repo.commit(pr_branch)):
         if commit.binsha == merge_base.binsha:
-            logging.info(f"Found the merge base {commit.hexsha}: we're done")
+            logging.info("Found the merge base %s: we're done" % (commit.hexsha))
             break
 
         per_commit_callback(commit, results)
@@ -67,4 +73,7 @@ def run(checker_name, per_commit_callback, result_messages):
         status = result_messages['none good']['status']
 
     print(msg)
+    with open(args_dict['status_msg_file'], 'w') as writer:
+        writer.write(msg)
+
     exit(status)
