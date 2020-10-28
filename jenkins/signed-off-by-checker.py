@@ -27,7 +27,7 @@ _prog = re.compile("^Signed-off-by: (.+?) <(.+)>$",
 def _signed_off_by_checker(commit, results):
     # Ignore merge commits
     if len(commit.parents) > 1:
-        loggging.info("Merge commit %s skipped" % (commit.hexsha))
+        logging.info("Merge commit %s skipped" % (commit.hexsha))
         return
 
     match = _prog.search(commit.message)
