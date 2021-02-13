@@ -89,7 +89,7 @@ class Builder(object):
         self._parser = argparse.ArgumentParser(description='Nightly build script for Open MPI related projects')
         self.add_arguments(self._parser)
         # copy arguments into options, assuming they were specified
-        for key, value in vars(self._parser.parse_args()).iteritems():
+        for key, value in vars(self._parser.parse_args()).items():
             if not value == None:
                 self._config[key] = value
         # special case hack...  expand out scratch_path
@@ -613,12 +613,12 @@ class Builder(object):
         for root, dirs, files in os.walk(dirpath):
             for momo in dirs:
                 try:
-                    os.chmod(os.path.join(root, momo), 0700)
+                    os.chmod(os.path.join(root, momo), 0o700)
                 except:
                     pass
             for momo in files:
                 try:
-                    os.chmod(os.path.join(root, momo), 0700)
+                    os.chmod(os.path.join(root, momo), 0o700)
                 except:
                     pass
         shutil.rmtree(dirpath)
