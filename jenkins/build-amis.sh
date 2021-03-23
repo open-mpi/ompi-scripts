@@ -29,7 +29,7 @@ while getopts "h?a:l" opt; do
         packer_opts="--only ${OPTARG}"
         ;;
     l)
-        ami_list=`sed -n -e 's/.*\"name\".*\"\(.*\)\".*/\1/p' packer.json | xargs`
+        ami_list=`packer inspect -machine-readable packer.json | grep template-builder | cut -f4 -d, | xargs`
         echo "Available amis: ${ami_list}"
         exit 0
         ;;
