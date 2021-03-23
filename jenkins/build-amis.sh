@@ -20,19 +20,19 @@ packer_opts=""
 while getopts "h?a:l" opt; do
     case "$opt" in
     h|\?)
-	echo "usage: build-ami.sh [-a <ami list>]"
-	echo "  -a <ami list>     Only build amis in ami list (comma separated)"
-	echo "  -l                List ami names available for building"
-	exit 1
-	;;
+        echo "usage: build-ami.sh [-a <ami list>]"
+        echo "  -a <ami list>     Only build amis in ami list (comma separated)"
+        echo "  -l                List ami names available for building"
+        exit 1
+        ;;
     a)
-	packer_opts="--only ${OPTARG}"
-	;;
+        packer_opts="--only ${OPTARG}"
+        ;;
     l)
-	ami_list=`sed -n -e 's/.*\"name\".*\"\(.*\)\".*/\1/p' packer.json | xargs`
-	echo "Available amis: ${ami_list}"
-	exit 0
-	;;
+        ami_list=`sed -n -e 's/.*\"name\".*\"\(.*\)\".*/\1/p' packer.json | xargs`
+        echo "Available amis: ${ami_list}"
+        exit 0
+        ;;
     esac
 done
 
