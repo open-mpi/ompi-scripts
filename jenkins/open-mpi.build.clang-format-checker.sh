@@ -1,4 +1,18 @@
 #!/usr/bin/env bash
+#
+# This script assumes that it is running in the root of an Open MPI
+# git clone.
+
+# Only run if there is a .clang-format file at the top of the tree.
+# This handles the case where this script is run on a branch that does
+# not have the .clang-format file.
+
+if test ! -f .clang-format; then
+    echo "There is no .clang-format file present; nothing to do!"
+    exit 0
+fi
+
+#####################################
 
 # Make sure we have clang-format v11.
 # This may well be redundant / unnecessary, since the AMI should be
