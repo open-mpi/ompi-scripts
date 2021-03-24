@@ -21,6 +21,7 @@ set -e
 labels="ec2"
 
 os=`uname -s`
+arch=`uname -m`
 if test "${os}" = "Linux"; then
     eval "PLATFORM_ID=`sed -n 's/^ID=//p' /etc/os-release`"
     eval "VERSION_ID=`sed -n 's/^VERSION_ID=//p' /etc/os-release`"
@@ -31,6 +32,7 @@ fi
 
 echo "==> Platform: $PLATFORM_ID"
 echo "==> Version:  $VERSION_ID"
+echo "==> Architecture: $arch"
 
 OPTIND=1         # Reset in case getopts has been used previously in the shell.
 run_test=0       # -b runs an ompi build test; useful for testing new AMIs
@@ -57,14 +59,12 @@ echo "==> Sleeping 2 minutes"
 # lock conflicts by waiting a couple minutes.
 sleep 120
 
-echo "==> Installing packages"
-
 case $PLATFORM_ID in
     rhel|centos)
+        echo "==> Installing packages"
         # RHEL's default repos only include the "base" compiler
         # version, so don't worry about script version
         # differentiation.
-        # gcc = 4.8.5
         sudo yum -y update
         sudo yum -y group install "Development Tools"
         sudo yum -y install libevent hwloc hwloc-libs java gdb
@@ -92,6 +92,7 @@ case $PLATFORM_ID in
          rm -rf awscli-bundle*)
         ;;
     amzn)
+        echo "==> Installing packages"
         sudo yum -y update
         sudo yum -y groupinstall "Development Tools"
         sudo yum -y install libevent-devel hwloc-devel \
@@ -112,21 +113,25 @@ case $PLATFORM_ID in
                 sudo yum -y install clang hwloc-devel \
                python2-pip python2 python2-boto3
                 sudo pip install mock
-                labels="${labels} amazon_linux_2 gcc7 clang7"
+                labels="${labels} amazon_linux_2-${arch} gcc7 clang7"
                 ;;
             *)
                 echo "ERROR: Unknown version ${PLATFORM_ID} ${VERSION_ID}"
                 exit 1
                 ;;
         esac
+        echo "==> Disabling Security Updates"
+        sed -e 's/repo_upgrade: security/repo_upgrade: none/g' /etc/cloud/cloud.cfg > /tmp/cloud.cfg.new
+        sudo mv -f /tmp/cloud.cfg.new /etc/cloud/cloud.cfg
         ;;
     ubuntu)
+        echo "==> Installing packages"
         sudo apt-get update
         sudo apt-get -y upgrade
         sudo apt-get -y install build-essential gfortran \
              autoconf automake libtool flex hwloc libhwloc-dev git \
              default-jre awscli python-mock rman pandoc
-        labels="${labels} linux ubuntu_${VERSION_ID} pandoc"
+        labels="${labels} linux ubuntu_${VERSION_ID}-${arch} pandoc"
         case $VERSION_ID in
             14.04)
                 sudo apt-get -y install python-boto3 python-mock \
@@ -142,9 +147,12 @@ case $PLATFORM_ID in
                      gcc-4.7 g++-4.7 gfortran-4.7 \
                      gcc-4.8 g++-4.8 gfortran-4.8 \
                      gcc-4.9 g++-4.9 gfortran-4.9 \
-                     clang-3.6 clang-3.7 clang-3.8 \
-                     gcc-multilib g++-multilib gfortran-multilib
-                labels="${labels} gcc47 gcc48 gcc49 gcc5 clang36 clang37 clang38 32bit_builds"
+                     clang-3.6 clang-3.7 clang-3.8 
+                labels="${labels} gcc47 gcc48 gcc49 gcc5 clang36 clang37 clang38"
+                if test "$arch" = "x86_64" ; then
+                    sudo apt-get -y install gcc-multilib g++-multilib gfortran-multilib
+                    labels="${labels} 32bit_builds"
+                fi
                 ;;
             18.04)
                 sudo apt-get -y install \
@@ -155,9 +163,12 @@ case $PLATFORM_ID in
                      gcc-7 g++-7 gfortran-7 \
                      gcc-8 g++-8 gfortran-8 \
                      clang-3.9 clang-4.0 clang-5.0 clang-6.0 \
-                     clang-7 clang-8 clang-9 \
-                     gcc-multilib g++-multilib gfortran-multilib
-                labels="${labels} gcc48 gcc5 gcc6 gcc7 gcc8 clang39 clang40 clang50 clang60 clang7 clang8 clang9 32bit_builds"
+                     clang-7 clang-8 clang-9 
+                labels="${labels} gcc48 gcc5 gcc6 gcc7 gcc8 clang39 clang40 clang50 clang60 clang7 clang8 clang9"
+                if test "$arch" = "x86_64" ; then
+                    sudo apt-get -y install gcc-multilib g++-multilib gfortran-multilib
+                    labels="${labels} 32bit_builds"
+                fi
                 ;;
             20.04)
                 sudo apt-get -y install \
@@ -167,20 +178,27 @@ case $PLATFORM_ID in
                      gcc-9 g++-9 gfortran-9 \
                      gcc-10 g++-10 gfortran-10 \
                      clang-6.0 clang-7 clang-8 clang-9 clang-10 \
-                     gcc-multilib g++-multilib gfortran-multilib
-                labels="${labels} gcc7 gcc8 gcc9 gcc10 clang60 clang7 clang8 clang9 clang10 32bit_builds"
+                     clang-format-11 bsdutils
+                labels="${labels} gcc7 gcc8 gcc9 gcc10 clang60 clang7 clang8 clang9 clang10"
+                if test "$arch" = "x86_64" ; then
+                    sudo apt-get -y install gcc-multilib g++-multilib gfortran-multilib
+                    labels="${labels} 32bit_builds"
+                fi
                 ;;
             *)
                 echo "ERROR: Unknown version ${PLATFORM_ID} ${VERSION_ID}"
                 exit 1
                 ;;
         esac
+        echo "==> Disabling Security Updates"
+        sed -e 's/APT::Periodic::Update-Package-Lists "1";/APT::Periodic::Update-Package-Lists "0";/g' /etc/apt/apt.conf.d/20auto-upgrades | sed -e 's/APT::Periodic::Unattended-Upgrade "1";/APT::Periodic::Unattended-Upgrade "0";/g' > /tmp/20auto-upgrades
+        sudo mv -f /tmp/20auto-upgrades /etc/apt/apt.conf.d/20auto-upgrades
         ;;
     sles)
         sudo zypper -n update
         sudo zypper -n install gcc gcc-c++ gcc-fortran \
              autoconf automake libtool flex make gdb
-        labels="${labels} linux sles_${VERSION_ID}"
+        labels="${labels} linux sles_${VERSION_ID}-${arch}"
         case $VERSION_ID in
             12.*)
                 # gcc5 == 5.3.1
@@ -192,27 +210,29 @@ case $PLATFORM_ID in
                      gcc5 gcc5-c++ gcc5-fortran \
                      gcc6 gcc6-c++ gcc6-fortran
                 labels="${labels} gcc48 gcc5 gcc6"
+
+                # No java shipped in SLES12 by default...
+                jre_file=jre-8u121-linux-x64.rpm
+                aws s3 cp s3://ompi-jenkins-config/${jre_file} /tmp/${jre_file}
+                sudo rpm -i /tmp/${jre_file}
                 ;;
             15.*)
                 sudo zypper -n install \
+                     java-11-openjdk \
                      python3-boto python3-boto3 python3-mock \
                      gcc7 gcc7-c++ gcc7-fortran \
-                     gcc8 gcc8-c++ gcc8-fortran \
-                     gcc9 gcc9-c++ gcc9-fortran
+                     gcc10 gcc10-c++ gcc10-fortran
                 sudo ln -s /usr/bin/python3 /usr/bin/python
-                labels="${labels} gcc7 gcc8 gcc9"
+                labels="${labels} gcc7 gcc10"
                 ;;
             *)
                 echo "ERROR: Unknown version ${PLATFORM_ID} ${VERSION_ID}"
                 exit 1
                 ;;
         esac
-        # No java shipped in SLES by default...
-        jre_file=jre-8u121-linux-x64.rpm
-        aws s3 cp s3://ompi-jenkins-config/${jre_file} /tmp/${jre_file}
-        sudo rpm -i /tmp/${jre_file}
         ;;
     FreeBSD)
+        labels="${labels} freebsd-${VERSION_ID}-${arch}"
         su -m root -c 'pkg install -y sudo'
         if ! grep -q '^%wheel ALL=(ALL) NOPASSWD: ALL' /usr/local/etc/sudoers ; then
             echo "--> Updating sudoers"

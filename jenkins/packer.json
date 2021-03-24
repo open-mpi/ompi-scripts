@@ -7,133 +7,375 @@
   },
   "builders": [{
     "type": "amazon-ebs",
-    "name" : "AmazonLinux1",
+    "name" : "AmazonLinux2-x86",
+    "ami_name": "Jenkins Amazon Linux 2 x86_64 {{user `build_date`}}",
     "region": "us-west-2",
-    "source_ami": "ami-01f08ef3e76b957e5",
+    "source_ami_filter": {
+        "filters": {
+            "architecture": "x86_64",
+            "virtualization-type": "hvm",
+            "root-device-type": "ebs",
+            "name": "amzn2-ami-hvm-2.0.*"
+        },
+        "owners": ["amazon"],
+        "most_recent": true
+    },
+    "ami_block_device_mappings": [ {
+        "device_name": "/dev/xvda",
+        "volume_size": 16,
+        "delete_on_termination": true
+        } ],
+    "launch_block_device_mappings": [ {
+        "device_name": "/dev/xvda",
+        "volume_size": 16,
+        "delete_on_termination": true
+    } ],
     "instance_type": "t3.micro",
     "ssh_username": "ec2-user",
     "ssh_pty" : true,
-    "ami_name": "Jenkins Amazon Linux 1 {{user `build_date`}}",
     "associate_public_ip_address" : true,
-    "sriov_support" : true,
     "ena_support" : true,
     "iam_instance_profile" : "{{user `iam_role`}}"
   },{
     "type": "amazon-ebs",
-    "name" : "AmazonLinux2",
+    "name" : "AmazonLinux2-arm64",
+    "ami_name": "Jenkins Amazon Linux 2 arm64 {{user `build_date`}}",
     "region": "us-west-2",
-    "source_ami": "ami-0d6621c01e8c2de2c",
-    "instance_type": "t3.micro",
+    "source_ami_filter": {
+        "filters": {
+            "architecture": "arm64",
+            "virtualization-type": "hvm",
+            "root-device-type": "ebs",
+            "name": "amzn2-ami-hvm-2.0.*"
+        },
+        "owners": ["amazon"],
+        "most_recent": true
+    },
+    "ami_block_device_mappings": [ {
+        "device_name": "/dev/xvda",
+        "volume_size": 16,
+        "delete_on_termination": true
+        } ],
+    "launch_block_device_mappings": [ {
+        "device_name": "/dev/xvda",
+        "volume_size": 16,
+        "delete_on_termination": true
+    } ],
+    "instance_type": "t4g.micro",
     "ssh_username": "ec2-user",
     "ssh_pty" : true,
-    "ami_name": "Jenkins Amazon Linux 2 {{user `build_date`}}",
     "associate_public_ip_address" : true,
-    "sriov_support" : true,
     "ena_support" : true,
     "iam_instance_profile" : "{{user `iam_role`}}"
   },{
     "type": "amazon-ebs",
-    "name" : "Ubuntu16.04",
+    "name" : "Ubuntu18.04-x86",
+    "ami_name": "Jenkins Ubuntu 18.04 x86_64 {{user `build_date`}}",
     "region": "us-west-2",
-    "source_ami": "ami-008c6427c8facbe08",
+    "source_ami_filter": {
+        "filters": {
+            "architecture": "x86_64",
+            "virtualization-type": "hvm",
+            "root-device-type": "ebs",
+            "name": "ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-*"
+        },
+        "owners": ["099720109477"],
+        "most_recent": true
+    },
+    "ami_block_device_mappings": [ {
+        "device_name": "/dev/sda1",
+        "volume_size": 16,
+        "delete_on_termination": true
+        } ],
+    "launch_block_device_mappings": [ {
+        "device_name": "/dev/sda1",
+        "volume_size": 16,
+        "delete_on_termination": true
+    } ],
     "instance_type": "t3.micro",
     "ssh_username": "ubuntu",
     "ssh_pty" : true,
-    "ami_name": "Jenkins Ubuntu 16.04 {{user `build_date`}}",
     "associate_public_ip_address" : true,
-    "sriov_support" : true,
     "ena_support" : true,
     "iam_instance_profile" : "{{user `iam_role`}}"
   },{
     "type": "amazon-ebs",
-    "name" : "Ubuntu18.04",
+    "name" : "Ubuntu18.04-arm64",
+    "ami_name": "Jenkins Ubuntu 18.04 arm64 {{user `build_date`}}",
     "region": "us-west-2",
-    "source_ami": "ami-003634241a8fcdec0",
+    "source_ami_filter": {
+        "filters": {
+            "architecture": "arm64",
+            "virtualization-type": "hvm",
+            "root-device-type": "ebs",
+            "name": "ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-arm64-server-*"
+        },
+        "owners": ["099720109477"],
+        "most_recent": true
+    },
+    "ami_block_device_mappings": [ {
+        "device_name": "/dev/sda1",
+        "volume_size": 16,
+        "delete_on_termination": true
+        } ],
+    "launch_block_device_mappings": [ {
+        "device_name": "/dev/sda1",
+        "volume_size": 16,
+        "delete_on_termination": true
+    } ],
+    "instance_type": "t4g.micro",
+    "ssh_username": "ubuntu",
+    "ssh_pty" : true,
+    "associate_public_ip_address" : true,
+    "ena_support" : true,
+    "iam_instance_profile" : "{{user `iam_role`}}"
+  },{
+    "type": "amazon-ebs",
+    "name" : "Ubuntu20.04-x86",
+    "ami_name": "Jenkins Ubuntu 20.04 x86_64 {{user `build_date`}}",
+    "region": "us-west-2",
+    "source_ami_filter": {
+        "filters": {
+            "architecture": "x86_64",
+            "virtualization-type": "hvm",
+            "root-device-type": "ebs",
+            "name": "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"
+        },
+        "owners": ["099720109477"],
+        "most_recent": true
+    },
+    "ami_block_device_mappings": [ {
+        "device_name": "/dev/sda1",
+        "volume_size": 16,
+        "delete_on_termination": true
+        } ],
+    "launch_block_device_mappings": [ {
+        "device_name": "/dev/sda1",
+        "volume_size": 16,
+        "delete_on_termination": true
+    } ],
     "instance_type": "t3.micro",
     "ssh_username": "ubuntu",
     "ssh_pty" : true,
-    "ami_name": "Jenkins Ubuntu 18.04 {{user `build_date`}}",
     "associate_public_ip_address" : true,
-    "sriov_support" : true,
     "ena_support" : true,
     "iam_instance_profile" : "{{user `iam_role`}}"
   },{
     "type": "amazon-ebs",
-    "name" : "Ubuntu20.04",
+    "name" : "Ubuntu20.04-arm64",
+    "ami_name": "Jenkins Ubuntu 20.04 arm64 {{user `build_date`}}",
     "region": "us-west-2",
-    "source_ami": "ami-09dd2e08d601bff67",
-    "instance_type": "t3.micro",
+    "source_ami_filter": {
+        "filters": {
+            "architecture": "arm64",
+            "virtualization-type": "hvm",
+            "root-device-type": "ebs",
+            "name": "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-arm64-server-*"
+        },
+        "owners": ["099720109477"],
+        "most_recent": true
+    },
+    "ami_block_device_mappings": [ {
+        "device_name": "/dev/sda1",
+        "volume_size": 16,
+        "delete_on_termination": true
+        } ],
+    "launch_block_device_mappings": [ {
+        "device_name": "/dev/sda1",
+        "volume_size": 16,
+        "delete_on_termination": true
+    } ],
+    "instance_type": "t4g.micro",
     "ssh_username": "ubuntu",
     "ssh_pty" : true,
-    "ami_name": "Jenkins Ubuntu 20.04 {{user `build_date`}}",
     "associate_public_ip_address" : true,
-    "sriov_support" : true,
     "ena_support" : true,
     "iam_instance_profile" : "{{user `iam_role`}}"
   },{
     "type": "amazon-ebs",
-    "name" : "RHEL77",
+    "name" : "RHEL7-x86",
+    "ami_name": "Jenkins RHEL 7 x86_64 {{user `build_date`}}",
     "region": "us-west-2",
-    "source_ami": "ami-00aa0a1b208ece144",
+    "source_ami_filter": {
+        "filters": {
+            "architecture": "x86_64",
+            "virtualization-type": "hvm",
+            "root-device-type": "ebs",
+            "name": "RHEL-7.*-0-Hourly2-GP2"
+        },
+        "owners": ["309956199498"],
+        "most_recent": true
+    },
+    "ami_block_device_mappings": [ {
+        "device_name": "/dev/sda1",
+        "volume_size": 16,
+        "delete_on_termination": true
+        } ],
+    "launch_block_device_mappings": [ {
+        "device_name": "/dev/sda1",
+        "volume_size": 16,
+        "delete_on_termination": true
+    } ],
     "instance_type": "t3.micro",
     "ssh_username": "ec2-user",
     "ssh_pty" : true,
-    "ami_name": "Jenkins RHEL 7.7 {{user `build_date`}}",
     "associate_public_ip_address" : true,
-    "sriov_support" : true,
     "ena_support" : true,
     "iam_instance_profile" : "{{user `iam_role`}}"
   },{
     "type": "amazon-ebs",
-    "name" : "RHEL80",
+    "name" : "RHEL8-x86",
+    "ami_name": "Jenkins RHEL 8 x86_64 {{user `build_date`}}",
     "region": "us-west-2",
-    "source_ami": "ami-02f147dfb8be58a10",
+    "source_ami_filter": {
+        "filters": {
+            "architecture": "x86_64",
+            "virtualization-type": "hvm",
+            "root-device-type": "ebs",
+            "name": "RHEL-8.*-0-Hourly2-GP2"
+        },
+        "owners": ["309956199498"],
+        "most_recent": true
+    },
+    "instance_type": "t3.micro",
+    "ami_block_device_mappings": [ {
+        "device_name": "/dev/sda1",
+        "volume_size": 16,
+        "delete_on_termination": true
+        } ],
+    "launch_block_device_mappings": [ {
+        "device_name": "/dev/sda1",
+        "volume_size": 16,
+        "delete_on_termination": true
+    } ],
+    "ssh_username": "ec2-user",
+    "ssh_pty" : true,
+    "associate_public_ip_address" : true,
+    "ena_support" : true,
+    "iam_instance_profile" : "{{user `iam_role`}}"
+  },{
+    "type": "amazon-ebs",
+    "name" : "RHEL8-arm64",
+    "ami_name": "Jenkins RHEL 8 arm64 {{user `build_date`}}",
+    "region": "us-west-2",
+    "source_ami_filter": {
+        "filters": {
+            "architecture": "arm64",
+            "virtualization-type": "hvm",
+            "root-device-type": "ebs",
+            "name": "RHEL-8.*-0-Hourly2-GP2"
+        },
+        "owners": ["309956199498"],
+        "most_recent": true
+    },
+    "ami_block_device_mappings": [ {
+        "device_name": "/dev/sda1",
+        "volume_size": 16,
+        "delete_on_termination": true
+        } ],
+    "launch_block_device_mappings": [ {
+        "device_name": "/dev/sda1",
+        "volume_size": 16,
+        "delete_on_termination": true
+    } ],
+    "instance_type": "t4g.micro",
+    "ssh_username": "ec2-user",
+    "ssh_pty" : true,
+    "associate_public_ip_address" : true,
+    "ena_support" : true,
+    "iam_instance_profile" : "{{user `iam_role`}}"
+  },{
+    "type": "amazon-ebs",
+    "name" : "SLES12-x86",
+    "ami_name": "Jenkins SLES 12 x86_64 {{user `build_date`}}",
+    "region": "us-west-2",
+    "source_ami_filter": {
+        "filters": {
+            "architecture": "x86_64",
+            "virtualization-type": "hvm",
+            "root-device-type": "ebs",
+            "name": "suse-sles-12-*"
+        },
+        "owners": ["amazon"],
+        "most_recent": true
+    },
+    "ami_block_device_mappings": [ {
+        "device_name": "/dev/sda1",
+        "volume_size": 16,
+        "delete_on_termination": true
+        } ],
+    "launch_block_device_mappings": [ {
+        "device_name": "/dev/sda1",
+        "volume_size": 16,
+        "delete_on_termination": true
+    } ],
     "instance_type": "t3.micro",
     "ssh_username": "ec2-user",
     "ssh_pty" : true,
-    "ami_name": "Jenkins RHEL 8.0 {{user `build_date`}}",
     "associate_public_ip_address" : true,
-    "sriov_support" : true,
     "ena_support" : true,
     "iam_instance_profile" : "{{user `iam_role`}}"
   },{
     "type": "amazon-ebs",
-    "name" : "SLES12sp5",
+    "name" : "SLES15-x86",
+    "ami_name": "Jenkins SLES 15 x86_64 {{user `build_date`}}",
     "region": "us-west-2",
-    "source_ami": "ami-0ef7bc560a2db93f8",
+    "source_ami_filter": {
+        "filters": {
+            "architecture": "x86_64",
+            "virtualization-type": "hvm",
+            "root-device-type": "ebs",
+            "name": "suse-sles-15-*"
+        },
+        "owners": ["amazon"],
+        "most_recent": true
+    },
+    "ami_block_device_mappings": [ {
+        "device_name": "/dev/sda1",
+        "volume_size": 16,
+        "delete_on_termination": true
+        } ],
+    "launch_block_device_mappings": [ {
+        "device_name": "/dev/sda1",
+        "volume_size": 16,
+        "delete_on_termination": true
+    } ],
     "instance_type": "t3.micro",
     "ssh_username": "ec2-user",
     "ssh_pty" : true,
-    "ami_name": "Jenkins SLES 12sp5 {{user `build_date`}}",
     "associate_public_ip_address" : true,
-    "sriov_support" : true,
     "ena_support" : true,
     "iam_instance_profile" : "{{user `iam_role`}}"
   },{
     "type": "amazon-ebs",
-    "name" : "SLES15sp1",
+    "name" : "FreeBSD11-x86",
+    "ami_name": "Jenkins FreeBSD 11 x86_64 {{user `build_date`}}",
     "region": "us-west-2",
-    "source_ami": "ami-0fde69c9f9f78ae47",
+    "source_ami_filter": {
+        "filters": {
+            "architecture": "x86_64",
+            "virtualization-type": "hvm",
+            "root-device-type": "ebs",
+            "name": "FreeBSD 11.*-RELEASE-amd64"
+        },
+        "owners": ["118940168514"],
+        "most_recent": true
+    },
+    "ami_block_device_mappings": [ {
+        "device_name": "/dev/sda1",
+        "volume_size": 16,
+        "delete_on_termination": true
+        } ],
+    "launch_block_device_mappings": [ {
+        "device_name": "/dev/sda1",
+        "volume_size": 16,
+        "delete_on_termination": true
+    } ],
     "instance_type": "t3.micro",
-    "ssh_username": "ec2-user",
-    "ssh_pty" : true,
-    "ami_name": "Jenkins SLES 15sp1 {{user `build_date`}}",
-    "associate_public_ip_address" : true,
-    "sriov_support" : true,
-    "ena_support" : true,
-    "iam_instance_profile" : "{{user `iam_role`}}"
-  },{
-    "type": "amazon-ebs",
-    "name" : "FreeBSD11",
-    "region": "us-west-2",
-    "source_ami": "ami-6926f809",
-    "instance_type": "t2.micro",
     "ssh_username": "ec2-user",
     "ssh_pty" : true,
     "ssh_timeout" : "10m",
-    "ami_name": "Jenkins FreeBSD 11 {{user `build_date`}}",
     "associate_public_ip_address" : true,
-    "sriov_support" : true,
     "ena_support" : true,
     "iam_instance_profile" : "{{user `iam_role`}}"
   }],
