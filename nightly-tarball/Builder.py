@@ -277,7 +277,7 @@ class Builder(object):
                         Coverity.run_coverity(self._logger,
                                               self._current_build['build_root'],
                                               os.path.join(self._current_build['source_tree'],
-                                                           self._current_build['artifacts'].keys()[0]),
+                                                           next(iter(self._current_build['artifacts'].keys()))),
                                               self._config['coverity'])
                     except Exception as e:
                         self._logger.error("ERROR: Coverity submission failed: %s"
