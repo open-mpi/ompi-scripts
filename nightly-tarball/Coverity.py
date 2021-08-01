@@ -14,7 +14,6 @@ import logging
 import time
 import shlex
 import shutil
-import urllib
 import requests
 import BuilderUtils
 
