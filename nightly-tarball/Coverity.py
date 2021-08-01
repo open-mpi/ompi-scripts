@@ -35,8 +35,13 @@ def run_coverity_internal(logger, build_root, source_tarball, config):
         logger.debug('Reusing existing tarball')
     else:
         logger.debug('Downloading %s' % (config['tool_url']))
-        urllib.urlretrieve(config['tool_url'], 'coverity_tool.tgz',
-                           data='token=%s&project=%s' % (token, config['project_name']))
+        data = {
+            'token' : token,
+            'project' : config['project_name'],
+        }
+        r = requests.get(config['tool_url'], params=data)
+        with open('coverity_tool.tgz', 'wb') as fp:
+            fp.write(r.content)
 
     # make sure we have a build root
     if not os.path.isdir(build_root):
