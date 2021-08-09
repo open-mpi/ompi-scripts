@@ -14,7 +14,6 @@ import logging
 import time
 import shlex
 import shutil
-import requests
 import BuilderUtils
 
 
@@ -36,13 +35,23 @@ def run_coverity_internal(logger, build_root, source_tarball, config):
         logger.debug('Reusing existing tarball')
     else:
         logger.debug('Downloading %s' % (config['tool_url']))
-        data = {
-            'token' : token,
-            'project' : config['project_name'],
-        }
-        r = requests.get(config['tool_url'], params=data)
-        with open(_cov_filename, 'wb') as fp:
-            fp.write(r.content)
+        # As of 9 Aug 2021, this file is 2+GB.  Downloading it all
+        # into a Python script and then writing it out to disk is not
+        # a good idea on our limited resources AWS VM (meaning: it
+        # brings the VM to a crawl).  From
+        # https://stackoverflow.com/questions/38969164/coverity-scan-for-projects-outside-github,
+        # we can use a command line tool to download, instead.  It's
+        # not very Pythonic, but it doesn't bring our VM to its knees.
+        cmd = [
+            'wget',
+            config["tool_url"],
+            '--post-data',
+            f'token={token}&project={config["project_name"]}',
+            '-O',
+            _cov_filename
+        ]
+        BuilderUtils.logged_call(cmd,
+                                 log_file=os.path.join(build_root, 'coverity-tools-download-output.txt'))
 
     # make sure we have a build root
     if not os.path.isdir(build_root):
