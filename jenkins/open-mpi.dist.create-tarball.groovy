@@ -37,11 +37,17 @@ node(rpm_builder) {
   }
 
   stage('Installing Dependencies') {
-    // because we build tags or hashes, not just branch heads,
-    // there's not a great way to do the branch -> Autotools
-    // version matching.  So instead grab them from the
-    // make_dist_tarball script
-    sh '/bin/bash ompi-scripts/jenkins/open-mpi-autotools-build.sh ompi'
+    // Build Autotools based on the dist script found in the active build
+    // branch.
+
+    // The tarball builder jobs only ever run on EC2 instances, so it
+    // should always be safe to use $HOME as the location for autotools
+    // build artifacts, as the EC2 instances always have a dedicated
+    // Jenkins user.  If you are copying this code for another job (like
+    // a CI test), please be careful about writing into $HOME.  The Cray
+    // builders in particular are using shared accounts.
+
+    sh "/bin/bash ompi-scripts/jenkins/open-mpi-autotools-build.sh -d -p ompi-scripts/jenkins/autotools-patches -t ${WORKSPACE}/autotools-install -r ${env.HOME}/autotools-builds -z ${WORKSPACE}/ompi/contrib/dist/make_dist_tarball"
   }
 
   // Build the initial tarball, verify that the resulting tarball
