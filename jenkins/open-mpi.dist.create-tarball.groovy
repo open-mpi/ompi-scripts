@@ -178,8 +178,11 @@ def checkout_code() {
 		 doGenerateSubmoduleConfigurations: false,
 		 extensions: [[$class: 'WipeWorkspace'],
 			      [$class: 'RelativeTargetDirectory',
-			       relativeTargetDir: 'ompi']],
-		 submoduleCfg: [],
+			       relativeTargetDir: 'ompi'],
+                              [$class: 'SubmoduleOption',
+                               recursiveSubmodules: 'true',
+                               disableSubmodules: 'false',
+                               parentCredentials: 'true']],
 		 userRemoteConfigs: [[credentialsId: '6de58bf1-2619-4065-99bb-8d284b4691ce',
 				      url: 'https://github.com/open-mpi/ompi/']]])
   // scm is a provided global variable that points to the repository
