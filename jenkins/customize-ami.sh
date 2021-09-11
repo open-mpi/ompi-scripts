@@ -18,6 +18,11 @@
 
 set -e
 
+pandoc_x86_url="s3://ompi-jenkins-config/pandoc-2.14.2-linux-amd64.tar.gz"
+pandoc_arm_url="s3://ompi-jenkins-config/pandoc-2.14.2-linux-arm64.tar.gz"
+awscli_x86_url="https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip"
+awscli_arm_url="https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip"
+
 labels="ec2"
 
 os=`uname -s`
@@ -59,6 +64,8 @@ echo "==> Sleeping 2 minutes"
 # lock conflicts by waiting a couple minutes.
 sleep 120
 
+pandoc_installed=0
+
 case $PLATFORM_ID in
     rhel|centos)
         echo "==> Installing packages"
@@ -85,11 +92,16 @@ case $PLATFORM_ID in
                 exit 1
                 ;;
         esac
+        if test "$arch" = "x86_64" ; then
+            awscli_url="${awscli_x86_url}"
+        else
+            awscli_url="${awscli_arm_url}"
+        fi
         (cd /tmp && \
-         curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip" && \
-         unzip awscli-bundle.zip && \
-         sudo ./awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws && \
-         rm -rf awscli-bundle*)
+         curl "${awscli_url}" -o "awscliv2.zip" && \
+         unzip awscliv2.zip && \
+         sudo ./aws/install &&
+         rm -rf aws)
         ;;
     amzn)
         echo "==> Installing packages"
@@ -100,15 +112,6 @@ case $PLATFORM_ID in
          gdb
         labels="${labels} linux"
         case $VERSION_ID in
-            2016.09|2017.03|2017.09|2018.03)
-                # clang == 3.6.2
-                sudo yum -y groupinstall "Java Development"
-                sudo yum -y install gcc44 gcc44-c++ gcc44-gfortran \
-                     gcc48 gcc48-c++ gcc48-gfortran clang \
-               python27-mock python27-boto python27-boto3
-                sudo alternatives --set java /usr/lib/jvm/jre-1.8.0-openjdk.x86_64/bin/java
-                labels="${labels} amazon_linux_1 gcc44 gcc48 clang36"
-                ;;
             2)
                 sudo yum -y install clang hwloc-devel \
                python2-pip python2 python2-boto3
@@ -131,29 +134,9 @@ case $PLATFORM_ID in
         sudo apt-get -y install build-essential gfortran \
              autoconf automake libtool flex hwloc libhwloc-dev git \
              default-jre awscli python-mock rman pandoc
-        labels="${labels} linux ubuntu_${VERSION_ID}-${arch} pandoc"
+        pandoc_installed=1
+        labels="${labels} linux ubuntu_${VERSION_ID}-${arch}"
         case $VERSION_ID in
-            14.04)
-                sudo apt-get -y install python-boto3 python-mock \
-                     gcc-4.4 g++-4.4 gfortran-4.4 \
-                     gcc-4.6 g++-4.6 gfortran-4.6 \
-                     gcc-4.7 g++-4.7 gfortran-4.7 \
-                     gcc-4.8 g++-4.8 gfortran-4.8 \
-                     clang-3.6 clang-3.7 clang-3.8
-                labels="${labels} gcc44 gcc46 gcc47 gcc48 clang36 clang37 clang38"
-                ;;
-            16.04)
-                sudo apt-get -y install python-boto3 python-mock \
-                     gcc-4.7 g++-4.7 gfortran-4.7 \
-                     gcc-4.8 g++-4.8 gfortran-4.8 \
-                     gcc-4.9 g++-4.9 gfortran-4.9 \
-                     clang-3.6 clang-3.7 clang-3.8 
-                labels="${labels} gcc47 gcc48 gcc49 gcc5 clang36 clang37 clang38"
-                if test "$arch" = "x86_64" ; then
-                    sudo apt-get -y install gcc-multilib g++-multilib gfortran-multilib
-                    labels="${labels} 32bit_builds"
-                fi
-                ;;
             18.04)
                 sudo apt-get -y install \
                      python-boto3 \
@@ -200,22 +183,6 @@ case $PLATFORM_ID in
              autoconf automake libtool flex make gdb
         labels="${labels} linux sles_${VERSION_ID}-${arch}"
         case $VERSION_ID in
-            12.*)
-                # gcc5 == 5.3.1
-                # gcc6 == 6.2.1
-                sudo zypper -n install \
-                                 hwloc-devel \
-                     python-boto python-boto3 python-mock \
-                     gcc48 gcc48-c++ gcc48-fortran \
-                     gcc5 gcc5-c++ gcc5-fortran \
-                     gcc6 gcc6-c++ gcc6-fortran
-                labels="${labels} gcc48 gcc5 gcc6"
-
-                # No java shipped in SLES12 by default...
-                jre_file=jre-8u121-linux-x64.rpm
-                aws s3 cp s3://ompi-jenkins-config/${jre_file} /tmp/${jre_file}
-                sudo rpm -i /tmp/${jre_file}
-                ;;
             15.*)
                 sudo zypper -n install \
                      java-11-openjdk \
@@ -240,7 +207,8 @@ case $PLATFORM_ID in
         else
             echo "--> Skipping sudoers update"
         fi
-        sudo pkg install -y openjdk8 autoconf automake libtool gcc wget curl git
+        sudo pkg install -y openjdk8 autoconf automake libtool gcc wget curl git hs-pandoc
+        pandoc_installed=1
         if ! grep -q '/dev/fd' /etc/fstab ; then
             echo "Adding /dev/fd entry to /etc/fstab"
             sudo sh -c 'echo "fdesc /dev/fd fdescfs rw 0 0" >> /etc/fstab'
@@ -254,6 +222,23 @@ case $PLATFORM_ID in
         echo "ERROR: Unkonwn platform ${PLATFORM_ID}"
         exit 1
 esac
+
+if [[ $pandoc_installed -eq 0 ]] ; then
+    if [[ $arch == "x86_64" ]] ; then
+        pandoc_url=${pandoc_x86_url}
+    else
+        pandoc_url=${pandoc_arm_url}
+    fi
+    pandoc_tarname=`basename ${pandoc_url}`
+
+    aws s3 cp "${pandoc_url}" "${pandoc_tarname}"
+    tar xf "${pandoc_tarname}"
+    # Pandoc does not name its directories exactly the same name
+    # as the tarball.  Sigh.
+    pandoc_dir=`find . -maxdepth 1 -name "pandoc*" -type d -print`
+    sudo cp "${pandoc_dir}/bin/pandoc" "/usr/local/bin/pandoc"
+    rm -rf "${pandoc_tarname}" "${pandoc_dir}"
+fi
 
 if test $run_test != 0; then
     # for these tests, fail the script if a test fails
