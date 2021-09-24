@@ -370,7 +370,7 @@ class Builder(object):
 
         # get an up-to-date git repository
         self._logger.debug("Cloning from " + remote_repository)
-        repo = Repo.clone_from(remote_repository, source_tree)
+        repo = Repo.clone_from(remote_repository, source_tree, recursive=True)
 
         # switch to the right branch and reset the HEAD to be
         # origin/<branch>/HEAD
