@@ -376,12 +376,11 @@ class Builder(object):
         # origin/<branch>/HEAD
         self._logger.debug("Switching to branch: " + branch)
         if not branch in repo.heads:
-            # TODO: Can we avoid calling into repo.git here?
-            repo.git.checkout('origin/' + branch, b=branch)
-        repo.head.reference = repo.refs['origin/' + branch]
+            repo.git.checkout(branch)
+        repo.head.reference = repo.refs[branch]
 
         # And pull in all the right submodules
-        repo.submodule_update(recursive = True)
+        repo.git.submodule('update', '--init', '--recursive')
 
         # wish I could figure out how to do this without resorting to
         # shelling out to git :/
