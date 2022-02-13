@@ -109,9 +109,25 @@ parallel (
     node(manpage_builder) {
       stage('Build Man Pages') {
 	checkout_code();
-	sh "ls -lR . ; /bin/bash ompi-scripts/jenkins/open-mpi.dist.create-tarball.build-manpages.sh ${build_prefix} ${tarball} ${branch}"
+	// JMS As of 8 Mar 2022, Open MPI master has been converted
+	// away from Pandoc to Sphinx.  The difference in the source
+	// tree is that master has a Python-style
+	// docs/requirements.txt file.  Meaning: if we see that file,
+	// then we don't have Pandoc, and there's no extra step needed
+	// to build HTML man pages.
+	//
+	// Once the Sphinx stuff has been brought to v5.0.x, Pandoc
+	// will be fully gone, and this whole Pandoc-specific
+	// build-manpages.sh stuff can be deleted.
+	sh """
+if test ! -f docs/requirements.txt; then
+    ls -lR . ; /bin/bash ompi-scripts/jenkins/open-mpi.dist.create-tarball.build-manpages.sh ${build_prefix} ${tarball} ${branch}
+fi
+"""
 	artifacts = sh(returnStdout:true, script:'cat ${WORKSPACE}/manpage-build-artifacts.txt').trim()
-	currentBuild.description="${currentBuild.description}<b>Manpages:</b> <A HREF=\"${artifacts}\">${artifacts}</A><BR>\n"
+	if (artifacts != "") {
+            currentBuild.description="${currentBuild.description}<b>Manpages:</b> <A HREF=\"${artifacts}\">${artifacts}</A><BR>\n"
+        }
       }
     }
   },

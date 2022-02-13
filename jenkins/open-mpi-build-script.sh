@@ -179,6 +179,9 @@ fi
 # ./configure --help.  In prep for 5.0, we added a developer
 # requirement for pandoc to build (not required for dist tarballs),
 # with an explicit option to disable.
+# JMS: The requirement will shortly change from pandoc to Sphinx.
+# Keep pandoc for now; when Sphinx is brought to the v5.0.x branch, we
+# can delete this whole Pandoc-specific if/else block.
 if `which pandoc > /dev/null 2>&1` ; then
     echo "--> Found pandoc.  Allowing default manpage behavior"
 else
