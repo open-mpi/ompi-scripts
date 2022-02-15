@@ -85,6 +85,7 @@ case $PLATFORM_ID in
                 sudo yum -y install python3.8 \
                   gcc gcc-c++ gcc-gfortran
                 sudo alternatives --set python /usr/bin/python3
+                sudo pip3 install sphinx recommonmark docutils sphinx-rtd-theme
                 labels="${labels} gcc8"
                 ;;
             *)
@@ -109,13 +110,14 @@ case $PLATFORM_ID in
         sudo yum -y groupinstall "Development Tools"
         sudo yum -y install libevent-devel hwloc-devel \
          java-1.8.0-openjdk-devel java-1.8.0-openjdk \
-         gdb
+         gdb python3-pip
         labels="${labels} linux"
         case $VERSION_ID in
             2)
                 sudo yum -y install clang hwloc-devel \
-               python2-pip python2 python2-boto3
+                python2-pip python2 python2-boto3 python3-pip python3
                 sudo pip install mock
+                sudo pip3 install sphinx recommonmark docutils sphinx-rtd-theme
                 labels="${labels} amazon_linux_2-${arch} gcc7 clang7"
                 ;;
             *)
@@ -139,7 +141,7 @@ case $PLATFORM_ID in
         case $VERSION_ID in
             18.04)
                 sudo apt-get -y install \
-                     python-boto3 \
+                     python-boto3 python-pip \
                      gcc-4.8 g++-4.8 gfortran-4.8 \
                      gcc-5 g++-5 gfortran-5 \
                      gcc-6 g++-6 gfortran-6 \
@@ -147,6 +149,7 @@ case $PLATFORM_ID in
                      gcc-8 g++-8 gfortran-8 \
                      clang-3.9 clang-4.0 clang-5.0 clang-6.0 \
                      clang-7 clang-8 clang-9 
+                sudo pip install sphinx recommonmark docutils sphinx-rtd-theme
                 labels="${labels} gcc48 gcc5 gcc6 gcc7 gcc8 clang39 clang40 clang50 clang60 clang7 clang8 clang9"
                 if test "$arch" = "x86_64" ; then
                     sudo apt-get -y install gcc-multilib g++-multilib gfortran-multilib
@@ -156,12 +159,14 @@ case $PLATFORM_ID in
             20.04)
                 sudo apt-get -y install \
                      python-is-python3 python3-boto3 python3-mock \
+                     python3-pip \
                      gcc-7 g++-7 gfortran-7 \
                      gcc-8 g++-8 gfortran-8 \
                      gcc-9 g++-9 gfortran-9 \
                      gcc-10 g++-10 gfortran-10 \
                      clang-6.0 clang-7 clang-8 clang-9 clang-10 \
                      clang-format-11 bsdutils
+                sudo pip3 install sphinx recommonmark docutils sphinx-rtd-theme
                 labels="${labels} gcc7 gcc8 gcc9 gcc10 clang60 clang7 clang8 clang9 clang10"
                 if test "$arch" = "x86_64" ; then
                     sudo apt-get -y install gcc-multilib g++-multilib gfortran-multilib
@@ -188,8 +193,10 @@ case $PLATFORM_ID in
                      java-11-openjdk \
                      python3-boto python3-boto3 python3-mock \
                      gcc7 gcc7-c++ gcc7-fortran \
-                     gcc10 gcc10-c++ gcc10-fortran
+                     gcc10 gcc10-c++ gcc10-fortran \
+                     python3-pip
                 sudo ln -s /usr/bin/python3 /usr/bin/python
+                sudo pip install sphinx recommonmark docutils sphinx-rtd-theme
                 labels="${labels} gcc7 gcc10"
                 ;;
             *)
