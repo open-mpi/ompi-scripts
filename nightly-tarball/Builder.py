@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017-2019 Amazon.com, Inc. or its affiliates.  All Rights
+# Copyright (c) 2017-2022 Amazon.com, Inc. or its affiliates.  All Rights
 #                         Reserved.
 # Copyright (c) 2081 Cisco Systems, Inc.  All rights reserved.
 #
@@ -270,6 +270,7 @@ class Builder(object):
                 self.update_version_file()
                 self.build()
                 self.find_build_artifacts()
+                self.publish_build_artifacts()
                 if ('coverity' in self._config['branches'][branch_name]
                     and self._config['branches'][branch_name]['coverity']
                     and len(self._current_build['artifacts']) > 0):
@@ -284,7 +285,6 @@ class Builder(object):
                                            % (str(e)))
                     else:
                         self._logger.info("Successfully submitted Coverity build")
-                self.publish_build_artifacts()
                 self._logger.info("%s build of revision %s completed successfully" %
                                   (branch_name, self._current_build['revision']))
         except Exception as e:
