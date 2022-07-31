@@ -37,17 +37,18 @@ print("Loading organization repos...")
 all_members = dict()
 repos = dict()
 for repo in ompi_org.get_repos():
-    print("Found Org Repo: {repo}".format(repo=repo.name))
+    print(f"Found Org Repo: {repo.name}")
+
+    if repo.archived:
+        print("--> NOTE: This repo is archived")
 
     # For each repo, get the teams on that repo
-    repo_teams   = dict()
+    repo_teams = dict()
     for team in repo.get_teams():
-        out = ("   Found team on repo {org}/{repo}: {team} ({perm}) "
-               .format(org=ompi_org.name, repo=repo.name,
-                       team=team.name, perm=team.permission))
+        out = f"   Found team on repo {ompi_org.name}/{repo.name}: {team.name} ({team.permission}) "
         # We only care about teams with push permissions
         if team.permission == "pull":
-            print("{out} -- SKIPPED".format(out=out))
+            print(f"{out} -- SKIPPED")
             continue
 
         print(out)
@@ -56,8 +57,7 @@ for repo in ompi_org.get_repos():
         team_members = dict()
         member_teams = dict()
         for member in team.get_members():
-            print("      Found member: {name}"
-                  .format(name=member.login))
+            print(f"      Found member: {member.login}")
             team_members[member.id] = member
 
             if member.id not in all_members:
@@ -81,7 +81,6 @@ for repo in ompi_org.get_repos():
         'repo_teams'  : repo_teams,
     }
 
-
 print("All the repos:")
 pprint(repos)
 pprint(all_members)
@@ -92,24 +91,31 @@ pprint(all_members)
 fieldnames = ['login', 'name', 'email', 'company']
 
 # Add all the repo names
-for _, rentry in repos.items():
+#
+# Skip archived repos -- they're read-only, and thereare are
+# effectively just noise in the annual review process.
+repo_names = list()
+for rentry in repos.values():
     repo = rentry['repo']
-    fieldnames.append("{org}/{repo}"
-                      .format(org=ompi_org.login,
-                              repo=repo.name))
+    if not repo.archived:
+        # Used to include the org name in here, but it was always
+        # "open-mpi", and it just made the colun need to be wider.
+        repo_names.append(repo.name)
+
+fieldnames.extend(sorted(repo_names))
 
 #--------------------------------------------------------------------
 
 # Now write out the CSV
 outfile = 'permissions.csv'
-print("Writing: ".format(outfile=outfile))
+print(f"Writing: {outfile}")
 with open(outfile, 'w', newline='') as csvfile:
     writer = csv.DictWriter(csvfile, fieldnames=fieldnames,
                             quoting=csv.QUOTE_ALL)
     writer.writeheader()
     for mid, mentry in all_members.items():
         member = mentry['member']
-        print("  Writing member: {member}".format(member=member.login))
+        print(f"  Writing member: {member.login}")
 
         # Initial entries about the user
         row = {
@@ -123,12 +129,16 @@ with open(outfile, 'w', newline='') as csvfile:
         for _, rentry in repos.items():
             repo = rentry['repo']
 
+            # Per above, skip archived repos
+            if repo.archived:
+                continue
+
             found = list()
             for tid, tentry in rentry['repo_teams'].items():
                 if tid in mentry['member_teams']:
                     team = tentry['team']
                     found.append(team.name)
 
-            row[repo.full_name] = ', '.join(found)
+            row[repo.name] = ', '.join(found)
 
         writer.writerow(row)
