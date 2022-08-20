@@ -240,7 +240,11 @@ cd ..
 set +e
 
 run_example() {
-    example=`basename ${2}`
+    if test -n "{$2}"; then
+        example=`basename ${2}`
+    else
+        example=`basename ${1}`
+    fi
     echo "--> Running example: $example"
     ${1} ${2}
     ret=$?
@@ -267,11 +271,13 @@ if test "${MPIRUN_MODE}" != "none"; then
 	    ;;
     esac
     run_example "${exec}" ./examples/hello_c
+    run_example ./examples/hello_c
     run_example "${exec}" ./examples/ring_c
     run_example "${exec}" ./examples/connectivity_c
     if ompi_info --parsable | grep -q bindings:cxx:yes >/dev/null; then
         echo "--> running C++ examples"
         run_example "${exec}" ./examples/hello_cxx
+        run_example ./examples/hello_cxx
         run_example "${exec}" ./examples/ring_cxx
     else
         echo "--> skipping C++ examples"
@@ -279,6 +285,7 @@ if test "${MPIRUN_MODE}" != "none"; then
     if ompi_info --parsable | grep -q bindings:mpif.h:yes >/dev/null; then
         echo "--> running mpif examples"
         run_example "${exec}" ./examples/hello_mpifh
+        run_example ./examples/hello_mpifh
         run_example "${exec}" ./examples/ring_mpifh
     else
         echo "--> skipping mpif examples"
@@ -286,6 +293,7 @@ if test "${MPIRUN_MODE}" != "none"; then
     if ompi_info --parsable | egrep -q bindings:use_mpi:\"\?yes >/dev/null; then
         echo "--> running usempi examples"
         run_example "${exec}" ./examples/hello_usempi
+        run_example ./examples/hello_usempi
         run_example "${exec}" ./examples/ring_usempi
     else
         echo "--> skipping usempi examples"
@@ -293,6 +301,7 @@ if test "${MPIRUN_MODE}" != "none"; then
     if ompi_info --parsable | grep -q bindings:use_mpi_f08:yes >/dev/null; then
         echo "--> running usempif08 examples"
         run_example "${exec}" ./examples/hello_usempif08
+        run_example ./examples/hello_usempif08
         run_example "${exec}" ./examples/ring_usempif08
     else
         echo "--> skipping usempif08 examples"
