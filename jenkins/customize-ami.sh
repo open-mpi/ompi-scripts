@@ -59,11 +59,6 @@ while getopts "h?tb" opt; do
     esac
 done
 
-echo "==> Sleeping 2 minutes"
-# Some systems run package updates during boot.  Avoid yum/apt/zypper
-# lock conflicts by waiting a couple minutes.
-sleep 120
-
 pandoc_installed=0
 
 case $PLATFORM_ID in
