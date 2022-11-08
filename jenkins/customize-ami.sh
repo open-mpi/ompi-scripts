@@ -74,16 +74,19 @@ case $PLATFORM_ID in
         # differentiation.
         sudo yum -y update
         sudo yum -y group install "Development Tools"
-        sudo yum -y install libevent hwloc hwloc-libs java gdb
+        sudo yum -y install libevent hwloc hwloc-libs gdb
         labels="${labels} linux rhel ${VERSION_ID}"
         case $VERSION_ID in
             7.*)
-                sudo yum -y install gcc gcc-c++ gcc-gfortran
+                sudo yum -y install gcc gcc-c++ gcc-gfortran \
+                  java-11-openjdk-headless
                 labels="${labels} gcc48"
                 ;;
             8.*)
                 sudo yum -y install python3.8 \
-                  gcc gcc-c++ gcc-gfortran
+                  gcc gcc-c++ gcc-gfortran \
+                  java-17-openjdk-headless
+                sudo yum -y remove java-1.8.0-openjdk-headless
                 sudo alternatives --set python /usr/bin/python3
                 sudo pip3 install sphinx recommonmark docutils sphinx-rtd-theme
                 labels="${labels} gcc8"
@@ -108,16 +111,15 @@ case $PLATFORM_ID in
         echo "==> Installing packages"
         sudo yum -y update
         sudo yum -y groupinstall "Development Tools"
-        sudo yum -y install libevent-devel hwloc-devel \
-         java-1.8.0-openjdk-devel java-1.8.0-openjdk \
-         gdb python3-pip
         labels="${labels} linux"
         case $VERSION_ID in
             2)
                 sudo yum -y install clang hwloc-devel \
-                python2-pip python2 python2-boto3 python3-pip python3
-                sudo pip install mock
-                sudo pip3 install sphinx recommonmark docutils sphinx-rtd-theme
+                  python2-pip python2 python2-boto3 python3-pip python3 \
+                  java-17-amazon-corretto-headless libevent-devel hwloc-devel \
+                  hwloc gdb python3-pip python3-devel
+                  sudo pip install mock
+                  sudo pip3 install sphinx recommonmark docutils sphinx-rtd-theme
                 labels="${labels} amazon_linux_2-${arch} gcc7 clang7"
                 ;;
             *)
@@ -135,13 +137,14 @@ case $PLATFORM_ID in
         sudo apt-get -y upgrade
         sudo apt-get -y install build-essential gfortran \
              autoconf automake libtool flex hwloc libhwloc-dev git \
-             default-jre awscli python-mock rman pandoc
+             default-jre awscli rman pandoc
         pandoc_installed=1
         labels="${labels} linux ubuntu_${VERSION_ID}-${arch}"
         case $VERSION_ID in
             18.04)
                 sudo apt-get -y install \
                      python-boto3 python-pip \
+                     python-mock \
                      gcc-4.8 g++-4.8 gfortran-4.8 \
                      gcc-5 g++-5 gfortran-5 \
                      gcc-6 g++-6 gfortran-6 \
@@ -168,6 +171,23 @@ case $PLATFORM_ID in
                      clang-format-11 bsdutils
                 sudo pip3 install sphinx recommonmark docutils sphinx-rtd-theme
                 labels="${labels} gcc7 gcc8 gcc9 gcc10 clang60 clang7 clang8 clang9 clang10"
+                if test "$arch" = "x86_64" ; then
+                    sudo apt-get -y install gcc-multilib g++-multilib gfortran-multilib
+                    labels="${labels} 32bit_builds"
+                fi
+                ;;
+            22.04)
+                sudo apt-get -y install \
+                     python-is-python3 python3-boto3 python3-mock \
+                     python3-pip \
+                     gcc-9 g++-9 gfortran-9 \
+                     gcc-10 g++-10 gfortran-10 \
+                     gcc-11 g++-11 gfortran-11 \
+                     gcc-12 g++-12 gfortran-12 \
+                     clang-11 clang-12 clang-13 clang-14 \
+                     clang-format-14 bsdutils
+                sudo pip3 install sphinx recommonmark docutils sphinx-rtd-theme
+                labels="${labels} gcc9 gcc10 gcc11 gcc12 clang11 clang13 clang14"
                 if test "$arch" = "x86_64" ; then
                     sudo apt-get -y install gcc-multilib g++-multilib gfortran-multilib
                     labels="${labels} 32bit_builds"
@@ -214,7 +234,7 @@ case $PLATFORM_ID in
         else
             echo "--> Skipping sudoers update"
         fi
-        sudo pkg install -y openjdk8 autoconf automake libtool gcc wget curl git hs-pandoc
+        sudo pkg install -y openjdk17 autoconf automake libtool gcc wget curl git hs-pandoc
         pandoc_installed=1
         if ! grep -q '/dev/fd' /etc/fstab ; then
             echo "Adding /dev/fd entry to /etc/fstab"
@@ -230,8 +250,8 @@ case $PLATFORM_ID in
         exit 1
 esac
 
-if [[ $pandoc_installed -eq 0 ]] ; then
-    if [[ $arch == "x86_64" ]] ; then
+if test $pandoc_installed -eq 0 ; then
+    if test $arch == "x86_64" ; then
         pandoc_url=${pandoc_x86_url}
     else
         pandoc_url=${pandoc_arm_url}
