@@ -193,68 +193,6 @@
     "iam_instance_profile" : "{{user `iam_role`}}"
   },{
     "type": "amazon-ebs",
-    "name" : "Ubuntu22.04-x86",
-    "ami_name": "Jenkins Ubuntu 22.04 x86_64 {{user `build_date`}}",
-    "region": "us-west-2",
-    "source_ami_filter": {
-        "filters": {
-            "architecture": "x86_64",
-            "virtualization-type": "hvm",
-            "root-device-type": "ebs",
-            "name": "ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"
-        },
-        "owners": ["099720109477"],
-        "most_recent": true
-    },
-    "ami_block_device_mappings": [ {
-        "device_name": "/dev/sda1",
-        "volume_size": 16,
-        "delete_on_termination": true
-        } ],
-    "launch_block_device_mappings": [ {
-        "device_name": "/dev/sda1",
-        "volume_size": 16,
-        "delete_on_termination": true
-    } ],
-    "instance_type": "t3.micro",
-    "ssh_username": "ubuntu",
-    "ssh_pty" : true,
-    "associate_public_ip_address" : true,
-    "ena_support" : true,
-    "iam_instance_profile" : "{{user `iam_role`}}"
-  },{
-    "type": "amazon-ebs",
-    "name" : "Ubuntu22.04-arm64",
-    "ami_name": "Jenkins Ubuntu 22.04 arm64 {{user `build_date`}}",
-    "region": "us-west-2",
-    "source_ami_filter": {
-        "filters": {
-            "architecture": "arm64",
-            "virtualization-type": "hvm",
-            "root-device-type": "ebs",
-            "name": "ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-arm64-server-*"
-        },
-        "owners": ["099720109477"],
-        "most_recent": true
-    },
-    "ami_block_device_mappings": [ {
-        "device_name": "/dev/sda1",
-        "volume_size": 16,
-        "delete_on_termination": true
-        } ],
-    "launch_block_device_mappings": [ {
-        "device_name": "/dev/sda1",
-        "volume_size": 16,
-        "delete_on_termination": true
-    } ],
-    "instance_type": "t4g.micro",
-    "ssh_username": "ubuntu",
-    "ssh_pty" : true,
-    "associate_public_ip_address" : true,
-    "ena_support" : true,
-    "iam_instance_profile" : "{{user `iam_role`}}"
-  },{
-    "type": "amazon-ebs",
     "name" : "RHEL7-x86",
     "ami_name": "Jenkins RHEL 7 x86_64 {{user `build_date`}}",
     "region": "us-west-2",
