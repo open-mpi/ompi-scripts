@@ -109,9 +109,14 @@ parallel (
     node(manpage_builder) {
       stage('Build Man Pages') {
 	checkout_code();
-	sh "ls -lR . ; /bin/bash ompi-scripts/jenkins/open-mpi.dist.create-tarball.build-manpages.sh ${build_prefix} ${tarball} ${branch}"
-	artifacts = sh(returnStdout:true, script:'cat ${WORKSPACE}/manpage-build-artifacts.txt').trim()
-	currentBuild.description="${currentBuild.description}<b>Manpages:</b> <A HREF=\"${artifacts}\">${artifacts}</A><BR>\n"
+    // Check if we need to build man pages
+    if (sh(script: "test -f ${WORKSPACE}/ompi/docs/history.rst", returnStatus: true) != 0) {
+        sh "ls -lR . ; /bin/bash ompi-scripts/jenkins/open-mpi.dist.create-tarball.build-manpages.sh ${build_prefix} ${tarball} ${branch}"
+        artifacts = sh(returnStdout:true, script:'cat ${WORKSPACE}/manpage-build-artifacts.txt').trim()
+        currentBuild.description="${currentBuild.description}<b>Manpages:</b> <A HREF=\"${artifacts}\">${artifacts}</A><BR>\n"
+    } else {
+        echo "Using RST; skipping building man pages"
+    }
       }
     }
   },
@@ -132,11 +137,9 @@ make distcheck"""
   "rpm test suites" : {
     node(rpm_builder) {
       stage('RPM Build') {
-	prep_rpm_environment()
-	sh """aws s3 cp ${build_prefix}/${srpm_name} ${srpm_name}
-rpmbuild --rebuild ${srpm_name}
-bin_rpm_name=`find ${WORKSPACE}/rpmbuild/RPMS -name "*.rpm" -print`
-sudo rpm -Uvh \${bin_rpm_name}"""
+	prep_rpm_environment();
+	checkout_code();
+	sh "/bin/bash ${WORKSPACE}/ompi-scripts/jenkins/open-mpi.dist.create-tarball.build-rpm.sh ${build_prefix} ${srpm_name}"
       }
     }
   },
