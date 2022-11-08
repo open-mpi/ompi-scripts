@@ -379,7 +379,7 @@
     "iam_instance_profile" : "{{user `iam_role`}}"
   },{
     "type": "amazon-ebs",
-    "name" : "FreeBSD11-x86",
+    "name" : "FreeBSD13-x86",
     "ami_name": "Jenkins FreeBSD 13 x86_64 {{user `build_date`}}",
     "region": "us-west-2",
     "source_ami_filter": {
