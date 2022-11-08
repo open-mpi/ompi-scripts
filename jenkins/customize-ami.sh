@@ -182,7 +182,7 @@ case $PLATFORM_ID in
                      clang-11 clang-12 clang-13 clang-14 \
                      clang-format-14 bsdutils
                 sudo pip3 install sphinx recommonmark docutils sphinx-rtd-theme
-                labels="${labels} gcc9 gcc10 gcc11 gcc12 clang11 clang13 clang14"
+                labels="${labels} gcc9 gcc10 gcc11 gcc12 clang11 clang12 clang13 clang14"
                 if test "$arch" = "x86_64" ; then
                     sudo DEBIAN_FRONTEND=noninteractive apt-get -y install gcc-multilib g++-multilib gfortran-multilib
                     labels="${labels} 32bit_builds"
@@ -210,7 +210,6 @@ case $PLATFORM_ID in
                      python3-pip
                 sudo ln -s /usr/bin/python3 /usr/bin/python
                 sudo pip install sphinx recommonmark docutils sphinx-rtd-theme
-                labels="${labels}"
                 ;;
             *)
                 echo "ERROR: Unknown version ${PLATFORM_ID} ${VERSION_ID}"
