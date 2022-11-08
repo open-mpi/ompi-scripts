@@ -40,4 +40,5 @@ done
 export BUILD_DATE=`date +%Y%m%d%H%M`
 export AWS_IAM_ROLE="jenkins-worker"
 
-packer build ${packer_opts} ${packer_file}
+packer build ${packer_opts} ${packer_file} | tee ${packer_file}.${BUILD_DATE}.txt
+grep 'Recommended labels' ${packer_file}.${BUILD_DATE}.txt
