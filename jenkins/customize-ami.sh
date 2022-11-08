@@ -212,12 +212,10 @@ case $PLATFORM_ID in
                 sudo zypper -n install \
                      java-11-openjdk \
                      python3-boto python3-boto3 python3-mock \
-                     gcc7 gcc7-c++ gcc7-fortran \
-                     gcc10 gcc10-c++ gcc10-fortran \
                      python3-pip
                 sudo ln -s /usr/bin/python3 /usr/bin/python
                 sudo pip install sphinx recommonmark docutils sphinx-rtd-theme
-                labels="${labels} gcc7 gcc10"
+                labels="${labels}"
                 ;;
             *)
                 echo "ERROR: Unknown version ${PLATFORM_ID} ${VERSION_ID}"
