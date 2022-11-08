@@ -16,6 +16,7 @@
 
 OPTIND=1
 packer_opts=""
+packer_file="jenkins-amis.hcl"
 
 while getopts "h?a:l" opt; do
     case "$opt" in
@@ -29,7 +30,7 @@ while getopts "h?a:l" opt; do
         packer_opts="--only ${OPTARG}"
         ;;
     l)
-        ami_list=`packer inspect -machine-readable packer.json | grep template-builder | cut -f4 -d, | xargs`
+        ami_list=`packer inspect -machine-readable ${packer_file} | grep template-builder | cut -f4 -d, | xargs`
         echo "Available amis: ${ami_list}"
         exit 0
         ;;
@@ -39,4 +40,4 @@ done
 export BUILD_DATE=`date +%Y%m%d%H%M`
 export AWS_IAM_ROLE="jenkins-worker"
 
-packer build ${packer_opts} packer.json
+packer build ${packer_opts} ${packer_file}
