@@ -18,27 +18,33 @@ aws s3 cp ${build_prefix}/${srpm_name} ${srpm_name}
 
 # Build and install PRRTE and OpenPMIX, if available
 if [[ -d ${WORKSPACE}/ompi/3rd-party/openpmix ]]; then
+    echo "Building OpenPMIx RPM"
     pushd ${WORKSPACE}/ompi/3rd-party/openpmix
     ./autogen.pl; ./configure; make dist
     cd contrib
     tarball=$(find .. -name "*.bz2" -print)
     rpmtopdir="${WORKSPACE}/rpmbuild" build_srpm=no build_single=yes ./buildrpm.sh $tarball
     rpm_name=$(find ${WORKSPACE}/rpmbuild/RPMS -name "pmix*.rpm" -print)
+    echo "Installing OpenPMIx RPM"
     sudo rpm -Uvh ${rpm_name}
     popd
 fi
 
 if [[ -d ${WORKSPACE}/ompi/3rd-party/prrte ]]; then
+    echo "Building PRRTE RPM"
     pushd ${WORKSPACE}/ompi/3rd-party/prrte
     ./autogen.pl; ./configure; make dist
     cd contrib/dist/linux
     tarball=$(find ../../.. -name "*.bz2" -print)
     rpmtopdir="${WORKSPACE}/rpmbuild" ./buildrpm.sh -b "${tarball}"
     rpm_name=$(find ${WORKSPACE}/rpmbuild/RPMS -name "prrte*.rpm" -print)
+    echo "Installing PRRTE RPM"
     sudo rpm -Uvh ${rpm_name}
     popd
 fi
 
+echo "Building Open MPI RPM"
 rpmbuild --rebuild ${srpm_name}
 bin_rpm_name=`find ${WORKSPACE}/rpmbuild/RPMS -name "openmpi*.rpm" -print`
+echo "Installing Open MPI RPM"
 sudo rpm -Uvh ${bin_rpm_name}

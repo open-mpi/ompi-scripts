@@ -109,13 +109,14 @@ parallel (
     node(manpage_builder) {
       stage('Build Man Pages') {
 	checkout_code();
-    // Check if we need to build man pages
+    // Open MPI 5.0 and later auto-build docs on readthedocs.io, so we do not need to build manpages for www.open-mpi.org.
+    // Skip this step if we find readthedocs input files.
     if (sh(script: "test -f ${WORKSPACE}/ompi/docs/history.rst", returnStatus: true) != 0) {
         sh "ls -lR . ; /bin/bash ompi-scripts/jenkins/open-mpi.dist.create-tarball.build-manpages.sh ${build_prefix} ${tarball} ${branch}"
         artifacts = sh(returnStdout:true, script:'cat ${WORKSPACE}/manpage-build-artifacts.txt').trim()
         currentBuild.description="${currentBuild.description}<b>Manpages:</b> <A HREF=\"${artifacts}\">${artifacts}</A><BR>\n"
     } else {
-        echo "Using RST; skipping building man pages"
+        echo "Using ReadTheDocs; skipping building man pages"
     }
       }
     }
