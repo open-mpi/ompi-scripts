@@ -133,16 +133,16 @@ case $PLATFORM_ID in
         ;;
     ubuntu)
         echo "==> Installing packages"
-        sudo apt-get update
-        sudo apt-get -y upgrade
-        sudo apt-get -y install build-essential gfortran \
+        sudo DEBIAN_FRONTEND=noninteractive apt-get update
+        sudo DEBIAN_FRONTEND=noninteractive apt-get -y upgrade
+        sudo DEBIAN_FRONTEND=noninteractive apt-get -y install build-essential gfortran \
              autoconf automake libtool flex hwloc libhwloc-dev git \
              default-jre awscli rman pandoc
         pandoc_installed=1
         labels="${labels} linux ubuntu_${VERSION_ID}-${arch}"
         case $VERSION_ID in
             18.04)
-                sudo apt-get -y install \
+                sudo DEBIAN_FRONTEND=noninteractive apt-get -y install \
                      python-boto3 python-pip \
                      python-mock \
                      gcc-4.8 g++-4.8 gfortran-4.8 \
@@ -155,12 +155,12 @@ case $PLATFORM_ID in
                 sudo pip install sphinx recommonmark docutils sphinx-rtd-theme
                 labels="${labels} gcc48 gcc5 gcc6 gcc7 gcc8 clang39 clang40 clang50 clang60 clang7 clang8 clang9"
                 if test "$arch" = "x86_64" ; then
-                    sudo apt-get -y install gcc-multilib g++-multilib gfortran-multilib
+                    sudo DEBIAN_FRONTEND=noninteractive apt-get -y install gcc-multilib g++-multilib gfortran-multilib
                     labels="${labels} 32bit_builds"
                 fi
                 ;;
             20.04)
-                sudo apt-get -y install \
+                sudo DEBIAN_FRONTEND=noninteractive apt-get -y install \
                      python-is-python3 python3-boto3 python3-mock \
                      python3-pip \
                      gcc-7 g++-7 gfortran-7 \
@@ -172,12 +172,12 @@ case $PLATFORM_ID in
                 sudo pip3 install sphinx recommonmark docutils sphinx-rtd-theme
                 labels="${labels} gcc7 gcc8 gcc9 gcc10 clang60 clang7 clang8 clang9 clang10"
                 if test "$arch" = "x86_64" ; then
-                    sudo apt-get -y install gcc-multilib g++-multilib gfortran-multilib
+                    sudo DEBIAN_FRONTEND=noninteractive apt-get -y install gcc-multilib g++-multilib gfortran-multilib
                     labels="${labels} 32bit_builds"
                 fi
                 ;;
             22.04)
-                sudo apt-get -y install \
+                sudo DEBIAN_FRONTEND=noninteractive apt-get -y install \
                      python-is-python3 python3-boto3 python3-mock \
                      python3-pip \
                      gcc-9 g++-9 gfortran-9 \
@@ -189,7 +189,7 @@ case $PLATFORM_ID in
                 sudo pip3 install sphinx recommonmark docutils sphinx-rtd-theme
                 labels="${labels} gcc9 gcc10 gcc11 gcc12 clang11 clang13 clang14"
                 if test "$arch" = "x86_64" ; then
-                    sudo apt-get -y install gcc-multilib g++-multilib gfortran-multilib
+                    sudo DEBIAN_FRONTEND=noninteractive apt-get -y install gcc-multilib g++-multilib gfortran-multilib
                     labels="${labels} 32bit_builds"
                 fi
                 ;;
