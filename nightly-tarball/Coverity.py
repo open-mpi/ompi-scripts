@@ -169,7 +169,7 @@ if __name__ == '__main__':
                         help='Coverity submission email address',
                         type=str)
 
-    for key, value in vars(parser.parse_args()).iteritems():
+    for key, value in vars(parser.parse_args()).items():
         if not value == None:
             config[key] = value
 
