@@ -266,34 +266,45 @@ if test "${MPIRUN_MODE}" != "none"; then
 	    exec="timeout -s SIGSEGV 4m mpirun --get-stack-traces --timeout 180 --hostfile ${WORKSPACE}/hostfile -np 2 "
 	    ;;
     esac
+    singleton="timeout -s SIGSEGV 1m "
     run_example "${exec}" ./examples/hello_c
+    run_example "${singleton}" ./examples/hello_c
     run_example "${exec}" ./examples/ring_c
+    run_example "${singleton}" ./examples/ring_c
     run_example "${exec}" ./examples/connectivity_c
     if ompi_info --parsable | grep -q bindings:cxx:yes >/dev/null; then
         echo "--> running C++ examples"
         run_example "${exec}" ./examples/hello_cxx
+        run_example "${singleton}" ./examples/hello_cxx
         run_example "${exec}" ./examples/ring_cxx
+        run_example "${singleton}" ./examples/ring_cxx
     else
         echo "--> skipping C++ examples"
     fi
     if ompi_info --parsable | grep -q bindings:mpif.h:yes >/dev/null; then
         echo "--> running mpif examples"
         run_example "${exec}" ./examples/hello_mpifh
+        run_example "${singleton}" ./examples/hello_mpifh
         run_example "${exec}" ./examples/ring_mpifh
+        run_example "${singleton}" ./examples/ring_mpifh
     else
         echo "--> skipping mpif examples"
     fi
     if ompi_info --parsable | egrep -q bindings:use_mpi:\"\?yes >/dev/null; then
         echo "--> running usempi examples"
         run_example "${exec}" ./examples/hello_usempi
+        run_example "${singleton}" ./examples/hello_usempi
         run_example "${exec}" ./examples/ring_usempi
+        run_example "${singleton}" ./examples/ring_usempi
     else
         echo "--> skipping usempi examples"
     fi
     if ompi_info --parsable | grep -q bindings:use_mpi_f08:yes >/dev/null; then
         echo "--> running usempif08 examples"
         run_example "${exec}" ./examples/hello_usempif08
+        run_example "${singleton}" ./examples/hello_usempif08
         run_example "${exec}" ./examples/ring_usempif08
+        run_example "${singleton}" ./examples/ring_usempif08
     else
         echo "--> skipping usempif08 examples"
     fi
