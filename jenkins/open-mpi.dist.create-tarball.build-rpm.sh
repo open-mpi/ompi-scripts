@@ -33,6 +33,8 @@ fi
 if [[ -d ${WORKSPACE}/ompi/3rd-party/prrte ]]; then
     echo "Building PRRTE RPM"
     pushd ${WORKSPACE}/ompi/3rd-party/prrte
+    echo "Applying PRRTE patch spec file issue."
+    patch -N -p0 < ${WORKSPACE}/ompi-scripts/jenkins/prrte.spec.patch
     ./autogen.pl; ./configure; make dist
     cd contrib/dist/linux
     tarball=$(find ../../.. -name "*.bz2" -print)
