@@ -1,6 +1,7 @@
 #
 # Copyright (c) 2017      Amazon.com, Inc. or its affiliates.  All Rights
 #                         Reserved.
+# Copyright (c) 2024      Jeffrey M. Squyres.  All rights reserved.
 #
 # Additional copyrights may follow
 #
@@ -14,7 +15,7 @@ import fileinput
 def logged_call(args,
                 wrapper_args=None,
                 log_file=None,
-                err_log_len=20,
+                err_log_len=30,
                 env=None):
     """Wrapper around check_call to log output
 
