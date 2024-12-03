@@ -27,6 +27,11 @@ variable "vpc_id" {
   default = "${env("AWS_VPC_ID")}"
 }
 
+variable "BuildType" {
+  type    = string
+  default = "${env("BUILD_TYPE")}"
+}
+
 
 ################################################################################
 #
@@ -65,6 +70,10 @@ source "amazon-ebs" "AmazonLinux2-arm64" {
   source_ami   = "${data.amazon-ami.AmazonLinux2-arm64.id}"
   ssh_pty      = true
   ssh_username = "ec2-user"
+  tags = {
+    BuildType = "${var.BuildType}",
+    JenkinsBuilderAmi = "True"
+  }
 }
 
 
@@ -100,6 +109,10 @@ source "amazon-ebs" "AmazonLinux2-x86" {
   source_ami   = "${data.amazon-ami.AmazonLinux2-x86.id}"
   ssh_pty      = true
   ssh_username = "ec2-user"
+  tags = {
+    BuildType = "${var.BuildType}",
+    JenkinsBuilderAmi = "True"
+  }
 }
 
 
@@ -141,6 +154,10 @@ source "amazon-ebs" "RHEL8-arm64" {
   source_ami   = "${data.amazon-ami.RHEL8-arm64.id}"
   ssh_pty      = true
   ssh_username = "ec2-user"
+  tags = {
+    BuildType = "${var.BuildType}",
+    JenkinsBuilderAmi = "True"
+  }
 }
 
 
@@ -177,6 +194,10 @@ source "amazon-ebs" "RHEL8-x86" {
   source_ami   = "${data.amazon-ami.RHEL8-x86.id}"
   ssh_pty      = true
   ssh_username = "ec2-user"
+  tags = {
+    BuildType = "${var.BuildType}",
+    JenkinsBuilderAmi = "True"
+  }
 }
 
 
@@ -217,6 +238,10 @@ source "amazon-ebs" "SLES15-x86" {
   source_ami   = "${data.amazon-ami.SLES15-x86.id}"
   ssh_pty      = true
   ssh_username = "ec2-user"
+  tags = {
+    BuildType = "${var.BuildType}",
+    JenkinsBuilderAmi = "True"
+  }
 }
 
 
@@ -258,6 +283,10 @@ source "amazon-ebs" "Ubuntu1804-x86" {
   source_ami   = "${data.amazon-ami.Ubuntu1804-x86.id}"
   ssh_pty      = true
   ssh_username = "ubuntu"
+  tags = {
+    BuildType = "${var.BuildType}",
+    JenkinsBuilderAmi = "True"
+  }
 }
 
 
@@ -293,6 +322,10 @@ source "amazon-ebs" "Ubuntu2004-arm64" {
   source_ami   = "${data.amazon-ami.Ubuntu2004-arm64.id}"
   ssh_pty      = true
   ssh_username = "ubuntu"
+  tags = {
+    BuildType = "${var.BuildType}",
+    JenkinsBuilderAmi = "True"
+  }
 }
 
 
@@ -328,6 +361,10 @@ source "amazon-ebs" "Ubuntu2004-x86" {
   source_ami   = "${data.amazon-ami.Ubuntu2004-x86.id}"
   ssh_pty      = true
   ssh_username = "ubuntu"
+  tags = {
+    BuildType = "${var.BuildType}",
+    JenkinsBuilderAmi = "True"
+  }
 }
 
 
@@ -363,6 +400,10 @@ source "amazon-ebs" "Ubuntu2204-arm64" {
   source_ami   = "${data.amazon-ami.Ubuntu2204-arm64.id}"
   ssh_pty      = true
   ssh_username = "ubuntu"
+  tags = {
+    BuildType = "${var.BuildType}",
+    JenkinsBuilderAmi = "True"
+  }
 }
 
 
@@ -398,6 +439,10 @@ source "amazon-ebs" "Ubuntu2204-x86" {
   source_ami   = "${data.amazon-ami.Ubuntu2204-x86.id}"
   ssh_pty      = true
   ssh_username = "ubuntu"
+  tags = {
+    BuildType = "${var.BuildType}",
+    JenkinsBuilderAmi = "True"
+  }
 }
 
 
@@ -433,6 +478,10 @@ source "amazon-ebs" "Ubuntu2404-arm64" {
   source_ami   = "${data.amazon-ami.Ubuntu2404-arm64.id}"
   ssh_pty      = true
   ssh_username = "ubuntu"
+  tags = {
+    BuildType = "${var.BuildType}",
+    JenkinsBuilderAmi = "True"
+  }
 }
 
 
@@ -468,6 +517,10 @@ source "amazon-ebs" "Ubuntu2404-x86" {
   source_ami   = "${data.amazon-ami.Ubuntu2404-x86.id}"
   ssh_pty      = true
   ssh_username = "ubuntu"
+  tags = {
+    BuildType = "${var.BuildType}",
+    JenkinsBuilderAmi = "True"
+  }
 }
 
 

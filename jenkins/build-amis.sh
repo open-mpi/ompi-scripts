@@ -17,28 +17,38 @@
 OPTIND=1
 packer_opts=""
 packer_file="jenkins-amis.pkr.hcl"
+build_type="testing"
 
-while getopts "h?a:l" opt; do
+while getopts "h?a:lpd" opt; do
     case "$opt" in
     h|\?)
         echo "usage: build-ami.sh [-a <ami list>]"
         echo "  -a <ami list>     Only build amis in ami list (comma separated)"
         echo "  -l                List ami names available for building"
+        echo "  -p                Label as production amis"
+        echo "  -d                Enable debugging for packer"
         exit 1
         ;;
     a)
-        packer_opts="--only ${OPTARG}"
+        packer_opts="${packer_opts} --only ${OPTARG}"
         ;;
     l)
         ami_list=`packer inspect -machine-readable ${packer_file} | grep template-builder | cut -f4 -d, | xargs`
         echo "Available amis: ${ami_list}"
         exit 0
         ;;
+    p)
+        build_type="production"
+        ;;
+    d)
+        packer_opts="${packer_opts} --debug"
+        ;;
     esac
 done
 
 export BUILD_DATE=`date +%Y%m%d%H%M`
 export AWS_IAM_ROLE="jenkins-worker"
+export BUILD_TYPE="${build_type}"
 
 packer build ${packer_opts} ${packer_file} | tee ${packer_file}.${BUILD_DATE}.txt
 grep 'Recommended labels' ${packer_file}.${BUILD_DATE}.txt
