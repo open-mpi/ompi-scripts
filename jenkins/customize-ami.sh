@@ -79,7 +79,7 @@ case $PLATFORM_ID in
                   java-17-openjdk-headless
                 sudo yum -y remove java-1.8.0-openjdk-headless
                 sudo alternatives --set python /usr/bin/python3
-                sudo pip3 install sphinx recommonmark docutils sphinx-rtd-theme
+                sudo pip3.8 install sphinx recommonmark docutils sphinx-rtd-theme
                 sphinx_installed=1
                 labels="${labels} gcc8"
                 ;;
@@ -131,15 +131,15 @@ case $PLATFORM_ID in
         sudo DEBIAN_FRONTEND=noninteractive apt-get update
         sudo DEBIAN_FRONTEND=noninteractive apt-get -y upgrade
         sudo DEBIAN_FRONTEND=noninteractive apt-get -y install build-essential gfortran \
-             autoconf automake libtool flex hwloc libhwloc-dev git \
-             awscli rman pandoc
+             autoconf automake libtool flex hwloc libhwloc-dev git libevent-dev \
+             rman pandoc
         pandoc_installed=1
         sphinx_installed=1
         labels="${labels} linux ubuntu_${VERSION_ID}-${arch}"
         case $VERSION_ID in
             18.04)
                 sudo DEBIAN_FRONTEND=noninteractive apt-get -y install \
-                     python-boto3 python-pip \
+                     awscli python-boto3 python-pip \
                      python-mock \
                      openjdk-17-jre-headless \
                      gcc-4.8 g++-4.8 gfortran-4.8 \
@@ -160,7 +160,7 @@ case $PLATFORM_ID in
                 ;;
             20.04)
                 sudo DEBIAN_FRONTEND=noninteractive apt-get -y install \
-                     python-is-python3 python3-boto3 python3-mock \
+                     awscli python-is-python3 python3-boto3 python3-mock \
                      python3-pip \
                      openjdk-21-jdk-headless \
                      gcc-7 g++-7 gfortran-7 \
@@ -178,7 +178,7 @@ case $PLATFORM_ID in
                 ;;
             22.04)
                 sudo DEBIAN_FRONTEND=noninteractive apt-get -y install \
-                     python-is-python3 python3-boto3 python3-mock \
+                     awscli python-is-python3 python3-boto3 python3-mock \
                      python3-pip \
                      openjdk-21-jre-headless \
                      gcc-9 g++-9 gfortran-9 \
@@ -197,16 +197,25 @@ case $PLATFORM_ID in
             24.04)
                 sudo DEBIAN_FRONTEND=noninteractive apt-get -y install \
                      python-is-python3 python3-boto3 python3-mock \
-                     python3-pip \
+                     python3-pip python3-recommonmark python3-docutils \
+                     python3-sphinx python3-sphinx-rtd-theme \
                      openjdk-21-jdk-headless \
                      gcc-9 g++-9 gfortran-9 \
                      gcc-10 g++-10 gfortran-10 \
                      gcc-11 g++-11 gfortran-11 \
                      gcc-12 g++-12 gfortran-12 \
-                     clang-11 clang-12 clang-13 clang-14 \
-                     clang-format-14 bsdutils
-                sudo pip3 install sphinx recommonmark docutils sphinx-rtd-theme
-                labels="${labels} gcc9 gcc10 gcc11 gcc12 clang11 clang12 clang13 clang14"
+                     gcc-13 g++-13 gfortran-13 \
+                     gcc-14 g++-14 gfortran-14 \
+                     clang-14 clang-15 flang-15 clang-16 flang-16 \
+                     clang-17 flang-17 clang-18 flang-18 \
+                     clang-format bsdutils unzip
+                ( cd $HOME
+                  curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+                  unzip awscliv2.zip
+                  sudo ./aws/install
+                  rm -rf awscliv2.zip aws
+                )
+                labels="${labels} gcc9 gcc10 gcc11 gcc12 gcc13 gcc14 clang11 clang12 clang13 clang14"
                 if test "$arch" = "x86_64" ; then
                     sudo DEBIAN_FRONTEND=noninteractive apt-get -y install gcc-multilib g++-multilib gfortran-multilib
                     labels="${labels} 32bit_builds"
@@ -230,11 +239,10 @@ case $PLATFORM_ID in
         case $VERSION_ID in
             15.*)
                 sudo zypper -n install \
-                     java-11-openjdk \
-                     python3-boto python3-boto3 python3-mock \
+                     java-17-openjdk-headless \
                      python3-pip
-                sudo ln -s /usr/bin/python3 /usr/bin/python
-                sudo pip install sphinx recommonmark docutils sphinx-rtd-theme
+                sudo pip install sphinx recommonmark docutils sphinx-rtd-theme \
+		     importlib_resources dataclasses
                 ;;
             *)
                 echo "ERROR: Unknown version ${PLATFORM_ID} ${VERSION_ID}"
@@ -251,7 +259,8 @@ case $PLATFORM_ID in
         else
             echo "--> Skipping sudoers update"
         fi
-        sudo pkg install -y openjdk17 autoconf automake libtool gcc wget curl git hs-pandoc
+        sudo pkg install -y openjdk17 autoconf automake libtool gcc wget \
+             curl git hs-pandoc lang/python3 libevent-devel
         pandoc_installed=1
         if ! grep -q '/dev/fd' /etc/fstab ; then
             echo "Adding /dev/fd entry to /etc/fstab"
