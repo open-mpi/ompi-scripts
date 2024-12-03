@@ -33,8 +33,8 @@ while getopts "h?a:lpd" opt; do
         packer_opts="${packer_opts} --only ${OPTARG}"
         ;;
     l)
-        ami_list=`packer inspect -machine-readable ${packer_file} | grep template-builder | cut -f4 -d, | xargs`
-        echo "Available amis: ${ami_list}"
+        ami_list=`packer inspect ${packer_file} | grep amazon-ebs`
+        echo "Available amis:\n${ami_list}"
         exit 0
         ;;
     p)
