@@ -40,7 +40,7 @@ echo "==> Version:  $VERSION_ID"
 echo "==> Architecture: $arch"
 
 OPTIND=1         # Reset in case getopts has been used previously in the shell.
-run_test=0       # -b runs an ompi build test; useful for testing new AMIs
+run_test=1       # -b runs an ompi build test; useful for testing new AMIs
 clean_ami=1      # -t enables testing mode, where the AMI isn't cleaned up
                  # after the test (so remote logins still work)
 
@@ -60,6 +60,7 @@ while getopts "h?tb" opt; do
 done
 
 pandoc_installed=0
+sphinx_installed=0
 
 case $PLATFORM_ID in
     rhel|centos)
@@ -74,7 +75,15 @@ case $PLATFORM_ID in
         case $VERSION_ID in
             7.*)
                 sudo yum -y install gcc gcc-c++ gcc-gfortran \
-                  java-11-openjdk-headless
+                  python3
+                ( cd $HOME
+                  curl -O https://download.java.net/java/GA/jdk23.0.1/c28985cbf10d4e648e4004050f8781aa/11/GPL/openjdk-23.0.1_linux-x64_bin.tar.gz
+                  tar xf openjdk-23.0.1_linux-x64_bin.tar.gz
+                  cd /usr/local
+                  sudo cp -rf $HOME/jdk-23.0.1/* .
+                  cd  $HOME
+                  rm -rf openjdk-23.0.1_linux-x64_bin.tar.gz jdk-23.0.1
+                )
                 labels="${labels} gcc48"
                 ;;
             8.*)
@@ -84,6 +93,7 @@ case $PLATFORM_ID in
                 sudo yum -y remove java-1.8.0-openjdk-headless
                 sudo alternatives --set python /usr/bin/python3
                 sudo pip3 install sphinx recommonmark docutils sphinx-rtd-theme
+                sphinx_installed=1
                 labels="${labels} gcc8"
                 ;;
             *)
@@ -106,6 +116,7 @@ case $PLATFORM_ID in
         echo "==> Installing packages"
         sudo yum -y update
         sudo yum -y groupinstall "Development Tools"
+        sphinx_installed=1
         labels="${labels} linux"
         case $VERSION_ID in
             2)
@@ -114,7 +125,9 @@ case $PLATFORM_ID in
                   java-17-amazon-corretto-headless libevent-devel hwloc-devel \
                   hwloc gdb python3-pip python3-devel
                   sudo pip install mock
-                  sudo pip3 install sphinx recommonmark docutils sphinx-rtd-theme
+                  # system python3 is linked against openssl 1.0, which doesn't work with
+                  # urllib3 2.0 or later.  So pin to an older version of urllib :(.
+                  sudo pip3 install sphinx recommonmark docutils sphinx-rtd-theme 'urllib3<2'
                 labels="${labels} amazon_linux_2-${arch} gcc7 clang7"
                 ;;
             *)
@@ -132,14 +145,16 @@ case $PLATFORM_ID in
         sudo DEBIAN_FRONTEND=noninteractive apt-get -y upgrade
         sudo DEBIAN_FRONTEND=noninteractive apt-get -y install build-essential gfortran \
              autoconf automake libtool flex hwloc libhwloc-dev git \
-             default-jre awscli rman pandoc
+             awscli rman pandoc
         pandoc_installed=1
+        sphinx_installed=1
         labels="${labels} linux ubuntu_${VERSION_ID}-${arch}"
         case $VERSION_ID in
             18.04)
                 sudo DEBIAN_FRONTEND=noninteractive apt-get -y install \
                      python-boto3 python-pip \
                      python-mock \
+                     openjdk-17-jre-headless \
                      gcc-4.8 g++-4.8 gfortran-4.8 \
                      gcc-5 g++-5 gfortran-5 \
                      gcc-6 g++-6 gfortran-6 \
@@ -153,18 +168,21 @@ case $PLATFORM_ID in
                     sudo DEBIAN_FRONTEND=noninteractive apt-get -y install gcc-multilib g++-multilib gfortran-multilib
                     labels="${labels} 32bit_builds"
                 fi
+                # Sphinx has become too old for master on Ubuntu 18, so don't try to build there.
+                sphinx_installed=0
                 ;;
             20.04)
                 sudo DEBIAN_FRONTEND=noninteractive apt-get -y install \
                      python-is-python3 python3-boto3 python3-mock \
                      python3-pip \
+                     openjdk-21-jdk-headless \
                      gcc-7 g++-7 gfortran-7 \
                      gcc-8 g++-8 gfortran-8 \
                      gcc-9 g++-9 gfortran-9 \
                      gcc-10 g++-10 gfortran-10 \
                      clang-6.0 clang-7 clang-8 clang-9 clang-10 \
                      clang-format-11 bsdutils
-                sudo pip3 install sphinx recommonmark docutils sphinx-rtd-theme
+                sudo pip3 install -U sphinx recommonmark docutils sphinx-rtd-theme
                 labels="${labels} gcc7 gcc8 gcc9 gcc10 clang60 clang7 clang8 clang9 clang10"
                 if test "$arch" = "x86_64" ; then
                     sudo DEBIAN_FRONTEND=noninteractive apt-get -y install gcc-multilib g++-multilib gfortran-multilib
@@ -175,6 +193,25 @@ case $PLATFORM_ID in
                 sudo DEBIAN_FRONTEND=noninteractive apt-get -y install \
                      python-is-python3 python3-boto3 python3-mock \
                      python3-pip \
+                     openjdk-21-jre-headless \
+                     gcc-9 g++-9 gfortran-9 \
+                     gcc-10 g++-10 gfortran-10 \
+                     gcc-11 g++-11 gfortran-11 \
+                     gcc-12 g++-12 gfortran-12 \
+                     clang-11 clang-12 clang-13 clang-14 \
+                     clang-format-14 bsdutils
+                sudo pip3 install sphinx recommonmark docutils sphinx-rtd-theme
+                labels="${labels} gcc9 gcc10 gcc11 gcc12 clang11 clang12 clang13 clang14"
+                if test "$arch" = "x86_64" ; then
+                    sudo DEBIAN_FRONTEND=noninteractive apt-get -y install gcc-multilib g++-multilib gfortran-multilib
+                    labels="${labels} 32bit_builds"
+                fi
+                ;;
+            24.04)
+                sudo DEBIAN_FRONTEND=noninteractive apt-get -y install \
+                     python-is-python3 python3-boto3 python3-mock \
+                     python3-pip \
+                     openjdk-21-jdk-headless \
                      gcc-9 g++-9 gfortran-9 \
                      gcc-10 g++-10 gfortran-10 \
                      gcc-11 g++-11 gfortran-11 \
@@ -200,8 +237,9 @@ case $PLATFORM_ID in
     sles)
         sudo zypper -n update
         sudo zypper -n install gcc gcc-c++ gcc-fortran \
-             autoconf automake libtool flex make gdb
+             autoconf automake libtool flex make gdb git bzip2
         labels="${labels} linux sles_${VERSION_ID}-${arch}"
+        sphinx_installed=1
         case $VERSION_ID in
             15.*)
                 sudo zypper -n install \
@@ -268,9 +306,13 @@ if test $run_test != 0; then
     cd ompi
     ./autogen.pl
     ./configure --prefix=$HOME/install
-    make -j 4 all
-    make check
-    make install
+    if test "$sphinx_installed" = "1" ; then
+        make -j 4 distcheck
+    else
+        make -j 4 all
+        make check
+        make install
+    fi
     cd $HOME
     rm -rf ${HOME}/ompi ${HOME}/install
     echo "==> SUCCESS!  Open MPI compiled!"

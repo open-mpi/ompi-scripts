@@ -16,7 +16,7 @@
 
 OPTIND=1
 packer_opts=""
-packer_file="jenkins-amis.hcl"
+packer_file="jenkins-amis.pkr.hcl"
 
 while getopts "h?a:l" opt; do
     case "$opt" in

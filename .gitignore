@@ -1,1 +1,2 @@
 *.pyc
+jenkins/jenkins-amis.pkr.hcl.*.txt
