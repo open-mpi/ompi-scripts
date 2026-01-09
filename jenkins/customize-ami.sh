@@ -114,7 +114,7 @@ case $PLATFORM_ID in
                   sudo pip install mock
                   # system python3 is linked against openssl 1.0, which doesn't work with
                   # urllib3 2.0 or later.  So pin to an older version of urllib :(.
-                  sudo pip3 install sphinx recommonmark docutils sphinx-rtd-theme 'urllib3<2'
+                  sudo pip3 install sphinx recommonmark docutils sphinx-rtd-theme 'urllib3<2' sphobjinv
                 labels="${labels} amazon_linux_2-${arch} gcc7 clang7"
                 ;;
             *)
@@ -152,7 +152,7 @@ case $PLATFORM_ID in
                      gcc-8 g++-8 gfortran-8 \
                      clang-3.9 clang-4.0 clang-5.0 clang-6.0 \
                      clang-7 clang-8 clang-9 
-                sudo pip install sphinx recommonmark docutils sphinx-rtd-theme
+                sudo pip install sphinx recommonmark docutils sphinx-rtd-theme sphobjinv
                 labels="${labels} gcc48 gcc5 gcc6 gcc7 gcc8 clang39 clang40 clang50 clang60 clang7 clang8 clang9"
                 if test "$arch" = "x86_64" ; then
                     sudo DEBIAN_FRONTEND=noninteractive apt-get -y install gcc-multilib g++-multilib gfortran-multilib
@@ -172,7 +172,7 @@ case $PLATFORM_ID in
                      gcc-10 g++-10 gfortran-10 \
                      clang-6.0 clang-7 clang-8 clang-9 clang-10 \
                      clang-format-11 bsdutils
-                sudo pip3 install -U sphinx recommonmark docutils sphinx-rtd-theme
+                sudo pip3 install -U sphinx recommonmark docutils sphinx-rtd-theme sphobjinv
                 labels="${labels} gcc7 gcc8 gcc9 gcc10 clang60 clang7 clang8 clang9 clang10"
                 if test "$arch" = "x86_64" ; then
                     sudo DEBIAN_FRONTEND=noninteractive apt-get -y install gcc-multilib g++-multilib gfortran-multilib
@@ -190,7 +190,7 @@ case $PLATFORM_ID in
                      gcc-12 g++-12 gfortran-12 \
                      clang-11 clang-12 clang-13 clang-14 \
                      clang-format-14 bsdutils
-                sudo pip3 install sphinx recommonmark docutils sphinx-rtd-theme
+                sudo pip3 install sphinx recommonmark docutils sphinx-rtd-theme sphobjinv
                 labels="${labels} gcc9 gcc10 gcc11 gcc12 clang11 clang12 clang13 clang14"
                 if test "$arch" = "x86_64" ; then
                     sudo DEBIAN_FRONTEND=noninteractive apt-get -y install gcc-multilib g++-multilib gfortran-multilib
@@ -201,7 +201,7 @@ case $PLATFORM_ID in
                 sudo DEBIAN_FRONTEND=noninteractive apt-get -y install \
                      python-is-python3 python3-boto3 python3-mock \
                      python3-pip python3-recommonmark python3-docutils \
-                     python3-sphinx python3-sphinx-rtd-theme \
+                     python3-sphinx python3-sphinx-rtd-theme  \
                      openjdk-21-jdk-headless \
                      gcc-9 g++-9 gfortran-9 \
                      gcc-10 g++-10 gfortran-10 \
@@ -212,6 +212,7 @@ case $PLATFORM_ID in
                      clang-14 clang-15 flang-15 clang-16 flang-16 \
                      clang-17 flang-17 clang-18 flang-18 \
                      clang-format bsdutils unzip
+                     sudo pip3 install --break-system-packages sphobjinv
                 ( cd $HOME
                   curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
                   unzip awscliv2.zip
@@ -252,7 +253,7 @@ case $PLATFORM_ID in
                      java-17-openjdk-headless \
                      python3-pip
                 sudo pip install sphinx recommonmark docutils sphinx-rtd-theme \
-		     importlib_resources dataclasses
+		     importlib_resources dataclasses sphobjinv
                 ;;
             *)
                 echo "ERROR: Unknown version ${PLATFORM_ID} ${VERSION_ID}"
