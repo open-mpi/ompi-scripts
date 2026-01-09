@@ -73,19 +73,6 @@ case $PLATFORM_ID in
         sudo yum -y install libevent hwloc hwloc-libs gdb
         labels="${labels} linux rhel ${VERSION_ID}"
         case $VERSION_ID in
-            7.*)
-                sudo yum -y install gcc gcc-c++ gcc-gfortran \
-                  python3
-                ( cd $HOME
-                  curl -O https://download.java.net/java/GA/jdk23.0.1/c28985cbf10d4e648e4004050f8781aa/11/GPL/openjdk-23.0.1_linux-x64_bin.tar.gz
-                  tar xf openjdk-23.0.1_linux-x64_bin.tar.gz
-                  cd /usr/local
-                  sudo cp -rf $HOME/jdk-23.0.1/* .
-                  cd  $HOME
-                  rm -rf openjdk-23.0.1_linux-x64_bin.tar.gz jdk-23.0.1
-                )
-                labels="${labels} gcc48"
-                ;;
             8.*)
                 sudo yum -y install python3.8 \
                   gcc gcc-c++ gcc-gfortran \
