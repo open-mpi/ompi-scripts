@@ -103,7 +103,6 @@ case $PLATFORM_ID in
         echo "==> Installing packages"
         sudo yum -y update
         sudo yum -y groupinstall "Development Tools"
-        sphinx_installed=1
         labels="${labels} linux"
         case $VERSION_ID in
             2)
@@ -115,7 +114,17 @@ case $PLATFORM_ID in
                   # system python3 is linked against openssl 1.0, which doesn't work with
                   # urllib3 2.0 or later.  So pin to an older version of urllib :(.
                   sudo pip3 install sphinx recommonmark docutils sphinx-rtd-theme 'urllib3<2' sphobjinv
+                sphinx_installed=1
                 labels="${labels} amazon_linux_2-${arch} gcc7 clang7"
+                ;;
+            2023)
+                sudo yum -y install clang gdb \
+                  java-17-amazon-corretto-headless \
+                  python3 python3-devel python3-pip \
+	          hwloc hwloc-devel libevent libevent-devel \
+		  python3-mock
+                sphinx_installed=0
+                labels="${labels} amazon_linux_2023-${arch} gcc11 clang15"
                 ;;
             *)
                 echo "ERROR: Unknown version ${PLATFORM_ID} ${VERSION_ID}"

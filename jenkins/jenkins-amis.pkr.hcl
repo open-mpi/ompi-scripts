@@ -118,6 +118,72 @@ source "amazon-ebs" "AmazonLinux2-x86" {
 }
 
 
+data "amazon-parameterstore" "AmazonLinux2023-arm64" {
+  name = "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-arm64"
+  region = "us-west-2"
+}
+
+source "amazon-ebs" "AmazonLinux2023-arm64" {
+  ami_block_device_mappings {
+    delete_on_termination = true
+    device_name           = "/dev/sda1"
+    volume_size           = 16
+  }
+  ami_name                    = "Jenkins Amazon Linux 2023 arm64"
+  deprecate_at                = "${var.deprecation_date}"
+  associate_public_ip_address = true
+  ena_support                 = true
+  iam_instance_profile        = "${var.iam_role}"
+  instance_type               = "t4g.large"
+  launch_block_device_mappings {
+    delete_on_termination = true
+    device_name           = "/dev/sda1"
+    volume_size           = 16
+  }
+  region       = "us-west-2"
+  source_ami   = "${data.amazon-parameterstore.AmazonLinux2023-arm64.value}"
+  ssh_pty      = true
+  ssh_username = "ec2-user"
+  tags = {
+    BuildType = "${var.BuildType}",
+    JenkinsBuilderAmi = "True"
+  }
+}
+
+
+data "amazon-parameterstore" "AmazonLinux2023-x86" {
+  name = "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64"
+  region = "us-west-2"
+}
+
+source "amazon-ebs" "AmazonLinux2023-x86" {
+  ami_block_device_mappings {
+    delete_on_termination = true
+    device_name           = "/dev/sda1"
+    volume_size           = 16
+  }
+  ami_name                    = "Jenkins Amazon Linux 2023 x86"
+  deprecate_at                = "${var.deprecation_date}"
+  associate_public_ip_address = true
+  ena_support                 = true
+  iam_instance_profile        = "${var.iam_role}"
+  instance_type               = "t3.large"
+  launch_block_device_mappings {
+    delete_on_termination = true
+    device_name           = "/dev/sda1"
+    volume_size           = 16
+  }
+  region       = "us-west-2"
+  source_ami   = "${data.amazon-parameterstore.AmazonLinux2023-x86.value}"
+  ssh_pty      = true
+  ssh_username = "ec2-user"
+  tags = {
+    BuildType = "${var.BuildType}",
+    JenkinsBuilderAmi = "True"
+  }
+}
+
+
 ################################################################################
 #
 # Red Hat Enterprise Linux
@@ -540,6 +606,8 @@ build {
   sources = [
     "source.amazon-ebs.AmazonLinux2-arm64",
     "source.amazon-ebs.AmazonLinux2-x86",
+    "source.amazon-ebs.AmazonLinux2023-arm64",
+    "source.amazon-ebs.AmazonLinux2023-x86",
     "source.amazon-ebs.RHEL8-arm64",
     "source.amazon-ebs.RHEL8-x86",
     "source.amazon-ebs.SLES15-x86",
