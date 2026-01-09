@@ -192,6 +192,41 @@ source "amazon-ebs" "AmazonLinux2023-x86" {
 
 ################################################################################
 #
+# FreeBSD
+#
+################################################################################
+data "amazon-parameterstore" "FreeBSD15-x86" {
+  name        = "/aws/service/freebsd/amd64/cloud-init/ufs/15.0/RELEASE"
+  region      = "us-west-2"
+}
+
+source "amazon-ebs" "FreeBSD15-x86" {
+  ami_block_device_mappings {
+    delete_on_termination = true
+    device_name           = "/dev/sda1"
+    volume_size           = 16
+  }
+  ami_name                    = "Jenkins FreeBSD 15 x86_64 ${var.build_date}"
+  deprecate_at                = "${var.deprecation_date}"
+  associate_public_ip_address = true
+  ena_support                 = true
+  iam_instance_profile        = "${var.iam_role}"
+  instance_type               = "t3.large"
+  launch_block_device_mappings {
+    delete_on_termination = true
+    device_name           = "/dev/sda1"
+    volume_size           = 16
+  }
+  region       = "us-west-2"
+  source_ami   = "${data.amazon-parameterstore.FreeBSD15-x86.value}"
+  ssh_pty      = true
+  ssh_timeout  = "10m"
+  ssh_username = "ec2-user"
+}
+
+
+################################################################################
+#
 # Red Hat Enterprise Linux
 #
 ################################################################################
@@ -614,6 +649,7 @@ build {
     "source.amazon-ebs.AmazonLinux2-x86",
     "source.amazon-ebs.AmazonLinux2023-arm64",
     "source.amazon-ebs.AmazonLinux2023-x86",
+    "source.amazon-ebs.FreeBSD15-x86",
     "source.amazon-ebs.RHEL8-arm64",
     "source.amazon-ebs.RHEL8-x86",
     "source.amazon-ebs.SLES15-x86",

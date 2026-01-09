@@ -61,7 +61,10 @@ done
 
 pandoc_installed=0
 
+skip_make_check=0
 skip_make_dist=0
+
+MAKE_CMD="make"
 
 case $PLATFORM_ID in
     rhel|centos)
@@ -268,7 +271,7 @@ case $PLATFORM_ID in
         esac
         ;;
     FreeBSD)
-        labels="${labels} freebsd-${VERSION_ID}-${arch}"
+        labels="${labels} freebsd freebsd-${VERSION_ID}-${arch}"
         su -m root -c 'pkg install -y sudo'
         if ! grep -q '^%wheel ALL=(ALL) NOPASSWD: ALL' /usr/local/etc/sudoers ; then
             echo "--> Updating sudoers"
@@ -276,9 +279,7 @@ case $PLATFORM_ID in
         else
             echo "--> Skipping sudoers update"
         fi
-        sudo pkg install -y openjdk17 autoconf automake libtool gcc wget \
-             curl git hs-pandoc lang/python3 libevent-devel
-        pandoc_installed=1
+
         if ! grep -q '/dev/fd' /etc/fstab ; then
             echo "Adding /dev/fd entry to /etc/fstab"
             sudo sh -c 'echo "fdesc /dev/fd fdescfs rw 0 0" >> /etc/fstab'
@@ -287,6 +288,24 @@ case $PLATFORM_ID in
             echo "Adding /proc entry to /etc/fstab"
             sudo sh -c 'echo "proc /proc procfs rw 0 0 " >> /etc/fstab'
         fi
+
+        case $VERSION_ID in
+            15.*)
+                sudo pkg install -y openjdk17 autoconf automake libtool gcc wget \
+                     curl git hs-pandoc libevent-devel hwloc2 \
+                     lang/python3 py311-pip gmake
+
+                MAKE_CMD=gmake
+
+                skip_make_check=1
+                skip_make_dist=1
+                pandoc_installed=1
+                ;;
+            *)
+                echo "ERROR: Unknown version ${PLATFORM_ID} ${VERSION_ID}"
+                exit 1
+                ;;
+        esac
         ;;
     *)
         echo "ERROR: Unkonwn platform ${PLATFORM_ID}"
@@ -319,11 +338,13 @@ if test $run_test != 0; then
     cd ompi
     ./autogen.pl
     ./configure --prefix=$HOME/install
-    make -j 4 all
-    make check
-    make install
+    ${MAKE_CMD} -j 4 all
+    if test "${skip_make_check}" = "0" ; then
+        ${MAKE_CMD} check
+    fi
+    ${MAKE_CMD} install
     if test "${skip_make_dist}" = "0" ; then
-        make dist
+        ${MAKE_CMD} dist
     fi
     cd $HOME
     rm -rf ${HOME}/ompi ${HOME}/install
