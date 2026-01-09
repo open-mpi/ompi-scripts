@@ -127,6 +127,9 @@ case $PLATFORM_ID in
         sudo mv -f /tmp/cloud.cfg.new /etc/cloud/cloud.cfg
         ;;
     ubuntu)
+        # Ubuntu needs a little time on first boot to get APT configured.
+        echo "Waiting 15 seconds so initial Apt configuration finishes"
+        sleep 15
         echo "==> Installing packages"
         sudo DEBIAN_FRONTEND=noninteractive apt-get update
         sudo DEBIAN_FRONTEND=noninteractive apt-get -y upgrade
@@ -231,6 +234,13 @@ case $PLATFORM_ID in
         sudo mv -f /tmp/20auto-upgrades /etc/apt/apt.conf.d/20auto-upgrades
         ;;
     sles)
+        # wait for zypper auto-updates to finish
+        echo "Waiting 180 seconds so initial Zypper configuration finishes"
+        sleep 180
+        while pgrep -x 'zypper' > /dev/null ; do
+            echo "Waiting 10 seconds for zypper to exit...."
+            sleep 10
+        done
         sudo zypper -n update
         sudo zypper -n install gcc gcc-c++ gcc-fortran \
              autoconf automake libtool flex make gdb git bzip2

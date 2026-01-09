@@ -541,7 +541,6 @@ build {
   ]
 
   provisioner "shell" {
-    pause_before = "5m0s"
     script       = "customize-ami.sh"
   }
 
