@@ -39,6 +39,10 @@ while getopts "h?a:lpd" opt; do
         exit 0
         ;;
     p)
+        if test "$JENKINS_URL" = "" ; then
+            echo "Can't build production amis ourside of Jenkins and don't see a \$JENKINS_URL."
+            exit 1
+        fi
         build_type="production"
         ;;
     d)
