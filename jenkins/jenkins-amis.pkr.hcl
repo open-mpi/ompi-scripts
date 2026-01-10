@@ -7,6 +7,12 @@ packer {
   }
 }
 
+
+variable "build_date" {
+  type    = string
+  default = "${env("BUILD_DATE")}"
+}
+
 variable "iam_role" {
   type    = string
   default = "${env("AWS_IAM_ROLE")}"
@@ -56,7 +62,7 @@ source "amazon-ebs" "AmazonLinux2-arm64" {
     device_name           = "/dev/xvda"
     volume_size           = 16
   }
-  ami_name                    = "Jenkins Amazon Linux 2 arm64"
+  ami_name                    = "Jenkins Amazon Linux 2 arm64 ${var.build_date}"
   deprecate_at                = "${var.deprecation_date}"
   associate_public_ip_address = true
   ena_support                 = true
@@ -96,7 +102,7 @@ source "amazon-ebs" "AmazonLinux2-x86" {
     device_name           = "/dev/xvda"
     volume_size           = 16
   }
-  ami_name                    = "Jenkins Amazon Linux 2 x86_64"
+  ami_name                    = "Jenkins Amazon Linux 2 x86_64 ${var.build_date}"
   deprecate_at                = "${var.deprecation_date}"
   associate_public_ip_address = true
   ena_support                 = true
@@ -129,7 +135,7 @@ source "amazon-ebs" "AmazonLinux2023-arm64" {
     device_name           = "/dev/sda1"
     volume_size           = 16
   }
-  ami_name                    = "Jenkins Amazon Linux 2023 arm64"
+  ami_name                    = "Jenkins Amazon Linux 2023 arm64 ${var.build_date}"
   deprecate_at                = "${var.deprecation_date}"
   associate_public_ip_address = true
   ena_support                 = true
@@ -162,7 +168,7 @@ source "amazon-ebs" "AmazonLinux2023-x86" {
     device_name           = "/dev/sda1"
     volume_size           = 16
   }
-  ami_name                    = "Jenkins Amazon Linux 2023 x86"
+  ami_name                    = "Jenkins Amazon Linux 2023 x86 ${var.build_date}"
   deprecate_at                = "${var.deprecation_date}"
   associate_public_ip_address = true
   ena_support                 = true
@@ -208,7 +214,7 @@ source "amazon-ebs" "RHEL8-arm64" {
     device_name           = "/dev/sda1"
     volume_size           = 16
   }
-  ami_name                    = "Jenkins RHEL 8 arm64"
+  ami_name                    = "Jenkins RHEL 8 arm64 ${var.build_date}"
   deprecate_at                = "${var.deprecation_date}"
   associate_public_ip_address = true
   ena_support                 = true
@@ -249,7 +255,7 @@ source "amazon-ebs" "RHEL8-x86" {
     device_name           = "/dev/sda1"
     volume_size           = 16
   }
-  ami_name                    = "Jenkins RHEL 8 x86_64"
+  ami_name                    = "Jenkins RHEL 8 x86_64 ${var.build_date}"
   deprecate_at                = "${var.deprecation_date}"
   associate_public_ip_address = true
   ena_support                 = true
@@ -294,7 +300,7 @@ source "amazon-ebs" "SLES15-x86" {
     device_name           = "/dev/sda1"
     volume_size           = 16
   }
-  ami_name                    = "Jenkins SLES 15 x86_64"
+  ami_name                    = "Jenkins SLES 15 x86_64 ${var.build_date}"
   deprecate_at                = "${var.deprecation_date}"
   associate_public_ip_address = true
   ena_support                 = true
@@ -340,7 +346,7 @@ source "amazon-ebs" "Ubuntu1804-x86" {
     device_name           = "/dev/sda1"
     volume_size           = 16
   }
-  ami_name                    = "Jenkins Ubuntu 18.04 x86_64"
+  ami_name                    = "Jenkins Ubuntu 18.04 x86_64 ${var.build_date}"
   deprecate_at                = "${var.deprecation_date}"
   associate_public_ip_address = true
   ena_support                 = true
@@ -380,7 +386,7 @@ source "amazon-ebs" "Ubuntu2004-arm64" {
     device_name           = "/dev/sda1"
     volume_size           = 16
   }
-  ami_name                    = "Jenkins Ubuntu 20.04 arm64"
+  ami_name                    = "Jenkins Ubuntu 20.04 arm64 ${var.build_date}"
   deprecate_at                = "${var.deprecation_date}"
   associate_public_ip_address = true
   ena_support                 = true
@@ -420,7 +426,7 @@ source "amazon-ebs" "Ubuntu2004-x86" {
     device_name           = "/dev/sda1"
     volume_size           = 16
   }
-  ami_name                    = "Jenkins Ubuntu 20.04 x86_64"
+  ami_name                    = "Jenkins Ubuntu 20.04 x86_64 ${var.build_date}"
   deprecate_at                = "${var.deprecation_date}"
   associate_public_ip_address = true
   ena_support                 = true
@@ -460,7 +466,7 @@ source "amazon-ebs" "Ubuntu2204-arm64" {
     device_name           = "/dev/sda1"
     volume_size           = 16
   }
-  ami_name                    = "Jenkins Ubuntu 22.04 arm64"
+  ami_name                    = "Jenkins Ubuntu 22.04 arm64 ${var.build_date}"
   deprecate_at                = "${var.deprecation_date}"
   associate_public_ip_address = true
   ena_support                 = true
@@ -500,7 +506,7 @@ source "amazon-ebs" "Ubuntu2204-x86" {
     device_name           = "/dev/sda1"
     volume_size           = 16
   }
-  ami_name                    = "Jenkins Ubuntu 22.04 x86_64"
+  ami_name                    = "Jenkins Ubuntu 22.04 x86_64 ${var.build_date}"
   deprecate_at                = "${var.deprecation_date}"
   associate_public_ip_address = true
   ena_support                 = true
@@ -540,7 +546,7 @@ source "amazon-ebs" "Ubuntu2404-arm64" {
     device_name           = "/dev/sda1"
     volume_size           = 16
   }
-  ami_name                    = "Jenkins Ubuntu 24.04 arm64"
+  ami_name                    = "Jenkins Ubuntu 24.04 arm64 ${var.build_date}"
   deprecate_at                = "${var.deprecation_date}"
   associate_public_ip_address = true
   ena_support                 = true
@@ -580,7 +586,7 @@ source "amazon-ebs" "Ubuntu2404-x86" {
     device_name           = "/dev/sda1"
     volume_size           = 16
   }
-  ami_name                    = "Jenkins Ubuntu 24.04 x86_64"
+  ami_name                    = "Jenkins Ubuntu 24.04 x86_64 ${var.build_date}"
   deprecate_at                = "${var.deprecation_date}"
   associate_public_ip_address = true
   ena_support                 = true

@@ -51,8 +51,7 @@ while getopts "h?a:lpd" opt; do
     esac
 done
 
-BUILD_DATE=`date +%Y%m%d%H%M`
-
+export BUILD_DATE=`date +%Y%m%d%H%M`
 export AWS_IAM_ROLE="jenkins-worker"
 export BUILD_TYPE="${build_type}"
 export DEPRECATION_DATE="${deprecation_date}"
