@@ -18,6 +18,7 @@ OPTIND=1
 packer_opts=""
 packer_file="jenkins-amis.pkr.hcl"
 build_type="testing"
+deprecation_date=`date -d "+3 weeks" +"%Y-%m-%dT%H:%M:00Z"`
 
 while getopts "h?a:lpd" opt; do
     case "$opt" in
@@ -46,9 +47,11 @@ while getopts "h?a:lpd" opt; do
     esac
 done
 
-export BUILD_DATE=`date +%Y%m%d%H%M`
+BUILD_DATE=`date +%Y%m%d%H%M`
+
 export AWS_IAM_ROLE="jenkins-worker"
 export BUILD_TYPE="${build_type}"
+export DEPRECATION_DATE="${deprecation_date}"
 
 packer build ${packer_opts} ${packer_file} | tee ${packer_file}.${BUILD_DATE}.txt
 grep 'Recommended labels' ${packer_file}.${BUILD_DATE}.txt
