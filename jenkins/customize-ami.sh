@@ -63,7 +63,9 @@ pandoc_installed=0
 
 skip_make_check=0
 skip_make_dist=0
+venv_preflight_modules=
 
+PIP_CMD="pip3"
 MAKE_CMD="make"
 
 case $PLATFORM_ID in
@@ -83,7 +85,8 @@ case $PLATFORM_ID in
                   java-17-openjdk-headless
                 sudo yum -y remove java-1.8.0-openjdk-headless
                 sudo alternatives --set python /usr/bin/python3
-                sudo pip3.8 install sphinx recommonmark docutils sphinx-rtd-theme sphobjinv
+                PIP_CMD=pip3.8
+                sudo ${PIP_CMD} install sphinx recommonmark docutils sphinx-rtd-theme sphobjinv
                 labels="${labels} gcc8"
                 ;;
             *)
@@ -114,9 +117,10 @@ case $PLATFORM_ID in
                   java-17-amazon-corretto-headless libevent-devel hwloc-devel \
                   hwloc gdb python3-pip python3-devel
                   sudo pip install mock
-                  # system python3 is linked against openssl 1.0, which doesn't work with
-                  # urllib3 2.0 or later.  So pin to an older version of urllib :(.
-                  sudo pip3 install sphinx recommonmark docutils sphinx-rtd-theme 'urllib3<2' sphobjinv
+                # system python3 is linked against openssl 1.0, which doesn't work with
+                # urllib3 2.0 or later.  So pin to an older version of urllib :(.
+                sudo ${PIP_CMD} install sphinx recommonmark docutils sphinx-rtd-theme 'urllib3<2' sphobjinv
+		venv_preflight_modules='urllib3<2'
                 labels="${labels} amazon_linux_2-${arch} gcc7 clang7"
                 ;;
             2023)
@@ -125,7 +129,6 @@ case $PLATFORM_ID in
                   python3 python3-devel python3-pip \
 	          hwloc hwloc-devel libevent libevent-devel \
 		  python3-mock
-                skip_make_dist=1
                 labels="${labels} amazon_linux_2023-${arch} gcc11 clang15"
                 ;;
             *)
@@ -152,7 +155,7 @@ case $PLATFORM_ID in
         case $VERSION_ID in
             18.04)
                 sudo DEBIAN_FRONTEND=noninteractive apt-get -y install \
-                     awscli python-boto3 python-pip \
+                     awscli python3-boto3 python-pip python3-venv \
                      python-mock \
                      openjdk-17-jre-headless \
                      gcc-4.8 g++-4.8 gfortran-4.8 \
@@ -162,19 +165,18 @@ case $PLATFORM_ID in
                      gcc-8 g++-8 gfortran-8 \
                      clang-3.9 clang-4.0 clang-5.0 clang-6.0 \
                      clang-7 clang-8 clang-9 
-                sudo pip install sphinx recommonmark docutils sphinx-rtd-theme sphobjinv
+                PIP_CMD=pip
+                sudo ${PIP_CMD} install sphinx recommonmark docutils sphinx-rtd-theme sphobjinv
                 labels="${labels} gcc48 gcc5 gcc6 gcc7 gcc8 clang39 clang40 clang50 clang60 clang7 clang8 clang9"
                 if test "$arch" = "x86_64" ; then
                     sudo DEBIAN_FRONTEND=noninteractive apt-get -y install gcc-multilib g++-multilib gfortran-multilib
                     labels="${labels} 32bit_builds"
                 fi
-                # Sphinx has become too old for master on Ubuntu 18, so don't try to build there.
-                skip_make_dist=1
                 ;;
             20.04)
                 sudo DEBIAN_FRONTEND=noninteractive apt-get -y install \
                      awscli python-is-python3 python3-boto3 python3-mock \
-                     python3-pip \
+                     python3-pip python3-venv\
                      openjdk-21-jdk-headless \
                      gcc-7 g++-7 gfortran-7 \
                      gcc-8 g++-8 gfortran-8 \
@@ -182,7 +184,7 @@ case $PLATFORM_ID in
                      gcc-10 g++-10 gfortran-10 \
                      clang-6.0 clang-7 clang-8 clang-9 clang-10 \
                      clang-format-11 bsdutils
-                sudo pip3 install -U sphinx recommonmark docutils sphinx-rtd-theme sphobjinv
+                sudo ${PIP_CMD} install -U sphinx recommonmark docutils sphinx-rtd-theme sphobjinv
                 labels="${labels} gcc7 gcc8 gcc9 gcc10 clang60 clang7 clang8 clang9 clang10"
                 if test "$arch" = "x86_64" ; then
                     sudo DEBIAN_FRONTEND=noninteractive apt-get -y install gcc-multilib g++-multilib gfortran-multilib
@@ -192,7 +194,7 @@ case $PLATFORM_ID in
             22.04)
                 sudo DEBIAN_FRONTEND=noninteractive apt-get -y install \
                      awscli python-is-python3 python3-boto3 python3-mock \
-                     python3-pip \
+                     python3-pip python3-venv\
                      openjdk-21-jre-headless \
                      gcc-9 g++-9 gfortran-9 \
                      gcc-10 g++-10 gfortran-10 \
@@ -200,7 +202,7 @@ case $PLATFORM_ID in
                      gcc-12 g++-12 gfortran-12 \
                      clang-11 clang-12 clang-13 clang-14 \
                      clang-format-14 bsdutils
-                sudo pip3 install sphinx recommonmark docutils sphinx-rtd-theme sphobjinv
+                sudo ${PIP_CMD} install sphinx recommonmark docutils sphinx-rtd-theme sphobjinv
                 labels="${labels} gcc9 gcc10 gcc11 gcc12 clang11 clang12 clang13 clang14"
                 if test "$arch" = "x86_64" ; then
                     sudo DEBIAN_FRONTEND=noninteractive apt-get -y install gcc-multilib g++-multilib gfortran-multilib
@@ -210,7 +212,7 @@ case $PLATFORM_ID in
             24.04)
                 sudo DEBIAN_FRONTEND=noninteractive apt-get -y install \
                      python-is-python3 python3-boto3 python3-mock \
-                     python3-pip python3-recommonmark python3-docutils \
+                     python3-pip python3-venv python3-recommonmark python3-docutils \
                      python3-sphinx python3-sphinx-rtd-theme  \
                      openjdk-21-jdk-headless \
                      gcc-9 g++-9 gfortran-9 \
@@ -222,7 +224,7 @@ case $PLATFORM_ID in
                      clang-14 clang-15 flang-15 clang-16 flang-16 \
                      clang-17 flang-17 clang-18 flang-18 \
                      clang-format bsdutils unzip
-                     sudo pip3 install --break-system-packages sphobjinv
+                sudo ${PIP_CMD} install --break-system-packages sphobjinv
                 ( cd $HOME
                   curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
                   unzip awscliv2.zip
@@ -261,7 +263,8 @@ case $PLATFORM_ID in
                 sudo zypper -n install \
                      java-17-openjdk-headless \
                      python3-pip
-                sudo pip install sphinx recommonmark docutils sphinx-rtd-theme \
+                PIP_CMD=pip
+                sudo ${PIP_CMD} install sphinx recommonmark docutils sphinx-rtd-theme \
 		     importlib_resources dataclasses sphobjinv
                 ;;
             *)
@@ -296,9 +299,9 @@ case $PLATFORM_ID in
                      lang/python3 py311-pip gmake
 
                 MAKE_CMD=gmake
+                PIP_CMD=pip
 
                 skip_make_check=1
-                skip_make_dist=1
                 pandoc_installed=1
                 ;;
             *)
@@ -329,13 +332,26 @@ if test $pandoc_installed -eq 0 ; then
     rm -rf "${pandoc_tarname}" "${pandoc_dir}"
 fi
 
+
+echo "==> Building pyenv"
+cd ${HOME}
+cat <<EOF > ${HOME}/ompi-setup-python.sh
+PIP_CMD=${PIP_CMD}
+. ${HOME}/ompi-venv/bin/activate
+EOF
+python3 -m venv ompi-venv
+. ${HOME}/ompi-setup-python.sh
+git clone --recurse-submodules https://github.com/open-mpi/ompi.git
+if test "${venv_preflight_modules}" != "" ; then
+    ${PIP_CMD} install ${venv_preflight_modules}
+fi
+find ompi -name "requirements.txt" -exec ${PIP_CMD} install -r {} \;
+
+
 if test $run_test != 0; then
     # for these tests, fail the script if a test fails
-    set -e
     echo "==> Running Compile test"
-    cd
-    git clone --recurse-submodules https://github.com/open-mpi/ompi.git
-    cd ompi
+    cd ${HOME}/ompi
     ./autogen.pl
     ./configure --prefix=$HOME/install
     ${MAKE_CMD} -j 4 all
@@ -350,6 +366,11 @@ if test $run_test != 0; then
     rm -rf ${HOME}/ompi ${HOME}/install
     echo "==> SUCCESS!  Open MPI compiled!"
 fi
+
+
+echo "==> Deactivating pyenv"
+deactivate
+
 
 if test "${clean_ami}" != "0" ; then
     echo "==> Cleaning instance"
