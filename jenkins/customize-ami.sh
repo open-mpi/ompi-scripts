@@ -41,10 +41,8 @@ echo "==> Architecture: $arch"
 
 OPTIND=1         # Reset in case getopts has been used previously in the shell.
 run_test=1       # -b runs an ompi build test; useful for testing new AMIs
-clean_ami=1      # -t enables testing mode, where the AMI isn't cleaned up
-                 # after the test (so remote logins still work)
 
-while getopts "h?tb" opt; do
+while getopts "h?b" opt; do
     case "$opt" in
     h|\?)
         echo "usage: customize-ami.sh [-t]"
@@ -52,9 +50,6 @@ while getopts "h?tb" opt; do
         ;;
     b)
         run_test=1
-        ;;
-    t)
-        clean_ami=0
         ;;
     esac
 done
@@ -372,23 +367,15 @@ echo "==> Deactivating pyenv"
 deactivate
 
 
-if test "${clean_ami}" != "0" ; then
-    echo "==> Cleaning instance"
-
-    if test "${PLATFORM_ID}" = "FreeBSD" ; then
-        sudo touch /firstboot
-    fi
-
-    rm -rf ${HOME}/.ssh ${HOME}/.history ${HOME}/.bash_history ${HOME}/.sudo_as_admin_successful ${HOME}/.cache ${HOME}/.oracle_jre_usage
-    sudo rm -rf /var/log/*
-    sudo rm -f /etc/ssh/ssh_host*
-    sudo rm -rf /root/* ~root/.ssh ~root/.history ~root/.bash_history
-    echo "Recommended labels: ${labels}"
-else
-    echo "Skipped cleaning instance.  Do not use to build AMI!"
+echo "==> Cleaning instance"
+if test "${PLATFORM_ID}" = "FreeBSD" ; then
+    sudo touch /firstboot
 fi
+rm -rf ${HOME}/.ssh ${HOME}/.history ${HOME}/.bash_history ${HOME}/.sudo_as_admin_successful ${HOME}/.cache ${HOME}/.oracle_jre_usage
+sudo rm -rf /var/log/*
+sudo rm -f /etc/ssh/ssh_host*
+sudo rm -rf /root/* ~root/.ssh ~root/.history ~root/.bash_history
 
+
+echo "Recommended labels: ${labels}"
 echo "==> All done!"
-
-
-# cleanup phase
