@@ -79,7 +79,7 @@ case $PLATFORM_ID in
                   java-17-openjdk-headless
                 sudo yum -y remove java-1.8.0-openjdk-headless
                 sudo alternatives --set python /usr/bin/python3
-                sudo pip3.8 install sphinx recommonmark docutils sphinx-rtd-theme
+                sudo pip3.8 install sphinx recommonmark docutils sphinx-rtd-theme sphobjinv
                 sphinx_installed=1
                 labels="${labels} gcc8"
                 ;;
