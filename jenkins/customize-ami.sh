@@ -60,7 +60,8 @@ while getopts "h?tb" opt; do
 done
 
 pandoc_installed=0
-sphinx_installed=0
+
+skip_make_dist=0
 
 case $PLATFORM_ID in
     rhel|centos)
@@ -80,7 +81,6 @@ case $PLATFORM_ID in
                 sudo yum -y remove java-1.8.0-openjdk-headless
                 sudo alternatives --set python /usr/bin/python3
                 sudo pip3.8 install sphinx recommonmark docutils sphinx-rtd-theme sphobjinv
-                sphinx_installed=1
                 labels="${labels} gcc8"
                 ;;
             *)
@@ -114,7 +114,6 @@ case $PLATFORM_ID in
                   # system python3 is linked against openssl 1.0, which doesn't work with
                   # urllib3 2.0 or later.  So pin to an older version of urllib :(.
                   sudo pip3 install sphinx recommonmark docutils sphinx-rtd-theme 'urllib3<2' sphobjinv
-                sphinx_installed=1
                 labels="${labels} amazon_linux_2-${arch} gcc7 clang7"
                 ;;
             2023)
@@ -123,7 +122,7 @@ case $PLATFORM_ID in
                   python3 python3-devel python3-pip \
 	          hwloc hwloc-devel libevent libevent-devel \
 		  python3-mock
-                sphinx_installed=0
+                skip_make_dist=1
                 labels="${labels} amazon_linux_2023-${arch} gcc11 clang15"
                 ;;
             *)
@@ -146,7 +145,6 @@ case $PLATFORM_ID in
              autoconf automake libtool flex hwloc libhwloc-dev git libevent-dev \
              rman pandoc
         pandoc_installed=1
-        sphinx_installed=1
         labels="${labels} linux ubuntu_${VERSION_ID}-${arch}"
         case $VERSION_ID in
             18.04)
@@ -168,7 +166,7 @@ case $PLATFORM_ID in
                     labels="${labels} 32bit_builds"
                 fi
                 # Sphinx has become too old for master on Ubuntu 18, so don't try to build there.
-                sphinx_installed=0
+                skip_make_dist=1
                 ;;
             20.04)
                 sudo DEBIAN_FRONTEND=noninteractive apt-get -y install \
@@ -255,7 +253,6 @@ case $PLATFORM_ID in
         sudo zypper -n install gcc gcc-c++ gcc-fortran \
              autoconf automake libtool flex make gdb git bzip2
         labels="${labels} linux sles_${VERSION_ID}-${arch}"
-        sphinx_installed=1
         case $VERSION_ID in
             15.*)
                 sudo zypper -n install \
@@ -322,12 +319,11 @@ if test $run_test != 0; then
     cd ompi
     ./autogen.pl
     ./configure --prefix=$HOME/install
-    if test "$sphinx_installed" = "1" ; then
-        make -j 4 distcheck
-    else
-        make -j 4 all
-        make check
-        make install
+    make -j 4 all
+    make check
+    make install
+    if test "${skip_make_dist}" = "0" ; then
+        make dist
     fi
     cd $HOME
     rm -rf ${HOME}/ompi ${HOME}/install
