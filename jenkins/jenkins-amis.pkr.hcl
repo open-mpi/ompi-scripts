@@ -362,47 +362,6 @@ source "amazon-ebs" "SLES15-x86" {
 # Ubuntu Linux
 #
 ################################################################################
-data "amazon-ami" "Ubuntu1804-x86" {
-  filters = {
-    architecture        = "x86_64"
-    name                = "ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-*"
-    root-device-type    = "ebs"
-    virtualization-type = "hvm"
-  }
-  most_recent = true
-  owners      = ["099720109477"]
-  region      = "us-west-2"
-  include_deprecated = true
-}
-
-source "amazon-ebs" "Ubuntu1804-x86" {
-  ami_block_device_mappings {
-    delete_on_termination = true
-    device_name           = "/dev/sda1"
-    volume_size           = 16
-  }
-  ami_name                    = "Jenkins Ubuntu 18.04 x86_64 ${var.build_date}"
-  deprecate_at                = "${var.deprecation_date}"
-  associate_public_ip_address = true
-  ena_support                 = true
-  iam_instance_profile        = "${var.iam_role}"
-  instance_type               = "t3.large"
-  launch_block_device_mappings {
-    delete_on_termination = true
-    device_name           = "/dev/sda1"
-    volume_size           = 16
-  }
-  region       = "us-west-2"
-  source_ami   = "${data.amazon-ami.Ubuntu1804-x86.id}"
-  ssh_pty      = true
-  ssh_username = "ubuntu"
-  tags = {
-    BuildType = "${var.BuildType}",
-    JenkinsBuilderAmi = "True"
-  }
-}
-
-
 data "amazon-ami" "Ubuntu2004-arm64" {
   filters = {
     architecture        = "arm64"
