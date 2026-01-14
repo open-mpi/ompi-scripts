@@ -223,8 +223,8 @@ case $PLATFORM_ID in
         ;;
     sles)
         # wait for zypper auto-updates to finish
-        echo "Waiting 180 seconds so initial Zypper configuration finishes"
-        sleep 180
+        echo "Waiting 300 seconds so initial Zypper configuration finishes"
+        sleep 300
         while pgrep -x 'zypper' > /dev/null ; do
             echo "Waiting 10 seconds for zypper to exit...."
             sleep 10
