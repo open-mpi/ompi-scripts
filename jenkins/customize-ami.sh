@@ -148,26 +148,6 @@ case $PLATFORM_ID in
         pandoc_installed=1
         labels="${labels} linux ubuntu_${VERSION_ID}-${arch}"
         case $VERSION_ID in
-            18.04)
-                sudo DEBIAN_FRONTEND=noninteractive apt-get -y install \
-                     awscli python3-boto3 python-pip python3-venv \
-                     python-mock \
-                     openjdk-17-jre-headless \
-                     gcc-4.8 g++-4.8 gfortran-4.8 \
-                     gcc-5 g++-5 gfortran-5 \
-                     gcc-6 g++-6 gfortran-6 \
-                     gcc-7 g++-7 gfortran-7 \
-                     gcc-8 g++-8 gfortran-8 \
-                     clang-3.9 clang-4.0 clang-5.0 clang-6.0 \
-                     clang-7 clang-8 clang-9 
-                PIP_CMD=pip
-                sudo ${PIP_CMD} install sphinx recommonmark docutils sphinx-rtd-theme sphobjinv
-                labels="${labels} gcc48 gcc5 gcc6 gcc7 gcc8 clang39 clang40 clang50 clang60 clang7 clang8 clang9"
-                if test "$arch" = "x86_64" ; then
-                    sudo DEBIAN_FRONTEND=noninteractive apt-get -y install gcc-multilib g++-multilib gfortran-multilib
-                    labels="${labels} 32bit_builds"
-                fi
-                ;;
             20.04)
                 sudo DEBIAN_FRONTEND=noninteractive apt-get -y install \
                      awscli python-is-python3 python3-boto3 python3-mock \
