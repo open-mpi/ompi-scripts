@@ -612,7 +612,6 @@ build {
     "source.amazon-ebs.RHEL8-arm64",
     "source.amazon-ebs.RHEL8-x86",
     "source.amazon-ebs.SLES15-x86",
-    "source.amazon-ebs.Ubuntu1804-x86",
     "source.amazon-ebs.Ubuntu2004-arm64",
     "source.amazon-ebs.Ubuntu2004-x86",
     "source.amazon-ebs.Ubuntu2204-arm64",
