@@ -269,7 +269,7 @@ case $PLATFORM_ID in
         case $VERSION_ID in
             15.*)
                 sudo pkg install -y openjdk17 autoconf automake libtool gcc wget \
-                     curl git hs-pandoc libevent-devel hwloc2 \
+                     curl git hs-pandoc libevent-devel hwloc2 rust \
                      lang/python3 py311-pip gmake
 
                 MAKE_CMD=gmake
