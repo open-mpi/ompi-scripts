@@ -77,7 +77,6 @@ case $PLATFORM_ID in
         sudo yum -y update
         sudo yum -y group install "Development Tools"
         sudo yum -y install libevent hwloc hwloc-libs gdb
-        labels="${labels} linux rhel ${VERSION_ID}"
         case $VERSION_ID in
             8.*)
                 sudo yum -y install python3.8 \
@@ -87,7 +86,7 @@ case $PLATFORM_ID in
                 sudo alternatives --set python /usr/bin/python3
                 PIP_CMD=pip3.8
                 sudo ${PIP_CMD} install sphinx recommonmark docutils sphinx-rtd-theme sphobjinv
-                labels="${labels} gcc8"
+                labels="${labels} linux rhel8 rhel8-${arch} gcc8"
                 ;;
             *)
                 echo "ERROR: Unknown version ${PLATFORM_ID} ${VERSION_ID}"
@@ -105,11 +104,11 @@ case $PLATFORM_ID in
          sudo ./aws/install &&
          rm -rf aws)
         ;;
+
     amzn)
         echo "==> Installing packages"
         sudo yum -y update
         sudo yum -y groupinstall "Development Tools"
-        labels="${labels} linux"
         case $VERSION_ID in
             2)
                 sudo yum -y install clang hwloc-devel \
@@ -121,7 +120,7 @@ case $PLATFORM_ID in
                 # urllib3 2.0 or later.  So pin to an older version of urllib :(.
                 sudo ${PIP_CMD} install sphinx recommonmark docutils sphinx-rtd-theme 'urllib3<2' sphobjinv
 		venv_preflight_modules='urllib3<2'
-                labels="${labels} amazon_linux_2-${arch} gcc7 clang7"
+                labels="${labels} linux amazon_linux_2 amazon_linux_2-${arch} gcc7 clang7"
                 ;;
             2023)
                 sudo yum -y install clang gdb \
@@ -129,7 +128,7 @@ case $PLATFORM_ID in
                   python3 python3-devel python3-pip \
 	          hwloc hwloc-devel libevent libevent-devel \
 		  python3-mock
-                labels="${labels} amazon_linux_2023-${arch} gcc11 clang15"
+                labels="${labels} linux amazon_linux_2023-${arch} gcc11 clang15"
                 ;;
             *)
                 echo "ERROR: Unknown version ${PLATFORM_ID} ${VERSION_ID}"
@@ -140,6 +139,7 @@ case $PLATFORM_ID in
         sed -e 's/repo_upgrade: security/repo_upgrade: none/g' /etc/cloud/cloud.cfg > /tmp/cloud.cfg.new
         sudo mv -f /tmp/cloud.cfg.new /etc/cloud/cloud.cfg
         ;;
+
     ubuntu)
         echo "==> Installing packages"
         sudo DEBIAN_FRONTEND=noninteractive apt-get update
@@ -162,7 +162,7 @@ case $PLATFORM_ID in
                      clang-6.0 clang-7 clang-8 clang-9 clang-10 \
                      clang-format-11 bsdutils
                 sudo ${PIP_CMD} install -U sphinx recommonmark docutils sphinx-rtd-theme sphobjinv
-                labels="${labels} gcc7 gcc8 gcc9 gcc10 clang60 clang7 clang8 clang9 clang10"
+                labels="${labels} ubuntu_${VERSION_ID} gcc7 gcc8 gcc9 gcc10 clang60 clang7 clang8 clang9 clang10"
                 if test "$arch" = "x86_64" ; then
                     sudo DEBIAN_FRONTEND=noninteractive apt-get -y install gcc-multilib g++-multilib gfortran-multilib
                     labels="${labels} 32bit_builds"
@@ -223,11 +223,12 @@ case $PLATFORM_ID in
         sed -e 's/APT::Periodic::Update-Package-Lists "1";/APT::Periodic::Update-Package-Lists "0";/g' /etc/apt/apt.conf.d/20auto-upgrades | sed -e 's/APT::Periodic::Unattended-Upgrade "1";/APT::Periodic::Unattended-Upgrade "0";/g' > /tmp/20auto-upgrades
         sudo mv -f /tmp/20auto-upgrades /etc/apt/apt.conf.d/20auto-upgrades
         ;;
+
     sles)
+        echo "==> Installing packages"
         sudo zypper -n update
         sudo zypper -n install gcc gcc-c++ gcc-fortran \
              autoconf automake libtool flex make gdb git bzip2
-        labels="${labels} linux sles_${VERSION_ID}-${arch}"
         case $VERSION_ID in
             15.*)
                 sudo zypper -n install \
@@ -236,6 +237,7 @@ case $PLATFORM_ID in
                 PIP_CMD=pip
                 sudo ${PIP_CMD} install sphinx recommonmark docutils sphinx-rtd-theme \
 		     importlib_resources dataclasses sphobjinv
+                labels="${labels} linux sles_15-${arch}"
                 ;;
             *)
                 echo "ERROR: Unknown version ${PLATFORM_ID} ${VERSION_ID}"
@@ -243,8 +245,9 @@ case $PLATFORM_ID in
                 ;;
         esac
         ;;
+
     FreeBSD)
-        labels="${labels} freebsd freebsd-${VERSION_ID}-${arch}"
+        echo "==> Configuring FreeBSD to be more Linux like"
         su -m root -c 'pkg install -y sudo'
         if ! grep -q '^%wheel ALL=(ALL) NOPASSWD: ALL' /usr/local/etc/sudoers ; then
             echo "--> Updating sudoers"
@@ -262,6 +265,7 @@ case $PLATFORM_ID in
             sudo sh -c 'echo "proc /proc procfs rw 0 0 " >> /etc/fstab'
         fi
 
+        echo "==> Installing packages"
         case $VERSION_ID in
             15.*)
                 sudo pkg install -y openjdk17 autoconf automake libtool gcc wget \
@@ -273,6 +277,7 @@ case $PLATFORM_ID in
 
                 skip_make_check=1
                 pandoc_installed=1
+                labels="${labels} freebsd freebsd-15-${arch}"
                 ;;
             *)
                 echo "ERROR: Unknown version ${PLATFORM_ID} ${VERSION_ID}"
