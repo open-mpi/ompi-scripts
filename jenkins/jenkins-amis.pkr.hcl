@@ -320,7 +320,7 @@ source "amazon-ebs" "RHEL8-x86" {
 data "amazon-ami" "SLES15-x86" {
   filters = {
     architecture        = "x86_64"
-    name                = "suse-sles-15-sp??-v????????-hvm-ssd*"
+    name                = "suse-sles-15-sp7-v????????-hvm-ssd*"
     root-device-type    = "ebs"
     virtualization-type = "hvm"
   }
