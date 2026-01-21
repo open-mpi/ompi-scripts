@@ -41,6 +41,7 @@ echo "==> Architecture: $arch"
 
 OPTIND=1         # Reset in case getopts has been used previously in the shell.
 run_test=1       # -b runs an ompi build test; useful for testing new AMIs
+ompi_compiler_script=${HOME}/ompi-compiler-setup.sh
 
 while getopts "h?b" opt; do
     case "$opt" in
@@ -68,6 +69,49 @@ echo "==> Waiting for cloud-init to complete"
 sudo cloud-init status --wait || true
 
 
+# Create a scriptlet on each AMI that can be used by CI jobs to translate a
+# compiler version into CC/CXX/FC variables.  Each OS likes to name their
+# versioned compilers a bit differently, and this is the sanest step at which to
+# create and verify the mapping, saving us from updating the CI scripts every
+# time a new compiler version is added to a distro.
+cat <<'EOF' > ${ompi_compiler_script}
+activate_compiler() {
+    compiler=${1}
+
+    if test "${compiler}" = "" ; then
+        echo "No argument to activate_compiler()"
+        exit 1
+    fi
+
+    echo "Activating compiler ${compiler}"
+    eval compiler_found=\${AMI_${compiler}_CONFIG}
+    if test "${compiler_found}" = "" ; then
+        echo "Could not find compiler information for ${compiler}"
+        exit 1
+    fi
+    eval CC=\${AMI_${compiler}_CC}
+    if test "${CC}" = "" ; then
+        echo "Could not find C compiler for ${compiler}"
+        exit 1
+    fi
+    eval CPP=\${AMI_${compiler}_CPP}
+    if test "${CPP}" = "" ; then
+        unset CPP
+    fi
+    eval CXX=\${AMI_${compiler}_CXX}
+    if test "${CXX}" = "" ; then
+        unset CXX
+    fi
+    eval FC=\${AMI_${compiler}_FC}
+    if test "${FC}" = "" ; then
+        unset FC
+    fi
+}
+
+EOF
+
+
+
 case $PLATFORM_ID in
     rhel|centos)
         echo "==> Installing packages"
@@ -86,7 +130,7 @@ case $PLATFORM_ID in
                 sudo alternatives --set python /usr/bin/python3
                 PIP_CMD=pip3.8
                 sudo ${PIP_CMD} install sphinx recommonmark docutils sphinx-rtd-theme sphobjinv
-                labels="${labels} linux rhel8 rhel8-${arch} gcc8"
+                labels="${labels} linux rhel8 rhel8-${arch}"
                 ;;
             *)
                 echo "ERROR: Unknown version ${PLATFORM_ID} ${VERSION_ID}"
@@ -120,7 +164,7 @@ case $PLATFORM_ID in
                 # urllib3 2.0 or later.  So pin to an older version of urllib :(.
                 sudo ${PIP_CMD} install sphinx recommonmark docutils sphinx-rtd-theme 'urllib3<2' sphobjinv
 		venv_preflight_modules='urllib3<2'
-                labels="${labels} linux amazon_linux_2 amazon_linux_2-${arch} gcc7 clang7"
+                labels="${labels} linux amazon_linux_2 amazon_linux_2-${arch}"
                 ;;
             2023)
                 sudo yum -y install clang gdb \
@@ -128,7 +172,7 @@ case $PLATFORM_ID in
                   python3 python3-devel python3-pip \
 	          hwloc hwloc-devel libevent libevent-devel \
 		  python3-mock
-                labels="${labels} linux amazon_linux_2023-${arch} gcc11 clang15"
+                labels="${labels} linux amazon_linux_2023-${arch}"
                 ;;
             *)
                 echo "ERROR: Unknown version ${PLATFORM_ID} ${VERSION_ID}"
@@ -162,7 +206,29 @@ case $PLATFORM_ID in
                      clang-6.0 clang-7 clang-8 clang-9 clang-10 \
                      clang-format-11 bsdutils
                 sudo ${PIP_CMD} install -U sphinx recommonmark docutils sphinx-rtd-theme sphobjinv
-                labels="${labels} ubuntu_${VERSION_ID} gcc7 gcc8 gcc9 gcc10 clang60 clang7 clang8 clang9 clang10"
+
+                for i in 7 8 9 10 ; do
+                    echo "AMI_gcc${i}_CONFIG=1" >> ${ompi_compiler_script}
+                    echo "AMI_gcc${i}_CC=gcc-${i}" >> ${ompi_compiler_script}
+                    echo "AMI_gcc${i}_CPP=cpp-${i}" >> ${ompi_compiler_script}
+                    echo "AMI_gcc${i}_CXX=g++-${i}" >> ${ompi_compiler_script}
+                    echo "AMI_gcc${i}_FC=gfortran-${i}" >> ${ompi_compiler_script}
+                    labels="${labels} gcc${i}"
+                done
+                # Clang 6 binaries are named slightly different than later versions
+                echo "AMI_clang6_CONFIG=1" >> ${ompi_compiler_script}
+                echo "AMI_clang6_CC=clang-6.0" >> ${ompi_compiler_script}
+                echo "AMI_clang6_CPP=clang-cpp-6.0" >> ${ompi_compiler_script}
+                echo "AMI_clang6_CXX=clang++-6.0" >> ${ompi_compiler_script}
+                labels="${labels} clang6"
+                for i in 7 8 9 10 ; do
+                    echo "AMI_clang${i}_CONFIG=1" >> ${ompi_compiler_script}
+                    echo "AMI_clang${i}_CC=clang-${i}" >> ${ompi_compiler_script}
+                    echo "AMI_clang${i}_CPP=clang-cpp${i}" >> ${ompi_compiler_script}
+                    echo "AMI_clang${i}_CXX=clang++-${i}" >> ${ompi_compiler_script}
+                    labels="${labels} clang${i}"
+                done
+                labels="${labels} ubuntu_${VERSION_ID}"
                 if test "$arch" = "x86_64" ; then
                     sudo DEBIAN_FRONTEND=noninteractive apt-get -y install gcc-multilib g++-multilib gfortran-multilib
                     labels="${labels} 32bit_builds"
@@ -180,7 +246,22 @@ case $PLATFORM_ID in
                      clang-11 clang-12 clang-13 clang-14 \
                      clang-format-14 bsdutils
                 sudo ${PIP_CMD} install sphinx recommonmark docutils sphinx-rtd-theme sphobjinv
-                labels="${labels} gcc9 gcc10 gcc11 gcc12 clang11 clang12 clang13 clang14"
+
+                for i in 9 10 11 12 ; do
+                    echo "AMI_gcc${i}_CONFIG=1" >> ${ompi_compiler_script}
+                    echo "AMI_gcc${i}_CC=gcc-${i}" >> ${ompi_compiler_script}
+                    echo "AMI_gcc${i}_CPP=cpp-${i}" >> ${ompi_compiler_script}
+                    echo "AMI_gcc${i}_CXX=g++-${i}" >> ${ompi_compiler_script}
+                    echo "AMI_gcc${i}_FC=gfortran-${i}" >> ${ompi_compiler_script}
+                    labels="${labels} gcc${i}"
+                done
+                for i in 11 12 13 14 ; do
+                    echo "AMI_clang${i}_CONFIG=1" >> ${ompi_compiler_script}
+                    echo "AMI_clang${i}_CC=clang-${i}" >> ${ompi_compiler_script}
+                    echo "AMI_clang${i}_CPP=clang-cpp-${i}" >> ${ompi_compiler_script}
+                    echo "AMI_clang${i}_CXX=clang++-${i}" >> ${ompi_compiler_script}
+                    labels="${labels} clang${i}"
+                done
                 if test "$arch" = "x86_64" ; then
                     sudo DEBIAN_FRONTEND=noninteractive apt-get -y install gcc-multilib g++-multilib gfortran-multilib
                     labels="${labels} 32bit_builds"
@@ -198,7 +279,7 @@ case $PLATFORM_ID in
                      gcc-12 g++-12 gfortran-12 \
                      gcc-13 g++-13 gfortran-13 \
                      gcc-14 g++-14 gfortran-14 \
-                     clang-14 clang-15 flang-15 clang-16 flang-16 \
+                     clang-15 flang-15 clang-16 flang-16 \
                      clang-17 flang-17 clang-18 flang-18 \
                      clang-format bsdutils unzip
                 sudo ${PIP_CMD} install --break-system-packages sphobjinv
@@ -208,7 +289,22 @@ case $PLATFORM_ID in
                   sudo ./aws/install
                   rm -rf awscliv2.zip aws
                 )
-                labels="${labels} gcc9 gcc10 gcc11 gcc12 gcc13 gcc14 clang11 clang12 clang13 clang14"
+                for i in 9 10 11 12 13 14 ; do
+                    echo "AMI_gcc${i}_CONFIG=1" >> ${ompi_compiler_script}
+                    echo "AMI_gcc${i}_CC=gcc-${i}" >> ${ompi_compiler_script}
+                    echo "AMI_gcc${i}_CPP=cpp-${i}" >> ${ompi_compiler_script}
+                    echo "AMI_gcc${i}_CXX=g++-${i}" >> ${ompi_compiler_script}
+                    echo "AMI_gcc${i}_FC=gfortran-${i}" >> ${ompi_compiler_script}
+                    labels="${labels} gcc${i}"
+                done
+                for i in 15 16 17 18 ; do
+                    echo "AMI_clang${i}_CONFIG=1" >> ${ompi_compiler_script}
+                    echo "AMI_clang${i}_CC=clang-${i}" >> ${ompi_compiler_script}
+                    echo "AMI_clang${i}_CPP=clang-cpp-${i}" >> ${ompi_compiler_script}
+                    echo "AMI_clang${i}_CXX=clang++-${i}" >> ${ompi_compiler_script}
+                    echo "AMI_clang${i}_FC=flang-new-${i}" >> ${ompi_compiler_script}
+                    labels="${labels} clang{i}"
+                done
                 if test "$arch" = "x86_64" ; then
                     sudo DEBIAN_FRONTEND=noninteractive apt-get -y install gcc-multilib g++-multilib gfortran-multilib
                     labels="${labels} 32bit_builds"
@@ -306,6 +402,28 @@ if test $pandoc_installed -eq 0 ; then
     sudo cp "${pandoc_dir}/bin/pandoc" "/usr/local/bin/pandoc"
     rm -rf "${pandoc_tarname}" "${pandoc_dir}"
 fi
+
+
+echo "==> Double Checking Compiler Setup"
+. ${ompi_compiler_script}
+for compiler in `grep '^AMI_.*_CONFIG' ${ompi_compiler_script} | cut -f2 -d_` ; do
+    echo "--> ${compiler}"
+    activate_compiler ${compiler}
+    echo "${CC} --version"
+    ${CC} --version
+    if test "${CXX}" = "" ; then
+        echo "CXX not set"
+    else
+        echo "${CXX} --version"
+        ${CXX} --version
+    fi
+    if test "${FC}" = "" ; then
+        echo "FC not set"
+    else
+        echo "${FC} --version"
+        ${FC} --version
+    fi
+done
 
 
 echo "==> Building pyenv"
