@@ -328,9 +328,8 @@ case $PLATFORM_ID in
         case $VERSION_ID in
             15.*)
                 sudo zypper -n install \
-                     java-17-openjdk-headless \
+                     java-25-openjdk-headless \
                      python3-pip
-                PIP_CMD=pip
                 sudo ${PIP_CMD} install sphinx recommonmark docutils sphinx-rtd-theme \
 		     importlib_resources dataclasses sphobjinv
                 labels="${labels} linux sles_15-${arch}"
