@@ -35,6 +35,13 @@ else
     VERSION_ID=`uname -r`
 fi
 
+if test "${arch}" = "x86_64" ; then
+    # seriously, Corretto?
+    corretto_arch="x64"
+else
+    corretto_arch=${arch}
+fi
+
 echo "==> Platform: $PLATFORM_ID"
 echo "==> Version:  $VERSION_ID"
 echo "==> Architecture: $arch"
@@ -125,7 +132,7 @@ case $PLATFORM_ID in
             8.*)
                 sudo yum -y install python3.8 \
                   gcc gcc-c++ gcc-gfortran \
-                  java-17-openjdk-headless
+                  java-21-openjdk-headless
                 sudo yum -y remove java-1.8.0-openjdk-headless
                 sudo alternatives --set python /usr/bin/python3
                 PIP_CMD=pip3.8
@@ -157,18 +164,21 @@ case $PLATFORM_ID in
             2)
                 sudo yum -y install clang hwloc-devel \
                   python2-pip python2 python2-boto3 python3-pip python3 \
-                  java-17-amazon-corretto-headless libevent-devel hwloc-devel \
+                  libevent-devel hwloc-devel \
                   hwloc gdb python3-pip python3-devel
                   sudo pip install mock
                 # system python3 is linked against openssl 1.0, which doesn't work with
                 # urllib3 2.0 or later.  So pin to an older version of urllib :(.
                 sudo ${PIP_CMD} install sphinx recommonmark docutils sphinx-rtd-theme 'urllib3<2' sphobjinv
+                curl -LO https://corretto.aws/downloads/latest/amazon-corretto-25-${corretto_arch}-linux-jdk.rpm
+                sudo rpm -ivh amazon-corretto-25-${corretto_arch}-linux-jdk.rpm
+                rm amazon-corretto-25-${corretto_arch}-linux-jdk.rpm
 		venv_preflight_modules='urllib3<2'
                 labels="${labels} linux amazon_linux_2 amazon_linux_2-${arch}"
                 ;;
             2023)
                 sudo yum -y install clang gdb \
-                  java-17-amazon-corretto-headless \
+                  java-25-amazon-corretto-headless \
                   python3 python3-devel python3-pip \
 	          hwloc hwloc-devel libevent libevent-devel \
 		  python3-mock
@@ -238,7 +248,7 @@ case $PLATFORM_ID in
                 sudo DEBIAN_FRONTEND=noninteractive apt-get -y install \
                      awscli python-is-python3 python3-boto3 python3-mock \
                      python3-pip python3-venv\
-                     openjdk-21-jre-headless \
+                     openjdk-25-jre-headless \
                      gcc-9 g++-9 gfortran-9 \
                      gcc-10 g++-10 gfortran-10 \
                      gcc-11 g++-11 gfortran-11 \
@@ -272,7 +282,7 @@ case $PLATFORM_ID in
                      python-is-python3 python3-boto3 python3-mock \
                      python3-pip python3-venv python3-recommonmark python3-docutils \
                      python3-sphinx python3-sphinx-rtd-theme  \
-                     openjdk-21-jdk-headless \
+                     openjdk-25-jdk-headless \
                      gcc-9 g++-9 gfortran-9 \
                      gcc-10 g++-10 gfortran-10 \
                      gcc-11 g++-11 gfortran-11 \
@@ -363,7 +373,7 @@ case $PLATFORM_ID in
         echo "==> Installing packages"
         case $VERSION_ID in
             15.*)
-                sudo pkg install -y openjdk17 autoconf automake libtool gcc wget \
+                sudo pkg install -y openjdk25 autoconf automake libtool gcc wget \
                      curl git hs-pandoc libevent-devel hwloc2 rust \
                      lang/python3 py311-pip gmake
 
