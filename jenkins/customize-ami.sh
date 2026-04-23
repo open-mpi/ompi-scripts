@@ -381,6 +381,11 @@ case $PLATFORM_ID in
                 exit 1
                 ;;
         esac
+
+        if test ! -r /bin/bash ; then
+            sudo ln -s /usr/local/bin/bash /bin/bash
+        fi
+
         ;;
     *)
         echo "ERROR: Unkonwn platform ${PLATFORM_ID}"
