@@ -222,6 +222,10 @@ source "amazon-ebs" "FreeBSD15-x86" {
   ssh_pty      = true
   ssh_timeout  = "10m"
   ssh_username = "ec2-user"
+  tags = {
+    BuildType = "${var.BuildType}",
+    JenkinsBuilderAmi = "True"
+  }
 }
 
 
