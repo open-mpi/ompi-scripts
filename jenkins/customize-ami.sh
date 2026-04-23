@@ -353,14 +353,6 @@ case $PLATFORM_ID in
 
     FreeBSD)
         echo "==> Configuring FreeBSD to be more Linux like"
-        su -m root -c 'pkg install -y sudo'
-        if ! grep -q '^%wheel ALL=(ALL) NOPASSWD: ALL' /usr/local/etc/sudoers ; then
-            echo "--> Updating sudoers"
-            su -m root -c 'echo "%wheel ALL=(ALL) NOPASSWD: ALL" >> /usr/local/etc/sudoers'
-        else
-            echo "--> Skipping sudoers update"
-        fi
-
         if ! grep -q '/dev/fd' /etc/fstab ; then
             echo "Adding /dev/fd entry to /etc/fstab"
             sudo sh -c 'echo "fdesc /dev/fd fdescfs rw 0 0" >> /etc/fstab'
@@ -375,7 +367,7 @@ case $PLATFORM_ID in
             15.*)
                 sudo pkg install -y openjdk25 autoconf automake libtool gcc wget \
                      curl git hs-pandoc libevent-devel hwloc2 rust \
-                     lang/python3 py311-pip gmake
+                     lang/python3 py311-pip gmake bash
 
                 MAKE_CMD=gmake
                 PIP_CMD=pip
