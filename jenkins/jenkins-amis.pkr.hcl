@@ -316,6 +316,170 @@ source "amazon-ebs" "RHEL8-x86" {
 }
 
 
+data "amazon-ami" "RHEL9-arm64" {
+  filters = {
+    architecture        = "arm64"
+    name                = "RHEL-9.7.0_HVM-*-Hourly2-GP3"
+    root-device-type    = "ebs"
+    virtualization-type = "hvm"
+  }
+  most_recent = true
+  owners      = ["309956199498"]
+  region      = "us-west-2"
+  include_deprecated = true
+}
+
+source "amazon-ebs" "RHEL9-arm64" {
+  ami_block_device_mappings {
+    delete_on_termination = true
+    device_name           = "/dev/sda1"
+    volume_size           = 16
+  }
+  ami_name                    = "Jenkins RHEL 9 arm64 ${var.build_date}"
+  deprecate_at                = "${var.deprecation_date}"
+  associate_public_ip_address = true
+  ena_support                 = true
+  iam_instance_profile        = "${var.iam_role}"
+  instance_type               = "t4g.large"
+  launch_block_device_mappings {
+    delete_on_termination = true
+    device_name           = "/dev/sda1"
+    volume_size           = 16
+  }
+  region       = "us-west-2"
+  source_ami   = "${data.amazon-ami.RHEL9-arm64.id}"
+  ssh_pty      = true
+  ssh_username = "ec2-user"
+  tags = {
+    BuildType = "${var.BuildType}",
+    JenkinsBuilderAmi = "True"
+  }
+}
+
+
+data "amazon-ami" "RHEL9-x86" {
+  filters = {
+    architecture        = "x86_64"
+    name                = "RHEL-9.7.0_HVM-*-Hourly2-GP3"
+    root-device-type    = "ebs"
+    virtualization-type = "hvm"
+  }
+  most_recent = true
+  owners      = ["309956199498"]
+  region      = "us-west-2"
+  include_deprecated = true
+}
+
+source "amazon-ebs" "RHEL9-x86" {
+  ami_block_device_mappings {
+    delete_on_termination = true
+    device_name           = "/dev/sda1"
+    volume_size           = 16
+  }
+  ami_name                    = "Jenkins RHEL 9 x86_64 ${var.build_date}"
+  deprecate_at                = "${var.deprecation_date}"
+  associate_public_ip_address = true
+  ena_support                 = true
+  iam_instance_profile        = "${var.iam_role}"
+  instance_type               = "t3.large"
+  launch_block_device_mappings {
+    delete_on_termination = true
+    device_name           = "/dev/sda1"
+    volume_size           = 16
+  }
+  region       = "us-west-2"
+  source_ami   = "${data.amazon-ami.RHEL9-x86.id}"
+  ssh_pty      = true
+  ssh_username = "ec2-user"
+  tags = {
+    BuildType = "${var.BuildType}",
+    JenkinsBuilderAmi = "True"
+  }
+}
+
+
+data "amazon-ami" "RHEL10-arm64" {
+  filters = {
+    architecture        = "arm64"
+    name                = "RHEL-10.1.0_HVM-*-Hourly2-GP3"
+    root-device-type    = "ebs"
+    virtualization-type = "hvm"
+  }
+  most_recent = true
+  owners      = ["309956199498"]
+  region      = "us-west-2"
+  include_deprecated = true
+}
+
+source "amazon-ebs" "RHEL10-arm64" {
+  ami_block_device_mappings {
+    delete_on_termination = true
+    device_name           = "/dev/sda1"
+    volume_size           = 16
+  }
+  ami_name                    = "Jenkins RHEL 10 arm64 ${var.build_date}"
+  deprecate_at                = "${var.deprecation_date}"
+  associate_public_ip_address = true
+  ena_support                 = true
+  iam_instance_profile        = "${var.iam_role}"
+  instance_type               = "t4g.large"
+  launch_block_device_mappings {
+    delete_on_termination = true
+    device_name           = "/dev/sda1"
+    volume_size           = 16
+  }
+  region       = "us-west-2"
+  source_ami   = "${data.amazon-ami.RHEL10-arm64.id}"
+  ssh_pty      = true
+  ssh_username = "ec2-user"
+  tags = {
+    BuildType = "${var.BuildType}",
+    JenkinsBuilderAmi = "True"
+  }
+}
+
+
+data "amazon-ami" "RHEL10-x86" {
+  filters = {
+    architecture        = "x86_64"
+    name                = "RHEL-10.1.0_HVM-*-Hourly2-GP3"
+    root-device-type    = "ebs"
+    virtualization-type = "hvm"
+  }
+  most_recent = true
+  owners      = ["309956199498"]
+  region      = "us-west-2"
+  include_deprecated = true
+}
+
+source "amazon-ebs" "RHEL10-x86" {
+  ami_block_device_mappings {
+    delete_on_termination = true
+    device_name           = "/dev/sda1"
+    volume_size           = 16
+  }
+  ami_name                    = "Jenkins RHEL 10 x86_64 ${var.build_date}"
+  deprecate_at                = "${var.deprecation_date}"
+  associate_public_ip_address = true
+  ena_support                 = true
+  iam_instance_profile        = "${var.iam_role}"
+  instance_type               = "t3.large"
+  launch_block_device_mappings {
+    delete_on_termination = true
+    device_name           = "/dev/sda1"
+    volume_size           = 16
+  }
+  region       = "us-west-2"
+  source_ami   = "${data.amazon-ami.RHEL10-x86.id}"
+  ssh_pty      = true
+  ssh_username = "ec2-user"
+  tags = {
+    BuildType = "${var.BuildType}",
+    JenkinsBuilderAmi = "True"
+  }
+}
+
+
 ################################################################################
 #
 # SUSE Linux Enterprise Server
@@ -352,6 +516,45 @@ source "amazon-ebs" "SLES15-x86" {
   }
   region       = "us-west-2"
   source_ami   = "${data.amazon-ami.SLES15-x86.id}"
+  ssh_pty      = true
+  ssh_username = "ec2-user"
+  tags = {
+    BuildType = "${var.BuildType}",
+    JenkinsBuilderAmi = "True"
+  }
+}
+
+data "amazon-ami" "SLES16-x86" {
+  filters = {
+    architecture        = "x86_64"
+    name                = "suse-sles-16-0-v????????-hvm-ssd*"
+    root-device-type    = "ebs"
+    virtualization-type = "hvm"
+  }
+  most_recent = true
+  owners      = ["amazon"]
+  region      = "us-west-2"
+}
+
+source "amazon-ebs" "SLES16-x86" {
+  ami_block_device_mappings {
+    delete_on_termination = true
+    device_name           = "/dev/sda1"
+    volume_size           = 16
+  }
+  ami_name                    = "Jenkins SLES 16 x86_64 ${var.build_date}"
+  deprecate_at                = "${var.deprecation_date}"
+  associate_public_ip_address = true
+  ena_support                 = true
+  iam_instance_profile        = "${var.iam_role}"
+  instance_type               = "t3.large"
+  launch_block_device_mappings {
+    delete_on_termination = true
+    device_name           = "/dev/sda1"
+    volume_size           = 16
+  }
+  region       = "us-west-2"
+  source_ami   = "${data.amazon-ami.SLES16-x86.id}"
   ssh_pty      = true
   ssh_username = "ec2-user"
   tags = {
@@ -606,6 +809,72 @@ source "amazon-ebs" "Ubuntu2404-x86" {
 }
 
 
+data "amazon-parameterstore" "Ubuntu2604-arm64" {
+  name = "/aws/service/canonical/ubuntu/server/resolute/stable/current/arm64/hvm/ebs-gp3/ami-id"
+  region = "us-west-2"
+}
+
+source "amazon-ebs" "Ubuntu2604-arm64" {
+  ami_block_device_mappings {
+    delete_on_termination = true
+    device_name           = "/dev/sda1"
+    volume_size           = 16
+  }
+  ami_name                    = "Jenkins Ubuntu 26.04 arm64 ${var.build_date}"
+  deprecate_at                = "${var.deprecation_date}"
+  associate_public_ip_address = true
+  ena_support                 = true
+  iam_instance_profile        = "${var.iam_role}"
+  instance_type               = "t4g.large"
+  launch_block_device_mappings {
+    delete_on_termination = true
+    device_name           = "/dev/sda1"
+    volume_size           = 16
+  }
+  region       = "us-west-2"
+  source_ami   = "${data.amazon-parameterstore.Ubuntu2604-arm64.value}"
+  ssh_pty      = true
+  ssh_username = "ubuntu"
+  tags = {
+    BuildType = "${var.BuildType}",
+    JenkinsBuilderAmi = "True"
+  }
+}
+
+
+data "amazon-parameterstore" "Ubuntu2604-x86" {
+  name = "/aws/service/canonical/ubuntu/server/resolute/stable/current/amd64/hvm/ebs-gp3/ami-id"
+  region = "us-west-2"
+}
+
+source "amazon-ebs" "Ubuntu2604-x86" {
+  ami_block_device_mappings {
+    delete_on_termination = true
+    device_name           = "/dev/sda1"
+    volume_size           = 16
+  }
+  ami_name                    = "Jenkins Ubuntu 26.04 x86_64 ${var.build_date}"
+  deprecate_at                = "${var.deprecation_date}"
+  associate_public_ip_address = true
+  ena_support                 = true
+  iam_instance_profile        = "${var.iam_role}"
+  instance_type               = "t3.large"
+  launch_block_device_mappings {
+    delete_on_termination = true
+    device_name           = "/dev/sda1"
+    volume_size           = 16
+  }
+  region       = "us-west-2"
+  source_ami   = "${data.amazon-parameterstore.Ubuntu2604-x86.value}"
+  ssh_pty      = true
+  ssh_username = "ubuntu"
+  tags = {
+    BuildType = "${var.BuildType}",
+    JenkinsBuilderAmi = "True"
+  }
+}
+
+
 build {
   sources = [
     "source.amazon-ebs.AmazonLinux2-arm64",
@@ -615,13 +884,19 @@ build {
     "source.amazon-ebs.FreeBSD15-x86",
     "source.amazon-ebs.RHEL8-arm64",
     "source.amazon-ebs.RHEL8-x86",
+    "source.amazon-ebs.RHEL9-arm64",
+    "source.amazon-ebs.RHEL9-x86",
+    "source.amazon-ebs.RHEL10-arm64",
+    "source.amazon-ebs.RHEL10-x86",
     "source.amazon-ebs.SLES15-x86",
     "source.amazon-ebs.Ubuntu2004-arm64",
     "source.amazon-ebs.Ubuntu2004-x86",
     "source.amazon-ebs.Ubuntu2204-arm64",
     "source.amazon-ebs.Ubuntu2204-x86",
     "source.amazon-ebs.Ubuntu2404-arm64",
-    "source.amazon-ebs.Ubuntu2404-x86"
+    "source.amazon-ebs.Ubuntu2404-x86",
+    "source.amazon-ebs.Ubuntu2604-arm64",
+    "source.amazon-ebs.Ubuntu2604-x86"
   ]
 
   provisioner "shell" {
