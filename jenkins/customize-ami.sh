@@ -139,6 +139,21 @@ case $PLATFORM_ID in
                 sudo ${PIP_CMD} install sphinx recommonmark docutils sphinx-rtd-theme sphobjinv
                 labels="${labels} linux rhel8 rhel8-${arch}"
                 ;;
+            9.*)
+                sudo yum -y install python3 \
+                  gcc gcc-c++ gcc-gfortran \
+                  java-21-openjdk-headless
+                sudo yum -y remove java-1.8.0-openjdk-headless
+                PIP_CMD=pip3
+                labels="${labels} linux rhel9 rhel9-${arch}"
+                ;;
+            10.*)
+                sudo yum -y install python3 \
+                  gcc gcc-c++ gcc-gfortran \
+                  java-25-openjdk-headless
+                PIP_CMD=pip3
+                labels="${labels} linux rhel10 rhel10-${arch}"
+                ;;
             *)
                 echo "ERROR: Unknown version ${PLATFORM_ID} ${VERSION_ID}"
                 exit 1
@@ -313,12 +328,50 @@ case $PLATFORM_ID in
                     echo "AMI_clang${i}_CPP=clang-cpp-${i}" >> ${ompi_compiler_script}
                     echo "AMI_clang${i}_CXX=clang++-${i}" >> ${ompi_compiler_script}
                     echo "AMI_clang${i}_FC=flang-new-${i}" >> ${ompi_compiler_script}
-                    labels="${labels} clang{i}"
+                    labels="${labels} clang${i}"
                 done
                 if test "$arch" = "x86_64" ; then
                     sudo DEBIAN_FRONTEND=noninteractive apt-get -y install gcc-multilib g++-multilib gfortran-multilib
                     labels="${labels} 32bit_builds"
                 fi
+                ;;
+            26.04)
+                # we skip clang 20, because Ubuntu's 26.04 doesn't allow flang
+                # 20 and flang 21 to be installed at the same time.
+                sudo DEBIAN_FRONTEND=noninteractive apt-get -y install \
+                     python3-boto3 python3-mock \
+                     python3-pip python3-venv openjdk-25-jdk-headless \
+                     gcc-11 g++-11 gfortran-11 \
+                     gcc-12 g++-12 gfortran-12 \
+                     gcc-13 g++-13 gfortran-13 \
+                     gcc-14 g++-14 gfortran-14 \
+                     gcc-15 g++-15 gfortran-15 \
+                     clang-17 flang-17 clang-18 flang-18 \
+                     clang-19 flang-19 \
+                     clang-21 flang-21 \
+                     clang-format bsdutils unzip
+                ( cd $HOME
+                  curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+                  unzip awscliv2.zip
+                  sudo ./aws/install
+                  rm -rf awscliv2.zip aws
+                )
+                for i in 11 12 13 14 15; do
+                    echo "AMI_gcc${i}_CONFIG=1" >> ${ompi_compiler_script}
+                    echo "AMI_gcc${i}_CC=gcc-${i}" >> ${ompi_compiler_script}
+                    echo "AMI_gcc${i}_CPP=cpp-${i}" >> ${ompi_compiler_script}
+                    echo "AMI_gcc${i}_CXX=g++-${i}" >> ${ompi_compiler_script}
+                    echo "AMI_gcc${i}_FC=gfortran-${i}" >> ${ompi_compiler_script}
+                    labels="${labels} gcc${i}"
+                done
+                for i in 17 18 19 21 ; do
+                    echo "AMI_clang${i}_CONFIG=1" >> ${ompi_compiler_script}
+                    echo "AMI_clang${i}_CC=clang-${i}" >> ${ompi_compiler_script}
+                    echo "AMI_clang${i}_CPP=clang-cpp-${i}" >> ${ompi_compiler_script}
+                    echo "AMI_clang${i}_CXX=clang++-${i}" >> ${ompi_compiler_script}
+                    echo "AMI_clang${i}_FC=flang-new-${i}" >> ${ompi_compiler_script}
+                    labels="${labels} clang${i}"
+                done
                 ;;
             *)
                 echo "ERROR: Unknown version ${PLATFORM_ID} ${VERSION_ID}"
@@ -343,6 +396,12 @@ case $PLATFORM_ID in
                 sudo ${PIP_CMD} install sphinx recommonmark docutils sphinx-rtd-theme \
 		     importlib_resources dataclasses sphobjinv
                 labels="${labels} linux sles_15-${arch}"
+                ;;
+            16.*)
+                sudo zypper -n install \
+                     java-25-openjdk-headless \
+                     python3-pip
+                labels="${labels} linux sles_16-${arch}"
                 ;;
             *)
                 echo "ERROR: Unknown version ${PLATFORM_ID} ${VERSION_ID}"
