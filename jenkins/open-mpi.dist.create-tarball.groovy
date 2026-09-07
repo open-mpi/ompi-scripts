@@ -12,8 +12,8 @@
 
 import java.text.SimpleDateFormat
 
-def rpm_builder = 'amazon_linux_2'
-def manpage_builder = 'ubuntu_20.04'
+def rpm_builder = 'amazon_linux_2023-x86_64'
+def manpage_builder = 'ubuntu_26.04-x86_64'
 
 def release_version
 def branch
