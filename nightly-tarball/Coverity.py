@@ -22,8 +22,13 @@ _cov_filename = 'coverity_tools.tgz'
 
 def run_coverity_internal(logger, build_root, source_tarball, config):
     # read the token file
-    file = open(config['token_file'], 'r')
-    token = file.readline().rstrip('\n')
+    if 'token_file' in config:
+        file = open(config['token_file'], 'r')
+        token = file.readline().rstrip('\n')
+    elif 'token_env' in config:
+        token = config['token_env']
+    else:
+        raise ValueError('Neither token_file nor token_env set')
 
     # get the tool
     if not os.path.isdir(config['tool_dir']):
@@ -158,6 +163,9 @@ if __name__ == '__main__':
                         type=str)
     parser.add_argument('--token-file',
                         help='File containing the Coverity token for project',
+                        type=str)
+    parser.add_argument('--token-env',
+                        help='Environment variable containing the Coverity token for project',
                         type=str)
     parser.add_argument('--configure-args',
                         help='Configuration arguments for source tarball',
