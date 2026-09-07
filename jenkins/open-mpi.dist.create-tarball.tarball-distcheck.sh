@@ -1,23 +1,21 @@
 #!/bin/bash
 #
-# Build man pages for Open MPI.
+# Run test build on release tarball
 #
-# usage build-manpages.sh <build_prefix> <tarball> <branch>
+# usage tarball-distcheck.sh <build_prefix> <tarball>
 #
 # Expected filesystem layout:
 #    ${WORKSPACE}/ompi-scripts/         ompi-scripts checkout
 #    ${WORKSPACE}/ompi/                 ompi checkout @ target REF
 #    ${WORKSPACE}/dist-files/           output of build
 
-set -e
+set -euo pipefail
 
-build_prefix=$1
-tarball=$2
-branch=$3
+build_prefix="$1"
+tarball="$2"
 
 echo "build_prefix: ${build_prefix}"
 echo "tarball: ${tarball}"
-echo "branch: ${branch}"
 
 if test -r "${HOME}/ompi-setup-python.sh" ; then
     echo "--> Initializing Python environment"
@@ -28,16 +26,20 @@ else
 fi
 
 aws s3 cp "${build_prefix}/${tarball}" "${WORKSPACE}/dist-files/${tarball}"
-tar xf ${WORKSPACE}/dist-files/${tarball}
 directory=`echo ${tarball} | sed -e 's/\(.*\)\.tar\..*/\1/'`
-cd ${directory}
-../ompi/contrib/dist/make-html-man-pages.pl
-mkdir ${WORKSPACE}/dist-files/doc
-cp -rp man-page-generator/php ${WORKSPACE}/dist-files/doc/${branch}
+rm -rf "${directory}"
+tar xf ${WORKSPACE}/dist-files/${tarball}
 
-cd ${WORKSPACE}/dist-files
-docname="${directory}-doc.tar.gz"
-tar czf ${docname} doc/
-aws s3 cp ${docname} s3://open-mpi-scratch/scratch/open-mpi-doc/${docname}
+cd "${directory}"
+./configure
 
-echo "https://download.open-mpi.org/scratch/open-mpi-doc/${docname}" > ${WORKSPACE}/manpage-build-artifacts.txt
+set +e
+make distcheck VERBOSE=1
+if test $? -ne 0 ; then
+    # Jenkins doesn't clean up properly if there's a bunch of unwriteable
+    # directories, so help it out with cleanup.
+    chmod -R u+w *
+    cd "${WORKSPACE}"
+    rm -rf "${directory}"
+fi
+set -e

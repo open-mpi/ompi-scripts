@@ -125,12 +125,7 @@ parallel (
   "tarball distcheck" : {
     node(rpm_builder) {
       stage('Tarball Distcheck') {
-	remove_build_directory('openmpi-*')
-	sh """aws s3 cp ${build_prefix}/${tarball} ${tarball}
-tar xf ${tarball}
-cd openmpi-*
-./configure
-make distcheck VERBOSE=1"""
+	sh "/bin/bash ompi-scripts/jenkins/open-mpi.dist.create-tarball.tarball-distcheck.sh ${build_prefix} ${tarball}"
       }
     }
   },

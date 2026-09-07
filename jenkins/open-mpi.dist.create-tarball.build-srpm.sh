@@ -21,6 +21,14 @@ build_date="$4"
 # guess release version from tarball, same way build_tarball does 
 release_version=`echo ${tarball} | sed -e 's/.*openmpi-\(.*\)\.tar\.\(gz\|bz2\)/\1/'`
 
+if test -r "${HOME}/ompi-setup-python.sh" ; then
+    echo "--> Initializing Python environment"
+    . ${HOME}/ompi-setup-python.sh
+    find . -name "requirements.txt" -exec ${PIP_CMD} install -r {} \;
+else
+    echo "--> No Python environment found, hoping for the best."
+fi
+
 # copy tarball back locally
 aws s3 cp "${s3_prefix}/open-mpi/${branch_name}/${tarball}" "${WORKSPACE}/dist-files/${tarball}"
 
