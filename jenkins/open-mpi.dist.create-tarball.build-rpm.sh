@@ -16,6 +16,14 @@ srpm_name="$2"
 
 aws s3 cp ${build_prefix}/${srpm_name} ${srpm_name}
 
+if test -r "${HOME}/ompi-setup-python.sh" ; then
+    echo "--> Initializing Python environment"
+    . ${HOME}/ompi-setup-python.sh
+    find . -name "requirements.txt" -exec ${PIP_CMD} install -r {} \;
+else
+    echo "--> No Python environment found, hoping for the best."
+fi
+
 # Build and install PRRTE and OpenPMIX, if available
 if [[ -d ${WORKSPACE}/ompi/3rd-party/openpmix ]]; then
     echo "Building OpenPMIx RPM"

@@ -68,6 +68,14 @@ case "$build_type" in
 	;;
 esac
 
+if test -r "${HOME}/ompi-setup-python.sh" ; then
+    echo "--> Initializing Python environment"
+    . ${HOME}/ompi-setup-python.sh
+    find . -name "requirements.txt" -exec ${PIP_CMD} install -r {} \;
+else
+    echo "--> No Python environment found, hoping for the best."
+fi
+
 rm -rf dist-files
 mkdir dist-files
 (cd ompi ; contrib/dist/make_dist_tarball --no-git-update ${greek_option} --distdir ${WORKSPACE}/dist-files)
