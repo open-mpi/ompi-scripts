@@ -180,8 +180,8 @@ case $PLATFORM_ID in
                 sudo yum -y install clang gdb \
                   java-25-amazon-corretto-headless \
                   python3 python3-devel python3-pip \
-	          hwloc hwloc-devel libevent libevent-devel \
-		  python3-mock
+                  hwloc hwloc-devel libevent libevent-devel \
+                  python3-mock python3-boto3
                 labels="${labels} linux amazon_linux_2023-${arch}"
                 ;;
             *)
