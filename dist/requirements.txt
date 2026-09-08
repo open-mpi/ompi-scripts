@@ -1,0 +1,4 @@
+boto3
+botocore
+mock
+python_dateutil
