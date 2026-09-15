@@ -128,21 +128,6 @@ parallel (
 	sh "/bin/bash ompi-scripts/jenkins/open-mpi.dist.create-tarball.tarball-distcheck.sh ${build_prefix} ${tarball}"
       }
     }
-  },
-
-  "tarball test suites" : {
-    node('gcc10') {
-      stage('Tarball Test Build') {
-	remove_build_directory('openmpi-*')
-	sh """aws s3 cp ${build_prefix}/${tarball} ${tarball}
-tar xf ${tarball}
-cd openmpi-*
-./configure --prefix=$WORKSPACE/openmpi-install
-make -j 8 all V=1
-make check VERBOSE=1
-make install"""
-      }
-    }
   }
 )
 
