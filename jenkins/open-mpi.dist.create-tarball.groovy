@@ -47,7 +47,7 @@ node(rpm_builder) {
     // a CI test), please be careful about writing into $HOME.  The Cray
     // builders in particular are using shared accounts.
 
-    sh "/bin/bash ompi-scripts/jenkins/open-mpi-autotools-build.sh -d -p ompi-scripts/jenkins/autotools-patches -t ${WORKSPACE}/autotools-install -r ${env.HOME}/autotools-builds -z ${WORKSPACE}/ompi/contrib/dist/make_dist_tarball"
+    sh "/bin/bash ompi-scripts/jenkins/open-mpi-autotools-build.sh -d -p ompi-scripts/jenkins/autotools-patches -t ${WORKSPACE}/autotools-install -r ${env.HOME}/autotools-builds -y ${WORKSPACE}/ompi/VERSION -z ${WORKSPACE}/ompi/contrib/dist/make_dist_tarball"
   }
 
   // Build the initial tarball, verify that the resulting tarball

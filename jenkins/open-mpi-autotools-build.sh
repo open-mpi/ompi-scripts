@@ -18,11 +18,11 @@
 #            [-l <libtool_version] [-n <m4 version>]
 #            [-f <flex_version>]
 
+version_file=
 dist_script=
 debug=0
 autotools_root=
 target_link=
-dist_script_path="/dev/null"
 patch_file_directory=
 s3_build_path="s3://ompi-jenkins-config/autotools-builds"
 autotools_scratch_dir=
@@ -45,6 +45,12 @@ usage() {
      echo "  -p DIR      Directory to search for patch files.  If a patch file"
      echo "              named <package_name>-<version>.patch is found in DIR"
      echo "              it will be applied to <package_name> before building."
+     echo "  -y FILE     Pull required Autotools versions from an Open MPI like"
+     echo "              VERSION file.  If both -y and -z are specified, the script"
+     echo "              will first try to use the VERSION file then, if that fails,"
+     echo "              try to use the dist script.  Only if both fail will the"
+     echo "              script fail.  This option is exclusive with -c, -m, -l,"
+     echo "              -n, and -f options."
      echo "  -z FILE     Pull required Autotools versions from an Open MPI like"
      echo "              dist script.  This option assumes certain variables are"
      echo "              set in FILE.  This option is exclusive with -c, -m, -l,"
@@ -73,7 +79,7 @@ if [[ $# -eq 0 ]]; then
     usage
     exit 1
 fi
-while getopts ":dz:r:t:c:m:l:n:f:p:h" arg; do
+while getopts ":dz:y:r:t:c:m:l:n:f:p:h" arg; do
     case $arg in
         d)
             debug=1
@@ -87,6 +93,9 @@ while getopts ":dz:r:t:c:m:l:n:f:p:h" arg; do
             ;;
         t)
             target_link=${OPTARG}
+            ;;
+        y)
+            version_file=${OPTARG}
             ;;
         z)
             dist_script=${OPTARG}
@@ -135,32 +144,73 @@ if [[ $? -ne 0 ]] ; then
      exit 2
 fi
 
+data_found=0
+# If a version file was specified, grab the version files from there.
+# Otherwise, expect all the versions to be explicitly specified.
+if [[ ${data_found} -eq 0 && -n "${version_file}" ]] ; then
+    debug_print "Finding versions from VERSION file ${version_file}"
+    if [[ ! -r ${version_file} ]] ; then
+        echo "Cannot read ${version_file}.  Aborting."
+        exit 1
+    fi
+
+    declare -a name_map
+    name_map[AC]="autoconf"
+    name_map[AM]="automake"
+    name_map[LT]="libtool"
+    name_map[M4]="m4"
+    name_map[FLEX]="flex"
+
+    data_found=1
+    for pkg in AC AM LT M4 FLEX ; do
+        eval "${pkg}_VERSION=`sed -ne \"s/^${name_map[$pkg]}_dist_version=\(.*\)/\1/p\" ${version_file}`"
+	eval "var=\"\$${pkg}_VERSION\""
+	if test -z "${var}" ; then
+            echo "${pkg}_dist_version not set in ${version_file}"
+	    data_found=0
+	    break;
+        fi
+    done
+fi
+
 # If a dist script was specified, grab the version files from there.
 # Otherwise, expect all the versions to be explicitly specified.
-if [[ -n "${dist_script}" ]] ; then
+if [[ ${data_found} -eq 0 &&  -n "${dist_script}" ]] ; then
     debug_print "Finding versions from dist script ${dist_script}"
     if [[ ! -r ${dist_script} ]] ; then
         echo "Cannot read ${dist_script}.  Aborting."
         exit 1
     fi
 
+    data_found=1
     for pkg in AC AM LT M4 FLEX ; do
         eval "${pkg}_VERSION=`sed -ne \"s/^${pkg}_TARGET_VERSION=\(.*\)/\1/p\" ${dist_script}`"
-	eval "var=${pkg}_VERSION"
+	eval "var=\"\$${pkg}_VERSION\""
 	if test -z "${var}" ; then
-            echo "${pkg_VERSION} not set in ${dist_script}"
-            exit 2
+            echo "${pkg}_VERSION not set in ${dist_script}"
+	    data_found=0
+	    break
         fi
     done
-else
+fi
+
+if [[ ${data_found} -eq 0 ]] ; then
+    data_found=1
     for pkg in AC AM LT M4 FLEX ; do
         eval "var=\"\$${pkg}_VERSION\""
         if test -z "${var}" ; then
             echo "${pkg}_VERSION not set on command line"
-            exit 1
+	    data_found=0
+	    break;
         fi
     done
 fi
+
+if [[ ${data_found} -eq 0 ]] ; then
+    echo "Could not find version data through any supported method.  Aborting."
+    exit 2
+fi
+
 for pkg in AC AM LT M4 FLEX ; do
     eval "var=\"\$${pkg}_VERSION\""
     debug_print "${pkg}_VERSION: $var"
