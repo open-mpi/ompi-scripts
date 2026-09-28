@@ -154,7 +154,13 @@ if [[ ${data_found} -eq 0 && -n "${version_file}" ]] ; then
         exit 1
     fi
 
-    declare -a name_map
+    # yay Bash having associative arrays.  When the VERSION file version hints
+    # were added, they didn't follow the same naming convention as the dist
+    # script (which became the internal convention for this file because the
+    # original author of this file was that lazy.  Rather than rewrite the
+    # entire file, we just have an indirection for VERSION file on which name to
+    # lookup.
+    declare -A name_map
     name_map[AC]="autoconf"
     name_map[AM]="automake"
     name_map[LT]="libtool"
