@@ -143,7 +143,7 @@ source "amazon-ebs" "AmazonLinux2023-arm64" {
   instance_type               = "t4g.large"
   launch_block_device_mappings {
     delete_on_termination = true
-    device_name           = "/dev/sda1"
+    device_name           = "/dev/xvda"
     volume_size           = 16
   }
   region       = "us-west-2"
@@ -176,7 +176,7 @@ source "amazon-ebs" "AmazonLinux2023-x86" {
   instance_type               = "t3.large"
   launch_block_device_mappings {
     delete_on_termination = true
-    device_name           = "/dev/sda1"
+    device_name           = "/dev/xvda"
     volume_size           = 16
   }
   region       = "us-west-2"
