@@ -86,6 +86,9 @@ source "amazon-ebs" "AmazonLinux2-arm64" {
     device_name           = "/dev/xvda"
     volume_size           = 16
   }
+  metadata_options {
+    http_tokens = "required"
+  }
   region       = "us-west-2"
   source_ami   = "${data.amazon-ami.AmazonLinux2-arm64.id}"
   ssh_pty      = true
@@ -130,6 +133,9 @@ source "amazon-ebs" "AmazonLinux2-x86" {
     device_name           = "/dev/xvda"
     volume_size           = 16
   }
+  metadata_options {
+    http_tokens = "required"
+  }
   region       = "us-west-2"
   source_ami   = "${data.amazon-ami.AmazonLinux2-x86.id}"
   ssh_pty      = true
@@ -167,6 +173,9 @@ source "amazon-ebs" "AmazonLinux2023-arm64" {
     device_name           = "/dev/xvda"
     volume_size           = 16
   }
+  metadata_options {
+    http_tokens = "required"
+  }
   region       = "us-west-2"
   source_ami   = "${data.amazon-parameterstore.AmazonLinux2023-arm64.value}"
   ssh_pty      = true
@@ -203,6 +212,9 @@ source "amazon-ebs" "AmazonLinux2023-x86" {
     delete_on_termination = true
     device_name           = "/dev/xvda"
     volume_size           = 16
+  }
+  metadata_options {
+    http_tokens = "required"
   }
   region       = "us-west-2"
   source_ami   = "${data.amazon-parameterstore.AmazonLinux2023-x86.value}"
@@ -245,6 +257,9 @@ source "amazon-ebs" "FreeBSD15-x86" {
     delete_on_termination = true
     device_name           = "/dev/sda1"
     volume_size           = 16
+  }
+  metadata_options {
+    http_tokens = "required"
   }
   region       = "us-west-2"
   source_ami   = "${data.amazon-parameterstore.FreeBSD15-x86.value}"
@@ -297,6 +312,9 @@ source "amazon-ebs" "RHEL8-arm64" {
     device_name           = "/dev/sda1"
     volume_size           = 16
   }
+  metadata_options {
+    http_tokens = "required"
+  }
   region       = "us-west-2"
   source_ami   = "${data.amazon-ami.RHEL8-arm64.id}"
   ssh_pty      = true
@@ -341,6 +359,9 @@ source "amazon-ebs" "RHEL8-x86" {
     delete_on_termination = true
     device_name           = "/dev/sda1"
     volume_size           = 16
+  }
+  metadata_options {
+    http_tokens = "required"
   }
   region       = "us-west-2"
   source_ami   = "${data.amazon-ami.RHEL8-x86.id}"
@@ -387,6 +408,9 @@ source "amazon-ebs" "RHEL9-arm64" {
     device_name           = "/dev/sda1"
     volume_size           = 16
   }
+  metadata_options {
+    http_tokens = "required"
+  }
   region       = "us-west-2"
   source_ami   = "${data.amazon-ami.RHEL9-arm64.id}"
   ssh_pty      = true
@@ -431,6 +455,9 @@ source "amazon-ebs" "RHEL9-x86" {
     delete_on_termination = true
     device_name           = "/dev/sda1"
     volume_size           = 16
+  }
+  metadata_options {
+    http_tokens = "required"
   }
   region       = "us-west-2"
   source_ami   = "${data.amazon-ami.RHEL9-x86.id}"
@@ -477,6 +504,9 @@ source "amazon-ebs" "RHEL10-arm64" {
     device_name           = "/dev/sda1"
     volume_size           = 16
   }
+  metadata_options {
+    http_tokens = "required"
+  }
   region       = "us-west-2"
   source_ami   = "${data.amazon-ami.RHEL10-arm64.id}"
   ssh_pty      = true
@@ -521,6 +551,9 @@ source "amazon-ebs" "RHEL10-x86" {
     delete_on_termination = true
     device_name           = "/dev/sda1"
     volume_size           = 16
+  }
+  metadata_options {
+    http_tokens = "required"
   }
   region       = "us-west-2"
   source_ami   = "${data.amazon-ami.RHEL10-x86.id}"
@@ -571,6 +604,9 @@ source "amazon-ebs" "SLES15-x86" {
     device_name           = "/dev/sda1"
     volume_size           = 16
   }
+  metadata_options {
+    http_tokens = "required"
+  }
   region       = "us-west-2"
   source_ami   = "${data.amazon-ami.SLES15-x86.id}"
   ssh_pty      = true
@@ -613,6 +649,9 @@ source "amazon-ebs" "SLES16-x86" {
     delete_on_termination = true
     device_name           = "/dev/sda1"
     volume_size           = 16
+  }
+  metadata_options {
+    http_tokens = "required"
   }
   region       = "us-west-2"
   source_ami   = "${data.amazon-ami.SLES16-x86.id}"
@@ -663,6 +702,9 @@ source "amazon-ebs" "Ubuntu2004-arm64" {
     device_name           = "/dev/sda1"
     volume_size           = 16
   }
+  metadata_options {
+    http_tokens = "required"
+  }
   region       = "us-west-2"
   source_ami   = "${data.amazon-ami.Ubuntu2004-arm64.id}"
   ssh_pty      = true
@@ -706,6 +748,9 @@ source "amazon-ebs" "Ubuntu2004-x86" {
     delete_on_termination = true
     device_name           = "/dev/sda1"
     volume_size           = 16
+  }
+  metadata_options {
+    http_tokens = "required"
   }
   region       = "us-west-2"
   source_ami   = "${data.amazon-ami.Ubuntu2004-x86.id}"
@@ -751,6 +796,9 @@ source "amazon-ebs" "Ubuntu2204-arm64" {
     device_name           = "/dev/sda1"
     volume_size           = 16
   }
+  metadata_options {
+    http_tokens = "required"
+  }
   region       = "us-west-2"
   source_ami   = "${data.amazon-ami.Ubuntu2204-arm64.id}"
   ssh_pty      = true
@@ -794,6 +842,9 @@ source "amazon-ebs" "Ubuntu2204-x86" {
     delete_on_termination = true
     device_name           = "/dev/sda1"
     volume_size           = 16
+  }
+  metadata_options {
+    http_tokens = "required"
   }
   region       = "us-west-2"
   source_ami   = "${data.amazon-ami.Ubuntu2204-x86.id}"
@@ -839,6 +890,9 @@ source "amazon-ebs" "Ubuntu2404-arm64" {
     device_name           = "/dev/sda1"
     volume_size           = 16
   }
+  metadata_options {
+    http_tokens = "required"
+  }
   region       = "us-west-2"
   source_ami   = "${data.amazon-ami.Ubuntu2404-arm64.id}"
   ssh_pty      = true
@@ -883,6 +937,9 @@ source "amazon-ebs" "Ubuntu2404-x86" {
     device_name           = "/dev/sda1"
     volume_size           = 16
   }
+  metadata_options {
+    http_tokens = "required"
+  }
   region       = "us-west-2"
   source_ami   = "${data.amazon-ami.Ubuntu2404-x86.id}"
   ssh_pty      = true
@@ -920,6 +977,9 @@ source "amazon-ebs" "Ubuntu2604-arm64" {
     device_name           = "/dev/sda1"
     volume_size           = 16
   }
+  metadata_options {
+    http_tokens = "required"
+  }
   region       = "us-west-2"
   source_ami   = "${data.amazon-parameterstore.Ubuntu2604-arm64.value}"
   ssh_pty      = true
@@ -956,6 +1016,9 @@ source "amazon-ebs" "Ubuntu2604-x86" {
     delete_on_termination = true
     device_name           = "/dev/sda1"
     volume_size           = 16
+  }
+  metadata_options {
+    http_tokens = "required"
   }
   region       = "us-west-2"
   source_ami   = "${data.amazon-parameterstore.Ubuntu2604-x86.value}"
