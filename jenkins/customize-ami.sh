@@ -399,7 +399,8 @@ case $PLATFORM_ID in
                      clang-format bsdutils unzip
                 sudo ${PIP_CMD} install --break-system-packages sphobjinv
                 ( cd $HOME
-                  curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+                  if test "$arch" = "x86_64" ; then awscli_url="${awscli_x86_url}" ; else awscli_url="${awscli_arm_url}" ; fi
+                  curl "${awscli_url}" -o "awscliv2.zip"
                   unzip awscliv2.zip
                   sudo ./aws/install
                   rm -rf awscliv2.zip aws
@@ -441,7 +442,8 @@ case $PLATFORM_ID in
                      clang-21 flang-21 \
                      clang-format bsdutils unzip
                 ( cd $HOME
-                  curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+                  if test "$arch" = "x86_64" ; then awscli_url="${awscli_x86_url}" ; else awscli_url="${awscli_arm_url}" ; fi
+                  curl "${awscli_url}" -o "awscliv2.zip"
                   unzip awscliv2.zip
                   sudo ./aws/install
                   rm -rf awscliv2.zip aws
