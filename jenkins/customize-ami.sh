@@ -516,9 +516,16 @@ case $PLATFORM_ID in
         echo "==> Installing packages"
         case $VERSION_ID in
             15.*)
+                # Install the base toolchain plus the default Python 3.  We do
+                # not hard-code the pip package name (py311-pip): the correct
+                # py3XX-pip name tracks whatever Python version "lang/python3"
+                # pulls in, so derive it at runtime and install that.
                 sudo pkg install -y openjdk25 autoconf automake libtool gcc wget \
                      curl git hs-pandoc libevent-devel hwloc2 rust \
-                     lang/python3 py311-pip gmake bash
+                     lang/python3 gmake bash
+                pip_pkg=`python3 -c 'import sys; print("py%d%d-pip" % sys.version_info[:2])'`
+                echo "--> Installing pip package ${pip_pkg} for default python3"
+                sudo pkg install -y "${pip_pkg}"
 
                 MAKE_CMD=gmake
                 PIP_CMD=pip
