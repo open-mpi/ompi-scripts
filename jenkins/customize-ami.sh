@@ -223,6 +223,9 @@ case $PLATFORM_ID in
         sudo yum -y update
         sudo yum -y group install "Development Tools"
         sudo yum -y install libevent hwloc hwloc-libs gdb
+        # rdma-core development packages are required to build libfabric's efa
+        # provider.  Always use the system-provided rdma-core packages.
+        sudo yum -y install rdma-core-devel libibverbs-devel librdmacm-devel
         case $VERSION_ID in
             8.*)
                 # RHEL 8's default python3 is 3.6, which is too old for Open
@@ -274,6 +277,9 @@ case $PLATFORM_ID in
         echo "==> Installing packages"
         sudo yum -y update
         sudo yum -y groupinstall "Development Tools"
+        # rdma-core development packages are required to build libfabric's efa
+        # provider.  Always use the system-provided rdma-core packages.
+        sudo yum -y install rdma-core-devel libibverbs-devel librdmacm-devel
         case $VERSION_ID in
             2)
                 sudo yum -y install clang hwloc-devel \
@@ -322,6 +328,11 @@ case $PLATFORM_ID in
         sudo DEBIAN_FRONTEND=noninteractive apt-get -y install build-essential gfortran \
              autoconf automake libtool flex hwloc libhwloc-dev git libevent-dev \
              rman pandoc
+        # rdma-core development packages are required to build libfabric's efa
+        # provider.  Always use the system-provided rdma-core packages.  On
+        # Debian/Ubuntu the rdma-core source package ships these as
+        # libibverbs-dev and librdmacm-dev.
+        sudo DEBIAN_FRONTEND=noninteractive apt-get -y install libibverbs-dev librdmacm-dev
         pandoc_installed=1
         labels="${labels} linux ubuntu_${VERSION_ID}-${arch}"
         case $VERSION_ID in
@@ -496,6 +507,9 @@ case $PLATFORM_ID in
         sudo zypper -n update
         sudo zypper -n install gcc gcc-c++ gcc-fortran \
              autoconf automake libtool flex make gdb git bzip2
+        # rdma-core development packages are required to build libfabric's efa
+        # provider.  Always use the system-provided rdma-core packages.
+        sudo zypper -n install rdma-core-devel libibverbs-devel librdmacm-devel
         case $VERSION_ID in
             15.*)
                 # SLES 15's default python3 is 3.6, too old for Open MPI's doc
