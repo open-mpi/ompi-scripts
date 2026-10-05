@@ -18,8 +18,8 @@
 
 set -e
 
-pandoc_x86_url="s3://ompi-jenkins-config/pandoc-2.14.2-linux-amd64.tar.gz"
-pandoc_arm_url="s3://ompi-jenkins-config/pandoc-2.14.2-linux-arm64.tar.gz"
+pandoc_x86_url="https://github.com/jgm/pandoc/releases/download/3.12/pandoc-3.12-linux-amd64.tar.gz"
+pandoc_arm_url="https://github.com/jgm/pandoc/releases/download/3.12/pandoc-3.12-linux-arm64.tar.gz"
 awscli_x86_url="https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip"
 awscli_arm_url="https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip"
 
@@ -549,7 +549,7 @@ if test $pandoc_installed -eq 0 ; then
     fi
     pandoc_tarname=`basename ${pandoc_url}`
 
-    aws s3 cp "${pandoc_url}" "${pandoc_tarname}"
+    curl -OL "${pandoc_url}"
     tar xf "${pandoc_tarname}"
     # Pandoc does not name its directories exactly the same name
     # as the tarball.  Sigh.
