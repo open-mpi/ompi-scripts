@@ -70,6 +70,11 @@ venv_preflight_modules=
 
 PIP_CMD="pip3"
 MAKE_CMD="make"
+# Interpreter used to create the Open MPI venv.  Some distros ship an old
+# default python3 (e.g. RHEL 8 / Python 3.6) that cannot satisfy Open MPI's
+# newer doc requirements (requests>=2.33.0 needs Python >=3.10); such platforms
+# override this with a newer interpreter installed below.
+VENV_PYTHON="python3"
 
 
 echo "==> Waiting for cloud-init to complete"
@@ -220,12 +225,16 @@ case $PLATFORM_ID in
         sudo yum -y install libevent hwloc hwloc-libs gdb
         case $VERSION_ID in
             8.*)
-                sudo yum -y install python3.8 \
+                # RHEL 8's default python3 is 3.6, which is too old for Open
+                # MPI's doc requirements (requests>=2.33.0 needs Python >=3.10).
+                # Install python3.11 from AppStream and use it for the venv.
+                sudo yum -y install python3.8 python3.11 python3.11-pip \
                   gcc gcc-c++ gcc-gfortran \
                   java-21-openjdk-headless
                 sudo yum -y remove java-1.8.0-openjdk-headless
                 sudo alternatives --set python /usr/bin/python3
-                PIP_CMD=pip3.8
+                PIP_CMD=pip3.11
+                VENV_PYTHON=python3.11
                 sudo ${PIP_CMD} install sphinx recommonmark docutils sphinx-rtd-theme sphobjinv
                 labels="${labels} linux rhel8 rhel8-${arch}"
                 ;;
@@ -482,9 +491,14 @@ case $PLATFORM_ID in
              autoconf automake libtool flex make gdb git bzip2
         case $VERSION_ID in
             15.*)
+                # SLES 15's default python3 is 3.6, too old for Open MPI's doc
+                # requirements (requests>=2.33.0 needs Python >=3.10).  Install
+                # python311 and use it for the venv.
                 sudo zypper -n install \
                      java-25-openjdk-headless \
-                     python3-pip
+                     python3-pip python311 python311-pip
+                PIP_CMD=pip3.11
+                VENV_PYTHON=python3.11
                 sudo ${PIP_CMD} install sphinx recommonmark docutils sphinx-rtd-theme \
 		     importlib_resources dataclasses sphobjinv
                 labels="${labels} linux sles_15-${arch}"
@@ -592,12 +606,23 @@ done
 
 echo "==> Building pyenv"
 cd ${HOME}
+# Inside the activated venv the correct pip is always "pip", regardless of
+# which versioned python/pip name the distro used for its system packages
+# above.  Downstream CI jobs source this file and run "${PIP_CMD} install", so
+# pin PIP_CMD to the venv's pip here.
 cat <<EOF > ${HOME}/ompi-setup-python.sh
-PIP_CMD=${PIP_CMD}
+PIP_CMD=pip
 . ${HOME}/ompi-venv/bin/activate
 EOF
-python3 -m venv ompi-venv
+${VENV_PYTHON} -m venv ompi-venv
 . ${HOME}/ompi-setup-python.sh
+# The pip bundled with the system python (and therefore with the venv) can be
+# quite old on some distros.  An old pip fails to resolve newer wheels --
+# notably "requests>=2.33.0" pulled in by Open MPI's doc requirements -- which
+# in turn means transitive deps such as importlib_resources never get
+# installed.  On older pythons that breaks the build (pympistandard needs
+# importlib_resources), so always upgrade pip first.
+${PIP_CMD} install --upgrade pip setuptools wheel
 git clone --recurse-submodules https://github.com/open-mpi/ompi.git
 if test "${venv_preflight_modules}" != "" ; then
     ${PIP_CMD} install ${venv_preflight_modules}
