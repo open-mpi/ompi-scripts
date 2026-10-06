@@ -76,6 +76,96 @@ echo "==> Waiting for cloud-init to complete"
 sudo cloud-init status --wait || true
 
 
+# Disable password-based SSH authentication *first*, before any of the long
+# package-install and compile steps below.  Automated security scanners probe
+# fresh instances within minutes of launch and will isolate (and enable
+# termination protection on) any instance that still accepts password logins;
+# because the full customize run takes 15-20+ minutes, hardening sshd at the
+# end leaves a long window in which the build instance gets quarantined
+# mid-provision and Packer fails with "Script disconnected unexpectedly".
+# Doing it here shrinks that window to a few seconds.
+#
+# Some base images allow password-based SSH login: most set
+# PasswordAuthentication no but, e.g., SLES 15 ships
+# KbdInteractiveAuthentication yes, which (via PAM) still permits interactive
+# password logins.  Disable both forms on every AMI.  Prefer a drop-in in
+# sshd_config.d (honored by all current platforms), then verify with
+# "sshd -T" and fall back to editing the main sshd_config if the drop-in is
+# not picked up.
+echo "==> Disabling password-based SSH authentication"
+ssh_hardening_conf="/etc/ssh/sshd_config.d/99-open-mpi-disable-password-auth.conf"
+sudo mkdir -p /etc/ssh/sshd_config.d
+sudo sh -c "cat > ${ssh_hardening_conf}" <<'SSHEOF'
+# Added by Open MPI customize-ami.sh: never allow password-based logins.
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+SSHEOF
+sudo chmod 644 "${ssh_hardening_conf}"
+
+# sshd is in /usr/sbin on Linux, /usr/sbin on FreeBSD too.
+sshd_bin=`command -v sshd || echo /usr/sbin/sshd`
+effective=`sudo ${sshd_bin} -T 2>/dev/null | grep -iE '^(passwordauthentication|kbdinteractiveauthentication)'`
+echo "--> Effective after drop-in:"
+echo "${effective}"
+if echo "${effective}" | grep -qi 'authentication yes' || test -z "${effective}" ; then
+    # Drop-in not honored (or sshd -T unavailable); force the setting in the
+    # main config file as well.
+    echo "--> Drop-in not fully effective; editing main sshd_config"
+    for opt in PasswordAuthentication KbdInteractiveAuthentication ChallengeResponseAuthentication ; do
+        if sudo grep -qiE "^[[:space:]]*#?[[:space:]]*${opt}[[:space:]]" /etc/ssh/sshd_config ; then
+            # Rewrite any existing (possibly commented) directive to "<opt> no".
+            # Use a temp file instead of "sed -i" for GNU/BSD portability.
+            sudo sed -E "s/^[[:space:]]*#?[[:space:]]*${opt}[[:space:]].*/${opt} no/I" \
+                /etc/ssh/sshd_config > /tmp/sshd_config.new
+            sudo sh -c "cat /tmp/sshd_config.new > /etc/ssh/sshd_config"
+            rm -f /tmp/sshd_config.new
+        else
+            sudo sh -c "echo '${opt} no' >> /etc/ssh/sshd_config"
+        fi
+    done
+    echo "--> Effective after sshd_config edit:"
+    sudo ${sshd_bin} -T 2>/dev/null | grep -iE '^(passwordauthentication|kbdinteractiveauthentication)' || true
+fi
+
+# The running sshd still has the old configuration cached, so the changes
+# above do not take effect until it re-reads its configuration.  Reload it now
+# so the hardened config applies to new connections immediately -- this is the
+# whole point of doing it early, so the scanner never sees password auth
+# enabled.
+#
+# Prefer "reload" over "restart": a reload makes sshd re-read its config and
+# apply it to all *new* connections (which is all we need -- future scanner
+# probes), while leaving already-established sessions untouched.  This matters
+# because Packer is driving this script over an SSH session; a full "restart"
+# can tear that control connection down and make Packer fail the build with
+# "Script disconnected unexpectedly".  Fall back to a restart only if the
+# platform's init system cannot reload sshd.
+echo "--> Reloading sshd to apply the new configuration"
+if test "${PLATFORM_ID}" = "FreeBSD" ; then
+    # rc.d sshd supports "reload" (HUPs the daemon) and keeps current sessions.
+    sudo service sshd reload || sudo service sshd restart
+else
+    # Linux distros name the unit either "sshd" (Amazon Linux, RHEL, SLES) or
+    # "ssh" (Debian/Ubuntu).  Reload whichever one this platform provides,
+    # falling back to a restart if reload is unsupported.
+    sshd_reloaded=0
+    for svc in sshd ssh ; do
+        if systemctl list-unit-files "${svc}.service" 2>/dev/null | grep -q "^${svc}.service" ; then
+            sudo systemctl reload "${svc}.service" \
+                || sudo systemctl restart "${svc}.service"
+            sshd_reloaded=1
+            break
+        fi
+    done
+    if test "${sshd_reloaded}" -eq 0 ; then
+        echo "ERROR: could not find an sshd/ssh systemd unit to reload"
+        exit 1
+    fi
+fi
+echo "--> Effective after sshd reload:"
+sudo ${sshd_bin} -T 2>/dev/null | grep -iE '^(passwordauthentication|kbdinteractiveauthentication)' || true
+
+
 # Create a scriptlet on each AMI that can be used by CI jobs to translate a
 # compiler version into CC/CXX/FC variables.  Each OS likes to name their
 # versioned compilers a bit differently, and this is the sanest step at which to
@@ -528,7 +618,6 @@ fi
 
 echo "==> Deactivating pyenv"
 deactivate
-
 
 echo "==> Cleaning instance"
 if test "${PLATFORM_ID}" = "FreeBSD" ; then
