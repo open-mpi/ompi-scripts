@@ -26,6 +26,7 @@ awscli_arm_url="https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip"
 libfabric_url="https://github.com/ofiwg/libfabric/releases/download/v2.7.0/libfabric-2.7.0.tar.bz2"
 ucx_url="https://github.com/openucx/ucx/releases/download/v1.22.0/ucx-1.22.0.tar.gz"
 xpmem_repo="https://github.com/hpc/xpmem.git"
+kdreg2_repo="https://github.com/HewlettPackard/shs-kdreg2.git"
 
 labels="ec2"
 
@@ -78,6 +79,7 @@ venv_preflight_modules=
 # the running kernel and source that compiles against it; only platforms known
 # to satisfy both opt in below.
 build_xpmem_kmod=0
+build_kdreg2_kmod=0
 
 # Extra configure argument used when building XPMEM, to force its install
 # libdir.  XPMEM installs into /usr and lets its autotools choose libdir from
@@ -336,16 +338,17 @@ case $PLATFORM_ID in
                 sudo yum -y install python3.11 python3.11-pip
                 PIP_CMD=pip3.11
                 VENV_PYTHON=python3.11
-                # Build the XPMEM kernel module on AL2023: the CI tests
-                # exercise it.  AL2023 ships its kernel-devel/headers under a
-                # version-prefixed package name (e.g. kernel6.18-devel), not the
-                # generic "kernel-devel" (which tracks a different, older kernel
-                # stream).  Derive the prefix from the running kernel's
-                # major.minor so this keeps working as the kernel moves.
+                # Build the XPMEM and kdreg2 kernel modules on AL2023: the CI
+                # tests exercise both.  AL2023 ships its kernel-devel/headers
+                # under a version-prefixed package name (e.g. kernel6.18-devel),
+                # not the generic "kernel-devel" (which tracks a different,
+                # older kernel stream).  Derive the prefix from the running
+                # kernel's major.minor so this keeps working as the kernel moves.
                 kver_mm=`uname -r | grep -oE '^[0-9]+\.[0-9]+'`
                 sudo yum -y install "kernel${kver_mm}-devel" "kernel${kver_mm}-headers" \
                   elfutils-libelf-devel
                 build_xpmem_kmod=1
+                build_kdreg2_kmod=1
                 labels="${labels} linux amazon_linux_2023-${arch}"
                 ;;
             *)
@@ -528,6 +531,13 @@ case $PLATFORM_ID in
                     echo "AMI_clang${i}_FC=flang-new-${i}" >> ${ompi_compiler_script}
                     labels="${labels} clang${i}"
                 done
+                # Build the kdreg2 kernel module on Ubuntu 26.04 (its header is
+                # installed on all Linux AMIs, but here we also build the
+                # module).  XPMEM's kernel module is intentionally NOT built
+                # here: hpc/xpmem does not compile against the 7.x kernel
+                # (it still references task_struct.cpus_allowed).
+                sudo DEBIAN_FRONTEND=noninteractive apt-get -y install "linux-headers-$(uname -r)"
+                build_kdreg2_kmod=1
                 ;;
             *)
                 echo "ERROR: Unknown version ${PLATFORM_ID} ${VERSION_ID}"
@@ -734,6 +744,37 @@ if test "$PLATFORM_ID" != "FreeBSD" ; then
     fi
     ompi_configure_args="${ompi_configure_args} --with-xpmem"
 
+    if ! test -f /usr/include/linux/kdreg2.h ; then
+        echo "--> Installing kdreg2"
+        cd ${HOME}/packages/src
+        git clone ${kdreg2_repo} kdreg2
+        # The userspace header is self-contained and is what downstream
+        # libraries (libfabric, UCX) need to detect and compile kdreg2
+        # support, so install it on every Linux AMI.  It must land at
+        # /usr/include/linux/kdreg2.h: libfabric's --with-kdreg2 probes for
+        # <linux/kdreg2.h>, so a flat /usr/include/kdreg2.h is not found and
+        # configure fails with "KDREG2 header not found".
+        sudo install -D -m 0644 kdreg2/include/kdreg2.h /usr/include/linux/kdreg2.h
+        if test "${build_kdreg2_kmod}" = "1" ; then
+            # The CI tests exercise kdreg2, so also build and install the
+            # kernel module and load it at boot.  kdreg2 uses a plain Kbuild
+            # Makefile rather than autotools.
+            cd kdreg2
+            kver=`uname -r`
+            if ! test -e /lib/modules/${kver}/build/Module.symvers ; then
+                echo "ERROR: no kernel build tree for ${kver}; cannot build kdreg2 module"
+                exit 1
+            fi
+            ${MAKE_CMD} modules
+            sudo ${MAKE_CMD} -C /lib/modules/${kver}/build M=`pwd` modules_install
+            echo kdreg2 | sudo tee /etc/modules-load.d/kdreg2.conf > /dev/null
+            sudo depmod -a
+            sudo modprobe kdreg2 || true
+        fi
+    else
+        echo "--> kdreg2 already installed"
+    fi
+
     if ! test -d ${HOME}/packages/libfabric ; then
         echo "--> Installing Libfabric"
         cd ${HOME}/packages/src
@@ -746,7 +787,7 @@ if test "$PLATFORM_ID" != "FreeBSD" ; then
         # packages are installed, libfabric would otherwise auto-enable verbs,
         # which fails to build against the older hwloc shipped on some distros
         # (e.g. Amazon Linux 2).
-        ./configure --prefix=${HOME}/packages/libfabric --enable-efa --disable-verbs
+        ./configure --prefix=${HOME}/packages/libfabric --enable-efa --disable-verbs --with-kdreg2
         ${MAKE_CMD} -j 4 all
         ${MAKE_CMD} install
     else
