@@ -18,6 +18,11 @@ variable "iam_role" {
   default = "${env("AWS_IAM_ROLE")}"
 }
 
+variable "security_group_id" {
+  type    = string
+  default = "${env("AWS_SECURITY_GROUP_ID")}"
+}
+
 variable "subnet_id" {
   type    = string
   default = "${env("AWS_SUBNET_ID")}"
@@ -67,6 +72,9 @@ source "amazon-ebs" "AmazonLinux2-arm64" {
   associate_public_ip_address = true
   ena_support                 = true
   iam_instance_profile        = "${var.iam_role}"
+  security_group_id           = "${var.security_group_id}"
+  subnet_id                   = "${var.subnet_id}"
+  vpc_id                      = "${var.vpc_id}"
   instance_type               = "t4g.large"
   launch_block_device_mappings {
     delete_on_termination = true
@@ -107,6 +115,9 @@ source "amazon-ebs" "AmazonLinux2-x86" {
   associate_public_ip_address = true
   ena_support                 = true
   iam_instance_profile        = "${var.iam_role}"
+  security_group_id           = "${var.security_group_id}"
+  subnet_id                   = "${var.subnet_id}"
+  vpc_id                      = "${var.vpc_id}"
   instance_type               = "t3.large"
   launch_block_device_mappings {
     delete_on_termination = true
@@ -140,6 +151,9 @@ source "amazon-ebs" "AmazonLinux2023-arm64" {
   associate_public_ip_address = true
   ena_support                 = true
   iam_instance_profile        = "${var.iam_role}"
+  security_group_id           = "${var.security_group_id}"
+  subnet_id                   = "${var.subnet_id}"
+  vpc_id                      = "${var.vpc_id}"
   instance_type               = "t4g.large"
   launch_block_device_mappings {
     delete_on_termination = true
@@ -173,6 +187,9 @@ source "amazon-ebs" "AmazonLinux2023-x86" {
   associate_public_ip_address = true
   ena_support                 = true
   iam_instance_profile        = "${var.iam_role}"
+  security_group_id           = "${var.security_group_id}"
+  subnet_id                   = "${var.subnet_id}"
+  vpc_id                      = "${var.vpc_id}"
   instance_type               = "t3.large"
   launch_block_device_mappings {
     delete_on_termination = true
@@ -211,6 +228,9 @@ source "amazon-ebs" "FreeBSD15-x86" {
   associate_public_ip_address = true
   ena_support                 = true
   iam_instance_profile        = "${var.iam_role}"
+  security_group_id           = "${var.security_group_id}"
+  subnet_id                   = "${var.subnet_id}"
+  vpc_id                      = "${var.vpc_id}"
   instance_type               = "t3.large"
   launch_block_device_mappings {
     delete_on_termination = true
@@ -258,6 +278,9 @@ source "amazon-ebs" "RHEL8-arm64" {
   associate_public_ip_address = true
   ena_support                 = true
   iam_instance_profile        = "${var.iam_role}"
+  security_group_id           = "${var.security_group_id}"
+  subnet_id                   = "${var.subnet_id}"
+  vpc_id                      = "${var.vpc_id}"
   instance_type               = "t4g.large"
   launch_block_device_mappings {
     delete_on_termination = true
@@ -299,6 +322,9 @@ source "amazon-ebs" "RHEL8-x86" {
   associate_public_ip_address = true
   ena_support                 = true
   iam_instance_profile        = "${var.iam_role}"
+  security_group_id           = "${var.security_group_id}"
+  subnet_id                   = "${var.subnet_id}"
+  vpc_id                      = "${var.vpc_id}"
   instance_type               = "t3.large"
   launch_block_device_mappings {
     delete_on_termination = true
@@ -340,6 +366,9 @@ source "amazon-ebs" "RHEL9-arm64" {
   associate_public_ip_address = true
   ena_support                 = true
   iam_instance_profile        = "${var.iam_role}"
+  security_group_id           = "${var.security_group_id}"
+  subnet_id                   = "${var.subnet_id}"
+  vpc_id                      = "${var.vpc_id}"
   instance_type               = "t4g.large"
   launch_block_device_mappings {
     delete_on_termination = true
@@ -381,6 +410,9 @@ source "amazon-ebs" "RHEL9-x86" {
   associate_public_ip_address = true
   ena_support                 = true
   iam_instance_profile        = "${var.iam_role}"
+  security_group_id           = "${var.security_group_id}"
+  subnet_id                   = "${var.subnet_id}"
+  vpc_id                      = "${var.vpc_id}"
   instance_type               = "t3.large"
   launch_block_device_mappings {
     delete_on_termination = true
@@ -422,6 +454,9 @@ source "amazon-ebs" "RHEL10-arm64" {
   associate_public_ip_address = true
   ena_support                 = true
   iam_instance_profile        = "${var.iam_role}"
+  security_group_id           = "${var.security_group_id}"
+  subnet_id                   = "${var.subnet_id}"
+  vpc_id                      = "${var.vpc_id}"
   instance_type               = "t4g.large"
   launch_block_device_mappings {
     delete_on_termination = true
@@ -463,6 +498,9 @@ source "amazon-ebs" "RHEL10-x86" {
   associate_public_ip_address = true
   ena_support                 = true
   iam_instance_profile        = "${var.iam_role}"
+  security_group_id           = "${var.security_group_id}"
+  subnet_id                   = "${var.subnet_id}"
+  vpc_id                      = "${var.vpc_id}"
   instance_type               = "t3.large"
   launch_block_device_mappings {
     delete_on_termination = true
@@ -508,6 +546,9 @@ source "amazon-ebs" "SLES15-x86" {
   associate_public_ip_address = true
   ena_support                 = true
   iam_instance_profile        = "${var.iam_role}"
+  security_group_id           = "${var.security_group_id}"
+  subnet_id                   = "${var.subnet_id}"
+  vpc_id                      = "${var.vpc_id}"
   instance_type               = "t3.large"
   launch_block_device_mappings {
     delete_on_termination = true
@@ -547,6 +588,9 @@ source "amazon-ebs" "SLES16-x86" {
   associate_public_ip_address = true
   ena_support                 = true
   iam_instance_profile        = "${var.iam_role}"
+  security_group_id           = "${var.security_group_id}"
+  subnet_id                   = "${var.subnet_id}"
+  vpc_id                      = "${var.vpc_id}"
   instance_type               = "t3.large"
   launch_block_device_mappings {
     delete_on_termination = true
@@ -592,6 +636,9 @@ source "amazon-ebs" "Ubuntu2004-arm64" {
   associate_public_ip_address = true
   ena_support                 = true
   iam_instance_profile        = "${var.iam_role}"
+  security_group_id           = "${var.security_group_id}"
+  subnet_id                   = "${var.subnet_id}"
+  vpc_id                      = "${var.vpc_id}"
   instance_type               = "t4g.large"
   launch_block_device_mappings {
     delete_on_termination = true
@@ -632,6 +679,9 @@ source "amazon-ebs" "Ubuntu2004-x86" {
   associate_public_ip_address = true
   ena_support                 = true
   iam_instance_profile        = "${var.iam_role}"
+  security_group_id           = "${var.security_group_id}"
+  subnet_id                   = "${var.subnet_id}"
+  vpc_id                      = "${var.vpc_id}"
   instance_type               = "t3.large"
   launch_block_device_mappings {
     delete_on_termination = true
@@ -672,6 +722,9 @@ source "amazon-ebs" "Ubuntu2204-arm64" {
   associate_public_ip_address = true
   ena_support                 = true
   iam_instance_profile        = "${var.iam_role}"
+  security_group_id           = "${var.security_group_id}"
+  subnet_id                   = "${var.subnet_id}"
+  vpc_id                      = "${var.vpc_id}"
   instance_type               = "t4g.large"
   launch_block_device_mappings {
     delete_on_termination = true
@@ -712,6 +765,9 @@ source "amazon-ebs" "Ubuntu2204-x86" {
   associate_public_ip_address = true
   ena_support                 = true
   iam_instance_profile        = "${var.iam_role}"
+  security_group_id           = "${var.security_group_id}"
+  subnet_id                   = "${var.subnet_id}"
+  vpc_id                      = "${var.vpc_id}"
   instance_type               = "t3.large"
   launch_block_device_mappings {
     delete_on_termination = true
@@ -752,6 +808,9 @@ source "amazon-ebs" "Ubuntu2404-arm64" {
   associate_public_ip_address = true
   ena_support                 = true
   iam_instance_profile        = "${var.iam_role}"
+  security_group_id           = "${var.security_group_id}"
+  subnet_id                   = "${var.subnet_id}"
+  vpc_id                      = "${var.vpc_id}"
   instance_type               = "t4g.large"
   launch_block_device_mappings {
     delete_on_termination = true
@@ -792,6 +851,9 @@ source "amazon-ebs" "Ubuntu2404-x86" {
   associate_public_ip_address = true
   ena_support                 = true
   iam_instance_profile        = "${var.iam_role}"
+  security_group_id           = "${var.security_group_id}"
+  subnet_id                   = "${var.subnet_id}"
+  vpc_id                      = "${var.vpc_id}"
   instance_type               = "t3.large"
   launch_block_device_mappings {
     delete_on_termination = true
@@ -825,6 +887,9 @@ source "amazon-ebs" "Ubuntu2604-arm64" {
   associate_public_ip_address = true
   ena_support                 = true
   iam_instance_profile        = "${var.iam_role}"
+  security_group_id           = "${var.security_group_id}"
+  subnet_id                   = "${var.subnet_id}"
+  vpc_id                      = "${var.vpc_id}"
   instance_type               = "t4g.large"
   launch_block_device_mappings {
     delete_on_termination = true
@@ -858,6 +923,9 @@ source "amazon-ebs" "Ubuntu2604-x86" {
   associate_public_ip_address = true
   ena_support                 = true
   iam_instance_profile        = "${var.iam_role}"
+  security_group_id           = "${var.security_group_id}"
+  subnet_id                   = "${var.subnet_id}"
+  vpc_id                      = "${var.vpc_id}"
   instance_type               = "t3.large"
   launch_block_device_mappings {
     delete_on_termination = true
