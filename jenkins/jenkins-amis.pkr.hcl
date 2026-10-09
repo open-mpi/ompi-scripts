@@ -23,6 +23,11 @@ variable "security_group_id" {
   default = "${env("AWS_SECURITY_GROUP_ID")}"
 }
 
+variable "ssh_interface" {
+  type    = string
+  default = "private_ip"
+}
+
 variable "subnet_id" {
   type    = string
   default = "${env("AWS_SUBNET_ID")}"
@@ -84,6 +89,7 @@ source "amazon-ebs" "AmazonLinux2-arm64" {
   region       = "us-west-2"
   source_ami   = "${data.amazon-ami.AmazonLinux2-arm64.id}"
   ssh_pty      = true
+  ssh_interface = "${var.ssh_interface}"
   ssh_username = "ec2-user"
   tags = {
     BuildType = "${var.BuildType}",
@@ -127,6 +133,7 @@ source "amazon-ebs" "AmazonLinux2-x86" {
   region       = "us-west-2"
   source_ami   = "${data.amazon-ami.AmazonLinux2-x86.id}"
   ssh_pty      = true
+  ssh_interface = "${var.ssh_interface}"
   ssh_username = "ec2-user"
   tags = {
     BuildType = "${var.BuildType}",
@@ -163,6 +170,7 @@ source "amazon-ebs" "AmazonLinux2023-arm64" {
   region       = "us-west-2"
   source_ami   = "${data.amazon-parameterstore.AmazonLinux2023-arm64.value}"
   ssh_pty      = true
+  ssh_interface = "${var.ssh_interface}"
   ssh_username = "ec2-user"
   tags = {
     BuildType = "${var.BuildType}",
@@ -199,6 +207,7 @@ source "amazon-ebs" "AmazonLinux2023-x86" {
   region       = "us-west-2"
   source_ami   = "${data.amazon-parameterstore.AmazonLinux2023-x86.value}"
   ssh_pty      = true
+  ssh_interface = "${var.ssh_interface}"
   ssh_username = "ec2-user"
   tags = {
     BuildType = "${var.BuildType}",
@@ -240,6 +249,7 @@ source "amazon-ebs" "FreeBSD15-x86" {
   region       = "us-west-2"
   source_ami   = "${data.amazon-parameterstore.FreeBSD15-x86.value}"
   ssh_pty      = true
+  ssh_interface = "${var.ssh_interface}"
   ssh_timeout  = "10m"
   ssh_username = "ec2-user"
   tags = {
@@ -290,6 +300,7 @@ source "amazon-ebs" "RHEL8-arm64" {
   region       = "us-west-2"
   source_ami   = "${data.amazon-ami.RHEL8-arm64.id}"
   ssh_pty      = true
+  ssh_interface = "${var.ssh_interface}"
   ssh_username = "ec2-user"
   tags = {
     BuildType = "${var.BuildType}",
@@ -334,6 +345,7 @@ source "amazon-ebs" "RHEL8-x86" {
   region       = "us-west-2"
   source_ami   = "${data.amazon-ami.RHEL8-x86.id}"
   ssh_pty      = true
+  ssh_interface = "${var.ssh_interface}"
   ssh_username = "ec2-user"
   tags = {
     BuildType = "${var.BuildType}",
@@ -378,6 +390,7 @@ source "amazon-ebs" "RHEL9-arm64" {
   region       = "us-west-2"
   source_ami   = "${data.amazon-ami.RHEL9-arm64.id}"
   ssh_pty      = true
+  ssh_interface = "${var.ssh_interface}"
   ssh_username = "ec2-user"
   tags = {
     BuildType = "${var.BuildType}",
@@ -422,6 +435,7 @@ source "amazon-ebs" "RHEL9-x86" {
   region       = "us-west-2"
   source_ami   = "${data.amazon-ami.RHEL9-x86.id}"
   ssh_pty      = true
+  ssh_interface = "${var.ssh_interface}"
   ssh_username = "ec2-user"
   tags = {
     BuildType = "${var.BuildType}",
@@ -466,6 +480,7 @@ source "amazon-ebs" "RHEL10-arm64" {
   region       = "us-west-2"
   source_ami   = "${data.amazon-ami.RHEL10-arm64.id}"
   ssh_pty      = true
+  ssh_interface = "${var.ssh_interface}"
   ssh_username = "ec2-user"
   tags = {
     BuildType = "${var.BuildType}",
@@ -510,6 +525,7 @@ source "amazon-ebs" "RHEL10-x86" {
   region       = "us-west-2"
   source_ami   = "${data.amazon-ami.RHEL10-x86.id}"
   ssh_pty      = true
+  ssh_interface = "${var.ssh_interface}"
   ssh_username = "ec2-user"
   tags = {
     BuildType = "${var.BuildType}",
@@ -558,6 +574,7 @@ source "amazon-ebs" "SLES15-x86" {
   region       = "us-west-2"
   source_ami   = "${data.amazon-ami.SLES15-x86.id}"
   ssh_pty      = true
+  ssh_interface = "${var.ssh_interface}"
   ssh_username = "ec2-user"
   tags = {
     BuildType = "${var.BuildType}",
@@ -600,6 +617,7 @@ source "amazon-ebs" "SLES16-x86" {
   region       = "us-west-2"
   source_ami   = "${data.amazon-ami.SLES16-x86.id}"
   ssh_pty      = true
+  ssh_interface = "${var.ssh_interface}"
   ssh_username = "ec2-user"
   tags = {
     BuildType = "${var.BuildType}",
@@ -648,6 +666,7 @@ source "amazon-ebs" "Ubuntu2004-arm64" {
   region       = "us-west-2"
   source_ami   = "${data.amazon-ami.Ubuntu2004-arm64.id}"
   ssh_pty      = true
+  ssh_interface = "${var.ssh_interface}"
   ssh_username = "ubuntu"
   tags = {
     BuildType = "${var.BuildType}",
@@ -691,6 +710,7 @@ source "amazon-ebs" "Ubuntu2004-x86" {
   region       = "us-west-2"
   source_ami   = "${data.amazon-ami.Ubuntu2004-x86.id}"
   ssh_pty      = true
+  ssh_interface = "${var.ssh_interface}"
   ssh_username = "ubuntu"
   tags = {
     BuildType = "${var.BuildType}",
@@ -734,6 +754,7 @@ source "amazon-ebs" "Ubuntu2204-arm64" {
   region       = "us-west-2"
   source_ami   = "${data.amazon-ami.Ubuntu2204-arm64.id}"
   ssh_pty      = true
+  ssh_interface = "${var.ssh_interface}"
   ssh_username = "ubuntu"
   tags = {
     BuildType = "${var.BuildType}",
@@ -777,6 +798,7 @@ source "amazon-ebs" "Ubuntu2204-x86" {
   region       = "us-west-2"
   source_ami   = "${data.amazon-ami.Ubuntu2204-x86.id}"
   ssh_pty      = true
+  ssh_interface = "${var.ssh_interface}"
   ssh_username = "ubuntu"
   tags = {
     BuildType = "${var.BuildType}",
@@ -820,6 +842,7 @@ source "amazon-ebs" "Ubuntu2404-arm64" {
   region       = "us-west-2"
   source_ami   = "${data.amazon-ami.Ubuntu2404-arm64.id}"
   ssh_pty      = true
+  ssh_interface = "${var.ssh_interface}"
   ssh_username = "ubuntu"
   tags = {
     BuildType = "${var.BuildType}",
@@ -863,6 +886,7 @@ source "amazon-ebs" "Ubuntu2404-x86" {
   region       = "us-west-2"
   source_ami   = "${data.amazon-ami.Ubuntu2404-x86.id}"
   ssh_pty      = true
+  ssh_interface = "${var.ssh_interface}"
   ssh_username = "ubuntu"
   tags = {
     BuildType = "${var.BuildType}",
@@ -899,6 +923,7 @@ source "amazon-ebs" "Ubuntu2604-arm64" {
   region       = "us-west-2"
   source_ami   = "${data.amazon-parameterstore.Ubuntu2604-arm64.value}"
   ssh_pty      = true
+  ssh_interface = "${var.ssh_interface}"
   ssh_username = "ubuntu"
   tags = {
     BuildType = "${var.BuildType}",
@@ -935,6 +960,7 @@ source "amazon-ebs" "Ubuntu2604-x86" {
   region       = "us-west-2"
   source_ami   = "${data.amazon-parameterstore.Ubuntu2604-x86.value}"
   ssh_pty      = true
+  ssh_interface = "${var.ssh_interface}"
   ssh_username = "ubuntu"
   tags = {
     BuildType = "${var.BuildType}",
