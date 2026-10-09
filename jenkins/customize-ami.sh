@@ -296,6 +296,13 @@ case $PLATFORM_ID in
                   python3 python3-devel python3-pip \
                   hwloc hwloc-devel libevent libevent-devel \
                   python3-mock python3-boto3
+                # AL2023's default python3 is 3.9 and stays there for the life
+                # of the release, which is too old for Open MPI's doc
+                # requirements (requests>=2.33.0 needs Python >=3.10).  Install
+                # python3.11 from the AL2023 repos and use it for the venv.
+                sudo yum -y install python3.11 python3.11-pip
+                PIP_CMD=pip3.11
+                VENV_PYTHON=python3.11
                 labels="${labels} linux amazon_linux_2023-${arch}"
                 ;;
             *)
