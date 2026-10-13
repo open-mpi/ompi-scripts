@@ -234,7 +234,7 @@ source "amazon-ebs" "AmazonLinux2023-x86" {
 #
 ################################################################################
 data "amazon-parameterstore" "FreeBSD15-x86" {
-  name        = "/aws/service/freebsd/amd64/cloud-init/ufs/15.0/RELEASE"
+  name        = "/aws/service/freebsd/amd64/cloud-init/ufs/15.1/RELEASE"
   region      = "us-west-2"
 }
 
