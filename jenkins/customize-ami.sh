@@ -613,6 +613,7 @@ case $PLATFORM_ID in
                 PIP_CMD=pip
 
                 skip_make_check=1
+                skip_make_dist=1
                 pandoc_installed=1
                 labels="${labels} freebsd freebsd-15-${arch}"
                 ;;
