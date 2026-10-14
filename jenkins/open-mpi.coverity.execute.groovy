@@ -72,7 +72,11 @@ node("ubuntu_26.04-x86_64") {
         // later does variable expansion.  So put the version in the
         // environment, since we can do environment expansion later.
         withEnv(["ompi_version=${ompi_version}"]) {
-            sh('curl --form "token=$token" --form "email=jsquyres@cisco.com" --form "file=@${WORKSPACE}/submission.tar.bz2" --form "version=${ompi_version}"  --form "description=nightly-master" "https://scan.coverity.com/builds?project=${project}"')
+            withCredentials([usernamePassword(credentialsId: 'b47cf375-6e78-4f1f-b215-18a7903a4763',
+                                              passwordVariable: 'token',
+                                              usernameVariable: 'project')]) {
+                sh('curl --form "token=$token" --form "email=jsquyres@cisco.com" --form "file=@${WORKSPACE}/submission.tar.bz2" --form "version=${ompi_version}"  --form "description=nightly-master" "https://scan.coverity.com/builds?project=${project}"')
+            }
         }
     }
 
