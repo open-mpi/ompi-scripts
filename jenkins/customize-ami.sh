@@ -86,7 +86,7 @@ dist_builder=0
 if test "${JENKINS_DIST_BUILDER}" = "1" ; then
     dist_builder=1
     run_test=0
-    echo "==> Distribution-tarball builder: will remove pandoc/Autotools/Flex/M4 and skip build test"
+    echo "==> Distribution-tarball builder: will remove Autotools/Flex/M4 and skip build test"
 fi
 
 # Whether to build and install the XPMEM / kdreg2 *kernel modules* (in addition
@@ -853,7 +853,7 @@ fi
 
 
 if test "${dist_builder}" = "1" ; then
-    # Distribution-tarball builder: strip pandoc, the GNU Autotools, Flex, and
+    # Distribution-tarball builder: the GNU Autotools, Flex, and
     # M4 back out of system paths now that everything that needed them (e.g.
     # building XPMEM/libfabric/UCX) has run.  The dist tarball jobs build their
     # own version-pinned Autotools and prepend it to PATH, so the released
@@ -861,13 +861,7 @@ if test "${dist_builder}" = "1" ; then
     # leaving them installed would mask such a dependence.  Guarded with
     # "|| true" so a package that is absent (or already removed as a dependency
     # of another) never fails the build under "set -e".
-    echo "==> Dist builder: removing pandoc, Autotools, Flex, and M4 from system paths"
-
-    # pandoc: on AL2023 the fallback installer drops a static binary at
-    # /usr/local/bin/pandoc; also remove any package-managed copy for good
-    # measure.
-    sudo rm -f /usr/local/bin/pandoc
-    sudo yum -y remove pandoc pandoc-common 2>/dev/null || true
+    echo "==> Dist builder: Autotools, Flex, and M4 from system paths"
 
     # Autotools + Flex + M4.  Remove autoconf/automake/libtool/flex first, then
     # m4 last (autoconf/automake/bison depend on m4, so pulling m4 would drag
@@ -876,13 +870,13 @@ if test "${dist_builder}" = "1" ; then
     sudo yum -y remove m4 2>/dev/null || true
 
     echo "--> Verifying the tools are no longer on PATH"
-    for tool in pandoc autoconf automake libtool aclocal flex m4 ; do
+    for tool in autoconf automake libtool aclocal flex m4 ; do
         if command -v "${tool}" >/dev/null 2>&1 ; then
             echo "ERROR: ${tool} is still present at `command -v ${tool}` on the dist builder"
             exit 1
         fi
     done
-    echo "--> Confirmed: pandoc, Autotools, Flex, and M4 are absent from system paths"
+    echo "--> Confirmed: Autotools, Flex, and M4 are absent from system paths"
 fi
 
 
