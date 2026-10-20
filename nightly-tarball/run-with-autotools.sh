@@ -42,17 +42,9 @@ module load $module_name
 # not all of which are available via linux distros,
 # so set up a virtual env to run the command in
 #
-REQ_FILE=""
-if [ -f "${PWD}/requirements.txt" ]; then
-    REQ_FILE="${PWD}/requirements.txt"
-elif [ -f "${PWD}/docs/requirements.txt" ]; then
-    REQ_FILE="${PWD}/docs/requirements.txt"
-fi
-if [ -n "$REQ_FILE" ]; then
-    python3 -m venv ompi-docs-venv
-    . ompi-docs-venv/bin/activate
-    pip3 install -r $REQ_FILE
-fi
+python3 -m venv ompi-docs-venv
+. ompi-docs-venv/bin/activate
+find . -name "requirements.txt" -exec pip3 install -r {} \;
 $program_name "${arguments[*]}"
 if [ -n "${VIRTUAL_ENV:-}" ] && command -v deactivate >/dev/null 2>&1; then
     deactivate
