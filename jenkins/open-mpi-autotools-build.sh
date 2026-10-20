@@ -265,7 +265,7 @@ if [[ ! -d ${autotools_install} ]] ; then
     cd ${autotools_scratch_dir}
     debug_print "build dir: $autotools_scratch_dir"
 
-    export PATH=${autotools_install/bin}:${PATH}
+    export PATH=${autotools_install}/bin:${PATH}
     export LD_LIBRARY_PATH=${autotools_install}/lib:${LD_LIBRARY_PATH}
 
     build_cleanup() {
