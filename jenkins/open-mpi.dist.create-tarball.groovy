@@ -12,9 +12,6 @@
 
 import java.text.SimpleDateFormat
 
-def rpm_builder = 'amazon_linux_2023-x86_64'
-def manpage_builder = 'ubuntu_26.04-x86_64'
-
 def release_version
 def branch
 def tarball
@@ -31,7 +28,7 @@ currentBuild.description = "<b>Build type:</b> ${build_type}<br>\n<b>Ref:</b> ${
 
 // Step 1: Build a release tarball and RPM.  Needs to be on an
 // RPM-based system, and easier to do it all in serial on one node.
-node(rpm_builder) {
+node("release-builder") {
   stage('Source Checkout') {
     checkout_code();
   }
@@ -106,7 +103,7 @@ node(rpm_builder) {
 // Run a bunch of different tests in parallel
 parallel (
   "man pages" : {
-    node(manpage_builder) {
+    node("release-builder") {
       stage('Build Man Pages') {
 	checkout_code();
     // Open MPI 5.0 and later auto-build docs on readthedocs.io, so we do not need to build manpages for www.open-mpi.org.
@@ -123,7 +120,7 @@ parallel (
   },
 
   "tarball distcheck" : {
-    node(rpm_builder) {
+    node("release-builder") {
       stage('Tarball Distcheck') {
 	sh "/bin/bash ompi-scripts/jenkins/open-mpi.dist.create-tarball.tarball-distcheck.sh ${build_prefix} ${tarball}"
       }
