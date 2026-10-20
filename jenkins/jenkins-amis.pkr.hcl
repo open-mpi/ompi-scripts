@@ -156,7 +156,7 @@ data "amazon-parameterstore" "AmazonLinux2023-arm64" {
 source "amazon-ebs" "AmazonLinux2023-arm64" {
   ami_block_device_mappings {
     delete_on_termination = true
-    device_name           = "/dev/sda1"
+    device_name           = "/dev/xvda"
     volume_size           = 16
   }
   ami_name                    = "Jenkins Amazon Linux 2023 arm64 ${var.build_date}"
@@ -196,7 +196,7 @@ data "amazon-parameterstore" "AmazonLinux2023-x86" {
 source "amazon-ebs" "AmazonLinux2023-x86" {
   ami_block_device_mappings {
     delete_on_termination = true
-    device_name           = "/dev/sda1"
+    device_name           = "/dev/xvda"
     volume_size           = 16
   }
   ami_name                    = "Jenkins Amazon Linux 2023 x86 ${var.build_date}"
@@ -224,6 +224,50 @@ source "amazon-ebs" "AmazonLinux2023-x86" {
   tags = {
     BuildType = "${var.BuildType}",
     JenkinsBuilderAmi = "True"
+  }
+}
+
+
+# Distribution-tarball builder variant of the Amazon Linux 2023 x86 AMI.  It is
+# intentionally identical to the AmazonLinux2023-x86 builder above except that
+# pandoc, the GNU Autotools, Flex, and M4 are NOT left installed in system
+# paths (customize-ami.sh removes them when JENKINS_DIST_BUILDER is set).  The
+# dist tarball jobs build their own version-pinned Autotools (see
+# open-mpi-autotools-build.sh) and must not pick up the distro's copies, so
+# this AMI deliberately lacks them.  Tagged JenkinsBuilderAmi=False and
+# JenkinsDistBuilderAmi=True so Jenkins can select it separately.
+source "amazon-ebs" "AmazonLinux2023Dist-x86" {
+  ami_block_device_mappings {
+    delete_on_termination = true
+    device_name           = "/dev/xvda"
+    volume_size           = 16
+  }
+  ami_name                    = "Jenkins Amazon Linux 2023 Dist x86 ${var.build_date}"
+  deprecate_at                = "${var.deprecation_date}"
+  associate_public_ip_address = true
+  ena_support                 = true
+  iam_instance_profile        = "${var.iam_role}"
+  security_group_id           = "${var.security_group_id}"
+  subnet_id                   = "${var.subnet_id}"
+  vpc_id                      = "${var.vpc_id}"
+  instance_type               = "t3.large"
+  launch_block_device_mappings {
+    delete_on_termination = true
+    device_name           = "/dev/xvda"
+    volume_size           = 16
+  }
+  metadata_options {
+    http_tokens = "required"
+  }
+  region       = "us-west-2"
+  source_ami   = "${data.amazon-parameterstore.AmazonLinux2023-x86.value}"
+  ssh_pty      = true
+  ssh_interface = "${var.ssh_interface}"
+  ssh_username = "ec2-user"
+  tags = {
+    BuildType = "${var.BuildType}",
+    JenkinsBuilderAmi = "False",
+    JenkinsDistBuilderAmi = "True"
   }
 }
 
@@ -1038,6 +1082,7 @@ build {
     "source.amazon-ebs.AmazonLinux2-x86",
     "source.amazon-ebs.AmazonLinux2023-arm64",
     "source.amazon-ebs.AmazonLinux2023-x86",
+    "source.amazon-ebs.AmazonLinux2023Dist-x86",
     "source.amazon-ebs.FreeBSD15-x86",
     "source.amazon-ebs.RHEL8-arm64",
     "source.amazon-ebs.RHEL8-x86",
@@ -1057,7 +1102,19 @@ build {
   ]
 
   provisioner "shell" {
-    script       = "customize-ami.sh"
+    script = "customize-ami.sh"
+    # Every source except the dist-tarball builder runs the stock
+    # customization.
+    except = ["amazon-ebs.AmazonLinux2023Dist-x86"]
+  }
+
+  provisioner "shell" {
+    # The dist-tarball builder runs the same script, but JENKINS_DIST_BUILDER
+    # tells it to remove pandoc / Autotools / Flex / M4 from system paths and
+    # skip the in-AMI Open MPI build test (which needs those tools).
+    script           = "customize-ami.sh"
+    only             = ["amazon-ebs.AmazonLinux2023Dist-x86"]
+    environment_vars = ["JENKINS_DIST_BUILDER=1"]
   }
 
 }
