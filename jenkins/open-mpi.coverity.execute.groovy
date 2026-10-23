@@ -16,7 +16,7 @@ def coverity_path = ""
 currentBuild.displayName = "#${currentBuild.number}"
 currentBuild.description = "Coverity Nightly Build for Open MPI\n"
 
-node("ubuntu_26.04-x86_64") {
+node("release-builder") {
     stage('Tools Checkout') {
         checkout(changelog: false, poll: false, scm: scm)
     }
