@@ -7,6 +7,8 @@
 //   ompi-scripts/         ompi-scripts master checkout
 //   coverity-tool/        Coverity tool build
 
+import java.nio.charset.StandardCharsets
+
 def snapshot_version = ""
 def ompi_tarball_name = ""
 def ompi_dir = ""
@@ -67,15 +69,17 @@ node("release-builder") {
 
     stage('Submit Results') {
         sh("cd ${WORKSPACE}/${ompi_dir} && tar jcf ${WORKSPACE}/submission.tar.bz2 cov-int")
-        // This is a bit silly, but I can't find a sane way to have an sh script
-        // string that both properly handles screts for the token field and
-        // later does variable expansion.  So put the version in the
-        // environment, since we can do environment expansion later.
-        withEnv(["ompi_version=${ompi_version}"]) {
-            withCredentials([usernamePassword(credentialsId: 'b47cf375-6e78-4f1f-b215-18a7903a4763',
-                                              passwordVariable: 'token',
-                                              usernameVariable: 'project')]) {
-                sh('curl --form "token=$token" --form "email=jsquyres@cisco.com" --form "file=@${WORKSPACE}/submission.tar.bz2" --form "version=${ompi_version}"  --form "description=nightly-master" "https://scan.coverity.com/builds?project=${project}"')
+        withCredentials([usernamePassword(credentialsId: 'b47cf375-6e78-4f1f-b215-18a7903a4763',
+                                          passwordVariable: 'token',
+                                          usernameVariable: 'project')]) {
+            // This is a bit silly, but I can't find a sane way to have an sh script
+            // string that both properly handles screts for the token field and
+            // later does variable expansion.  So put the version in the
+            // environment, since we can do environment expansion later.
+	    def url_project=URLEncoder.encode(project, StandardCharsets.UTF_8.name())
+	    echo "url_project: ${url_project}"
+            withEnv(["ompi_version=${ompi_version}", "url_project=${url_project}"]) {
+                sh('curl --form "token=$token" --form "email=jsquyres@cisco.com" --form "file=@${WORKSPACE}/submission.tar.bz2" --form "version=${ompi_version}"  --form "description=nightly-master" "https://scan.coverity.com/builds?project=${url_project}"')
             }
         }
     }
