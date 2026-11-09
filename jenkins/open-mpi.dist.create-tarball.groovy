@@ -122,7 +122,8 @@ parallel (
   "tarball distcheck" : {
     node("release-builder") {
       stage('Tarball Distcheck') {
-	sh "/bin/bash ompi-scripts/jenkins/open-mpi.dist.create-tarball.tarball-distcheck.sh ${build_prefix} ${tarball}"
+        checkout_code();
+        sh "/bin/bash ompi-scripts/jenkins/open-mpi.dist.create-tarball.tarball-distcheck.sh ${build_prefix} ${tarball}"
       }
     }
   }
